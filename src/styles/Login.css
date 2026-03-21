@@ -1,0 +1,491 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.login-page {
+  --nav-height: 64px;
+  --text-on-light: var(--foundation-color);
+  --text-on-dark: var(--neutral-color);
+  --text-muted-on-light: var(--muted-color);
+  height: 100dvh;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+.login-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--nav-height);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 18px;
+  padding-right: 24px;
+  background: var(--neutral-color);
+  border-bottom: 1px solid var(--tint-color);
+  z-index: 30;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex: 0 0 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.logo-image {
+  width: 44px;
+  height: 44px;
+  display: block;
+  flex: 0 0 44px;
+  object-fit: contain;
+}
+
+.logo h1 {
+  margin: 0;
+  font-size: clamp(0.95rem, 1.3vw, 1.2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--primary-color);
+}
+
+.support-link {
+  color: var(--text-on-light);
+  text-decoration: none;
+  font-size: 0.96rem;
+  font-weight: 600;
+}
+
+.support-link:hover {
+  text-decoration: underline;
+}
+
+.login-container {
+  display: flex;
+  height: calc(100dvh - var(--nav-height));
+  width: 100%;
+  margin: 0;
+  margin-top: var(--nav-height);
+  padding: 0;
+  overflow: hidden;
+}
+
+.info-panel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 60%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.info-panel:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('../assets/MSA_Building.jpg') no-repeat center center / cover;
+  filter: brightness(0.6);
+  z-index: -2;
+}
+
+.background-gradient {
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-visual-soul);
+  opacity: 0.7;
+  z-index: -1;
+}
+
+.info-panel_content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 0 1 auto;
+  max-width: 680px;
+  color: var(--text-on-dark);
+  padding: 20px 28px;
+}
+
+.title-badge {
+  padding: 4px 22px;
+  width: fit-content;
+  background: rgba(25, 25, 29 , 0.65);
+  gap: 8px;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  
+}
+.title-badge h2 {
+  color: rgba(251, 249, 250, 0.5);
+  font-size: 1rem;
+  align-self: flex-start;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.info-slide {
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  gap: 10px;
+}
+
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+}
+
+.info-panel_content h3 {
+  margin: 22px 0;
+  font-size: clamp(1.5rem, 2.2vw, 2rem);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.info-panel_content p {
+  margin: 10px 0;
+  max-width: 60ch;
+  font-family: var(--font-main);
+  font-size: clamp(0.95rem, 1.1vw, 1.02rem);
+  line-height: 1.6;
+  color: rgba(251, 249, 250, 0.92);
+}
+
+.previous,
+.next {
+  cursor: pointer;
+  padding: 8px;
+  color: var(--text-on-dark);
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+.previous:hover,
+.next:hover {
+  opacity: 1;
+}
+
+.changeInfo {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.bar {
+  width: 30px;
+  height: 4px;
+  background: #ccc;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.bar.current {
+  width: 40px;
+  background: var(--accent-color);
+}
+
+.login-panel {
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 40px 24px 16px;
+  background: var(--neutral-color);
+  color: var(--text-on-light);
+}
+
+.login-panel form {
+  width: min(100%, 380px);
+  padding: 0;
+  background: var(--neutral-color);
+  display: grid;
+  gap: 12px;
+}
+
+.form-links {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.forgot-password {
+  font-size: 0.9rem;
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
+.input-group {
+  width: 100%;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  border: 1px solid #d6d9df;
+  border-radius: 6px;
+  background: #eef0f3;
+  overflow: hidden;
+}
+
+.input-icon {
+  width: 40px;
+  min-width: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #616977;
+  font-weight: 600;
+}
+
+.input-icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.login-panel input {
+  width: 100%;
+  height: 100%;
+  padding: 0 12px 0 0;
+  border: 0;
+  border-radius: 0;
+  font-size: 0.95rem;
+  color: var(--text-on-light);
+  background: transparent;
+  transition: border-color 0.2s ease;
+}
+
+.login-panel input::placeholder {
+  color: #9aa2b1;
+}
+
+.login-panel input:focus {
+  outline: none;
+}
+
+.input-group:focus-within {
+  border-color: var(--primary-color);
+  background: #f5f7fa;
+}
+
+.Header {
+  width: min(100%, 380px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.Header h1 {
+  margin: 0;
+  color: #0f1b31;
+  font-size: clamp(1.85rem, 2.2vw, 2.25rem);
+  line-height: 1.1;
+}
+
+.Header p {
+  margin: 0;
+  color: #4a5362;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.83rem;
+  font-weight: 600;
+}
+
+.Portal-Options {
+  width: min(100%, 380px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #e4e6ea;
+  border-radius: 6px;
+  padding: 3px;
+  margin-bottom: 26px;
+}
+
+.Portal-Options .btn {
+  min-width: 0;
+  width: 100%;
+  height: 38px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 5px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #3b4250;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.Portal-Options .btn.is-active {
+  background: #f7f8fa;
+  color: #111827;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.Portal-Options .btn:not(.is-active):hover {
+  background: rgba(247, 248, 250, 0.55);
+}
+
+.login-panel label {
+  margin-top: 10px;
+  margin-bottom: -4px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #4a5362;
+}
+
+.form-links {
+  margin-top: -2px;
+}
+
+.submit-div {
+  margin-top: 10px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.submit-div button {
+  width: 100%;
+  height: 46px;
+  border: 0;
+  border-radius: 6px;
+  padding: 0 46px 0 20px;
+  font-size: 0.97rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-on-dark);
+  background: var(--primary-color);
+  cursor: pointer;
+}
+
+.submit-div svg {
+  position: absolute;
+  right: 16px;
+  width: 17px;
+  height: 17px;
+  pointer-events: none;
+  color: var(--text-on-dark);
+}
+@media (max-width: 980px) {
+  .login-page {
+    --nav-height: 56px;
+  }
+
+  .login-container {
+    flex-direction: column;
+    height: calc(100dvh - var(--nav-height));
+  }
+
+  .info-panel {
+    width: 100%;
+    height: 44%;
+  }
+
+  .info-panel_content h3 {
+    font-size: clamp(1.35rem, 3vw, 1.8rem);
+  }
+
+  .login-panel {
+    width: 100%;
+    height: 56%;
+    padding: 22px 12px 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .login-page {
+    --nav-height: 52px;
+  }
+
+  .login-navbar {
+    padding: 6px 10px;
+  }
+
+  .logo-image {
+    width: 30px;
+    height: 30px;
+    flex-basis: 30px;
+  }
+
+  .logo h1 {
+    font-size: 0.86rem;
+  }
+
+  .support-link {
+    font-size: 0.85rem;
+  }
+
+  .info-panel {
+    height: 41%;
+  }
+
+  .info-panel_content {
+    padding: 10px 14px;
+  }
+
+  .info-panel_content h3 {
+    font-size: 1.25rem;
+  }
+
+  .info-panel_content p {
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  .previous,
+  .next {
+    padding: 5px;
+  }
+
+  .login-panel {
+    height: 59%;
+  }
+
+  .login-panel form {
+    width: 100%;
+    max-width: 330px;
+    padding: 0;
+  }
+
+  .Header {
+    margin-bottom: 14px;
+  }
+
+  .Header h1 {
+    font-size: 1.8rem;
+  }
+
+  .Portal-Options {
+    margin-bottom: 16px;
+  }
+}
