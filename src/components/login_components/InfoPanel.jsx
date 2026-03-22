@@ -1,5 +1,8 @@
 import React, { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+
+const MotionDiv = motion.div;
 
 const content = [
   {
@@ -21,13 +24,51 @@ const content = [
 
 const InfoPanel = () => {
   const [index, setIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
+
+  const getXnew = (isEntering, isExiting) => {
+    if (direction > 0) {
+      if (isEntering) {
+        return -12;
+      }
+
+      if (isExiting) {
+        return 12;
+      }
+    }
+
+    if (isEntering) {
+      return 12;
+    }
+
+    if (isExiting) {
+      return -12;
+    }
+
+    return 0;
+  };
+
+  const getBarClassName = (barIndex) => {
+    if (barIndex === index) {
+      return "bar current";
+    }
+
+    return "bar";
+  };
 
   const next = () => {
+    setDirection(1);
     setIndex((prev) => (prev + 1) % content.length);
   };
 
   const prev = () => {
+    setDirection(-1);
     setIndex((prev) => (prev - 1 + content.length) % content.length);
+  };
+
+  const selectSlide = (targetIndex) => {
+    setDirection(targetIndex > index ? 1 : -1);
+    setIndex(targetIndex);
   };
 
   return (
@@ -42,17 +83,27 @@ const InfoPanel = () => {
           <h2>MSA University</h2>
         </div>
 
-        <div className="info-slide" key={index}>
-          <h3>{content[index].title}</h3>
-          <p>{content[index].description}</p>
-        </div>
+        <AnimatePresence mode="wait" custom={direction}>
+          <MotionDiv
+            className="info-slide"
+            key={index}
+            custom={direction}
+            initial={{ opacity: 0, y: 8, x: getXnew(true, false) }}
+            animate={{ opacity: 1, y: 0, x: 0 }}
+            exit={{ opacity: 0, y: -6, x: getXnew(false, true) }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+          >
+            <h3>{content[index].title}</h3>
+            <p>{content[index].description}</p>
+          </MotionDiv>
+        </AnimatePresence>
 
         <div className="changeInfo">
           {content.map((_, i) => (
             <div
               key={i}
-              className={`bar ${i === index ? "current" : ""}`}
-              onClick={() => setIndex(i)}
+              className={getBarClassName(i)}
+              onClick={() => selectSlide(i)}
             ></div>
           ))}
         </div>

@@ -1,15 +1,14 @@
-import { Routes, Route, Link } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
-import LoginNavbar from "./components/login_components/LoginNavbar";  
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
     <main style={{ flex: 1}}>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
-
-      
     </main>
   );
 }

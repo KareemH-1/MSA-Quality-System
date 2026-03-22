@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Lock , MoveRight} from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Lock , MoveRight, Eye, EyeOff } from 'lucide-react'
 
 const containerVariants = {
   hidden: { opacity: 0, y: 18 },
@@ -25,9 +24,19 @@ const itemVariants = {
 const MotionDiv = motion.div
 const MotionButton = motion.button
 const MotionForm = motion.form
+const LoginForm = ({ onForgotPassword }) => {
+  const [currentRole, setCurrentRole] = useState('student')
+  const [showPassword, setShowPassword] = useState(false)
 
-const LoginForm = () => {
-  const [currentRole, setCurrentRole] = useState('staff')
+  let passwordType = 'password'
+  let toggleLabel = 'Show password'
+  let ToggleIcon = Eye
+
+  if (showPassword) {
+    passwordType = 'text'
+    toggleLabel = 'Hide password'
+    ToggleIcon = EyeOff
+  }
 
   return (
     <MotionDiv
@@ -41,14 +50,7 @@ const LoginForm = () => {
             <p>Login to your account</p>
           </MotionDiv>
           <MotionDiv className="Portal-Options" variants={itemVariants}>
-            <MotionButton
-              type="button"
-              className={`staff-btn btn ${currentRole === 'staff' ? 'is-active' : ''}`}
-              onClick={() => setCurrentRole('staff')}
-              whileTap={{ scale: 0.98 }}
-            >
-              Staff Login
-            </MotionButton>
+           
             <MotionButton
               type="button"
               className={`student-btn btn ${currentRole === 'student' ? 'is-active' : ''}`}
@@ -57,6 +59,16 @@ const LoginForm = () => {
             >
               Student Login
             </MotionButton>
+
+             <MotionButton
+              type="button"
+              className={`staff-btn btn ${currentRole === 'staff' ? 'is-active' : ''}`}
+              onClick={() => setCurrentRole('staff')}
+              whileTap={{ scale: 0.98 }}
+            >
+              Staff Login
+            </MotionButton>
+            
           </MotionDiv>
           <MotionForm variants={itemVariants}>
             <label htmlFor="username">University Email</label>
@@ -73,11 +85,19 @@ const LoginForm = () => {
                 <div className="input-icon">
                     <Lock />
                 </div>
-                <input type="password" id="password" placeholder="Password" required />
+                <input type={passwordType} id="password" placeholder="Password" required />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={toggleLabel}
+                >
+                  <ToggleIcon />
+                </button>
             </MotionDiv>
 
             <div className="form-links">
-              <Link to="/forgot-password" className="forgot-password">Forgot password?</Link>
+              <button type="button" className="forgot-password" onClick={onForgotPassword}>Forgot password?</button>
             </div>
             <MotionDiv className="submit-div" whileHover={{ y: -1 }} whileTap={{ y: 0 }}>
               <MotionButton type="submit" whileTap={{ scale: 0.99 }}>Sign In</MotionButton>
