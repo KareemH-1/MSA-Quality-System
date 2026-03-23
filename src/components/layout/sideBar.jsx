@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import MSA_Logo from "../../assets/MSA_Logo.png";
 
 const SideBar = ({ isOpen, onClose }) => {
   return (
@@ -9,7 +10,8 @@ const SideBar = ({ isOpen, onClose }) => {
         aria-hidden={!isOpen}
       >
         <div className="sidebar-header">
-          <h2>Menu</h2>
+          <h2>MSA Quality Assurance</h2>
+          <img src={MSA_Logo} className="logo-image" alt="MSA Logo" />
         </div>
 
         <nav className="sidebar-nav">
@@ -19,7 +21,7 @@ const SideBar = ({ isOpen, onClose }) => {
           <Link to="/logout">Logout</Link>
         </nav>
       </aside>
-      {isOpen && <div className="sidebar-overlay" onClick={onClose} />} 
+      {isOpen && <div className="sidebar-overlay" onClick={onClose} />}
     </>
   );
 };
