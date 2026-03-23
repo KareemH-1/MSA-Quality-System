@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -25,6 +25,17 @@ const content = [
 const InfoPanel = () => {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
+  const [autoDelayMs, setAutoDelayMs] = useState(5000);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDirection(1);
+      setIndex((prev) => (prev + 1) % content.length);
+      setAutoDelayMs(5000);
+    }, autoDelayMs);
+
+    return () => clearTimeout(timeoutId);
+  }, [index, autoDelayMs]);
 
   const getXnew = (isEntering, isExiting) => {
     if (direction > 0) {
@@ -58,16 +69,19 @@ const InfoPanel = () => {
 
   const next = () => {
     setDirection(1);
+    setAutoDelayMs(10000);
     setIndex((prev) => (prev + 1) % content.length);
   };
 
   const prev = () => {
     setDirection(-1);
+    setAutoDelayMs(10000);
     setIndex((prev) => (prev - 1 + content.length) % content.length);
   };
 
   const selectSlide = (targetIndex) => {
     setDirection(targetIndex > index ? 1 : -1);
+    setAutoDelayMs(10000);
     setIndex(targetIndex);
   };
 
