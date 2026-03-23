@@ -18,15 +18,16 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: var(--nav-height);
+  height: var(--nav-height); 
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
   padding: 8px 18px;
   padding-right: 24px;
-  background: var(--neutral-color);
-  border-bottom: 1px solid var(--tint-color);
+  background: var(--foundation-color);
+  color: var(--neutral-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 30;
 }
 
@@ -53,11 +54,10 @@
   font-weight: 700;
   line-height: 1.2;
   white-space: nowrap;
-  color: var(--primary-color);
 }
 
 .support-link {
-  color: var(--text-on-light);
+  color: var(--neutral-color);
   text-decoration: none;
   font-size: 0.96rem;
   font-weight: 600;
@@ -93,7 +93,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: url('../assets/MSA_Building.jpg') no-repeat center center / cover;
+  background: url("../assets/MSA_Building.jpg") no-repeat center center / cover;
   filter: brightness(0.6);
   z-index: -2;
 }
@@ -117,15 +117,17 @@
 }
 
 .title-badge {
+  position: absolute;
+  top: 170px;
   padding: 4px 22px;
   width: fit-content;
-  background: rgba(25, 25, 29 , 0.65);
+  background: rgba(25, 25, 29, 0.65);
   gap: 8px;
   display: flex;
   align-items: flex-start;
   margin-bottom: 24px;
-  
 }
+
 .title-badge h2 {
   color: rgba(251, 249, 250, 0.5);
   font-size: 1rem;
@@ -321,7 +323,6 @@
 
 .Header h1 {
   margin: 0;
-  color: #0f1b31;
   font-size: clamp(1.85rem, 2.2vw, 2.25rem);
   line-height: 1.1;
 }
@@ -357,7 +358,10 @@
   color: #3b4250;
   background: transparent;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .Portal-Options .btn.is-active {

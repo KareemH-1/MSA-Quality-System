@@ -1,30 +1,33 @@
 :root {
-  --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-secondary: 'Lora', serif;
-  --font-data: 'JetBrains Mono', monospace;
-  
+  --font-main:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-secondary: "Lora", serif;
+  --font-data: "JetBrains Mono", monospace;
+
+  --bridge-teal: #004369;
+  --warm-sand: #eae0d5;
+  --dusty-sage: #8daa91;
+  --gold-accent: #d4a373;
+  --slate-ui: #2c3335;
+
   --primary-color: #002147; /* 0, 33, 71 */
-  --secondary-color: #FE624E; /*  254, 98, 78 */
-  --tertiary-color: #3D1500;       /* 61, 21, 0 */
-  
-  --accent-color: #b22b1d;       /*  178, 43, 29 */
-  
-  --neutral-color: #FBF9FA;     /* 248, 249, 250 */
-  --tint-color: #F1F3F5;       /* 241, 243, 245 */
-  --soft-color: #ADB5BD;        /* 173, 161, 189 */
-  --muted-color: #495857;       /* 73, 80, 87 */
-  --foundation-color: #191C1D;   /* 25, 25, 29 */
+  --secondary-color: #fe624e; /*  254, 98, 78 */
+  --tertiary-color: #3d1500; /* 61, 21, 0 */
 
-  --success-color: #08F3DC; /* 8, 243, 220 */
-  --warning-color: #FDF2E9; /* 253, 242, 233 */
-  --error-color: #FFDAD6; /* 255, 218, 214 */
-  --info-color: #E0F2FE; /* 224, 242, 254 */
+  --accent-color: #b22b1d; /*  178, 43, 29 */
 
-  --gradient-visual-soul: linear-gradient(
-    135deg, 
-    #001a38 0%,
-    #0a0c0d 100%
-  );
+  --neutral-color: #fbf9fa; /* 248, 249, 250 */
+  --tint-color: #f1f3f5; /* 241, 243, 245 */
+  --soft-color: #adb5bd; /* 173, 161, 189 */
+  --muted-color: #495857; /* 73, 80, 87 */
+  --foundation-color: #191c1d; /* 25, 25, 29 */
+
+  --success-color: #08f3dc; /* 8, 243, 220 */
+  --warning-color: #fdf2e9; /* 253, 242, 233 */
+  --error-color: #ffdad6; /* 255, 218, 214 */
+  --info-color: #e0f2fe; /* 224, 242, 254 */
+
+  --gradient-visual-soul: linear-gradient(135deg, #001a38 0%, #0a0c0d 100%);
   --card-accent-line: #b22b1d;
 
   --surface-low: var(--tint-color);
@@ -34,7 +37,6 @@
   --anim-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   --anim-standard: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 
 * {
   box-sizing: border-box;
@@ -59,7 +61,12 @@
   background: var(--muted-color);
 }
 
-h1 , h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   margin: 0;
   font-weight: 600;
   font-family: var(--font-main);
@@ -70,7 +77,6 @@ p {
   line-height: 1.5;
   font-family: var(--font-secondary);
 }
-
 
 body {
   margin: 0;
