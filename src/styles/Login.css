@@ -114,7 +114,7 @@
   max-width: 680px;
   color: var(--text-on-dark);
   gap: 14px;
-  padding: clamp(24px, 5vh, 48px);  
+  padding: clamp(24px, 5vh, 48px);
 }
 
 .title-badge {
@@ -139,7 +139,7 @@
 .info-slide {
   display: flex;
   flex-direction: column;
-  width: min(100%, 60ch); 
+  width: min(100%, 60ch);
   min-height: 190px;
   gap: 10px;
 }
