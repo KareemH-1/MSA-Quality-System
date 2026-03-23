@@ -30,8 +30,8 @@
   --gradient-visual-soul: linear-gradient(135deg, #001a38 0%, #0a0c0d 100%);
   --card-accent-line: #b22b1d;
 
-  --surface-low: var(--tint-color);
-  --elevation: var(--neutral-color);
+  --surface-low: var(--tint-color); /* in hexa: #f1f3f5 */
+  --elevation: var(--neutral-color); /* in hexa: #fbf9fa */
   --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
 
   --anim-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);

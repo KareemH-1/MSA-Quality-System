@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import SideBar from "../components/layout/sideBar";
 import "../styles/Home.css";
 import { Logs, CircleX } from "lucide-react";
+import NavBar from "../components/layout/navBar";
 
 const Home = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -16,6 +17,7 @@ const Home = () => {
 
   return (
     <div className="home-page">
+      <NavBar isSidebarOpen={isSidebarOpen} />
       <button
         type="button"
         className="sidebar-toggle-btn"

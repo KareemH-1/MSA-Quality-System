@@ -1,0 +1,78 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background-color: #ffffffcc;
+  color: var(--foundation-color);
+  transition: margin-left var(--anim-standard);
+}
+
+.navbar h2 {
+  font-size: 1.2rem;
+  padding-left: 50px;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 20px;
+}
+
+.navbar-item a {
+  color: var(--foundation-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  border-bottom: 2px solid transparent;
+  transition: 0.2s ease;
+}
+
+.navbar-item a:hover {
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.navbar-actions input {
+  padding: 6px 12px;
+  border: 1px solid var(--soft-color);
+  border-radius: 12px;
+  background-color: var(--surface-low);
+  color: var(--foundation-color);
+  transition: 0.2s ease;
+}
+
+.navbar-actions input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.navbar-icons {
+  display: flex;
+  gap: 12px;
+}
+
+.navbar-icons svg {
+  width: 20px;
+  height: 20px;
+  color: var(--foundation-color);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.navbar-icons svg:hover {
+  color: var(--primary-color);
+}
+
+@media (min-width: 981px) {
+  .navbar.navbar-shifted {
+    margin-left: 280px;
+  }
+
+  .sidebar-overlay {
+    display: none;
+  }
+}
