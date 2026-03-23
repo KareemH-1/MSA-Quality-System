@@ -2,10 +2,19 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "../../styles/NavBar.css";
 import { Bell, Info, UserRoundPen } from "lucide-react";
+import { motion } from "framer-motion";
+
+const MotionNav = motion.nav;
+const MotionSpan = motion.span;
 
 const NavBar = ({ isSidebarOpen }) => {
   return (
-    <nav className={isSidebarOpen ? "navbar navbar-shifted" : "navbar"}>
+    <MotionNav
+      className={isSidebarOpen ? "navbar navbar-shifted" : "navbar"}
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+    >
       <h2>Academic Editorial</h2>
       <div className="navbar-links">
         <div className="navbar-item">
@@ -27,12 +36,18 @@ const NavBar = ({ isSidebarOpen }) => {
       <div className="navbar-actions">
         <input type="text" placeholder="Search..." />
         <div className="navbar-icons">
-          <Bell />
-          <Info />
-          <UserRoundPen />
+          <MotionSpan whileHover={{ y: -1 }} transition={{ duration: 0.1 }}>
+            <Bell />
+          </MotionSpan>
+          <MotionSpan whileHover={{ y: -1 }} transition={{ duration: 0.1 }}>
+            <Info />
+          </MotionSpan>
+          <MotionSpan whileHover={{ y: -1 }} transition={{ duration: 0.1 }}>
+            <UserRoundPen />
+          </MotionSpan>
         </div>
       </div>
-    </nav>
+    </MotionNav>
   );
 };
 
