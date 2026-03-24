@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Lock, MoveRight, Eye, EyeOff } from "lucide-react";
 
@@ -27,6 +27,44 @@ const MotionForm = motion.form;
 const LoginForm = ({ onForgotPassword }) => {
   const [currentRole, setCurrentRole] = useState("student");
   const [showPassword, setShowPassword] = useState(false);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:8000/login.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password, role: currentRole }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
+      //save token to localStorage
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // Redirect to home page
+      window.location.href = "/home";
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   let passwordType = "password";
   let toggleLabel = "Show password";
@@ -68,7 +106,7 @@ const LoginForm = ({ onForgotPassword }) => {
           Staff Login
         </MotionButton>
       </MotionDiv>
-      <MotionForm variants={itemVariants}>
+      <MotionForm variants={itemVariants} onSubmit={handleSubmit}>
         <label htmlFor="username">University Email</label>
 
         <MotionDiv className="input-group" whileFocus={{ scale: 1.01 }}>
@@ -78,6 +116,8 @@ const LoginForm = ({ onForgotPassword }) => {
             id="username"
             placeholder="University Email"
             required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </MotionDiv>
         <label htmlFor="password">Password</label>
@@ -91,6 +131,8 @@ const LoginForm = ({ onForgotPassword }) => {
             id="password"
             placeholder="Password"
             required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
           <button
             type="button"
@@ -101,6 +143,8 @@ const LoginForm = ({ onForgotPassword }) => {
             <ToggleIcon />
           </button>
         </MotionDiv>
+
+        {error ? <p className="error-message">{error}</p> : null}
 
         <div className="form-links">
           <button
@@ -116,8 +160,12 @@ const LoginForm = ({ onForgotPassword }) => {
           whileHover={{ y: -1 }}
           whileTap={{ y: 0 }}
         >
-          <MotionButton type="submit" whileTap={{ scale: 0.99 }}>
-            Sign In
+          <MotionButton
+            type="submit"
+            whileTap={{ scale: 0.99 }}
+            disabled={loading}
+          >
+            {loading ? "Signing In..." : "Sign In"}
           </MotionButton>
           <MoveRight />
         </MotionDiv>

@@ -126,10 +126,11 @@
   color: var(--foundation-color);
 }
 
-.home-content p {
-  max-width: 62ch;
+.home-content h3 {
+  margin-left: 7px;
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  line-height: 1.2;
   color: var(--muted-color);
-  font-size: 1rem;
 }
 
 @media (min-width: 981px) {
