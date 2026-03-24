@@ -11,15 +11,18 @@
   --slate-ui: #2c3335;
 
   --primary-color: #002147; /* 0, 33, 71 */
-  --secondary-color: #fe624e; /*  254, 98, 78 */
-  --tertiary-color: #3d1500; /* 61, 21, 0 */
+  --secondary-color: #172554; /* 23, 37, 84 */
+  --tertiary-color: #fe624e; /*  254, 98, 78 */
+  --quaternary-color: #3d1500; /* 61, 21, 0 */
 
   --accent-color: #b22b1d; /*  178, 43, 29 */
 
   --neutral-color: #fbf9fa; /* 248, 249, 250 */
-  --tint-color: #f1f3f5; /* 241, 243, 245 */
+  --tint-color: #f1f5f9; /* 241, 245, 249 */
+  --footer-color: #E7E8E9; /* 231, 232, 233 */
   --soft-color: #adb5bd; /* 173, 161, 189 */
   --muted-color: #495857; /* 73, 80, 87 */
+  --text-color: #64748b; /* 100, 116, 139 */
   --foundation-color: #191c1d; /* 25, 25, 29 */
 
   --success-color: #08f3dc; /* 8, 243, 220 */
@@ -30,7 +33,8 @@
   --gradient-visual-soul: linear-gradient(135deg, #001a38 0%, #0a0c0d 100%);
   --card-accent-line: #b22b1d;
 
-  --surface-low: var(--tint-color); /* in hexa: #f1f3f5 */
+  --surface-low: #FFFFFFCC; /* in hexa: #f1f3f5 */
+  --surface-high: #f8f9fa; /* in hexa: #f8f9fa */
   --elevation: var(--neutral-color); /* in hexa: #fbf9fa */
   --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
 

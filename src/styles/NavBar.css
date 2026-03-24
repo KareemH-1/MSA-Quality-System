@@ -4,7 +4,7 @@
   justify-content: space-between;
   min-height: 58px;
   padding: 10px 20px 10px 64px;
-  background-color: color-mix(in srgb, var(--neutral-color) 85%, transparent);
+  background-color: var(--surface-low);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid color-mix(in srgb, var(--soft-color) 42%, var(--neutral-color));
   color: var(--foundation-color);
@@ -51,9 +51,9 @@
   width: min(32vw, 260px);
   height: 34px;
   padding: 0 12px;
-  border: 1px solid color-mix(in srgb, var(--soft-color) 48%, var(--neutral-color));
+  border: 1px solid var(--soft-color);
   border-radius: 10px;
-  background-color: var(--neutral-color);
+  background-color: var(--surface-high);
   color: var(--muted-color);
   transition: 0.2s ease;
 }
