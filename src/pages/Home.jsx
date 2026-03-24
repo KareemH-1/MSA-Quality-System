@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import "../styles/Home.css";
 
-const Home = () => {
+const Home = ({ currentNavItem }) => {
   const greetingName = useMemo(() => {
     const storedUser = localStorage.getItem("user");
 
@@ -37,6 +37,7 @@ const Home = () => {
     <>
       <h1>Welcome to the MSA Quality System</h1>
       <h3>Welcome, {greetingName}</h3>
+      {currentNavItem && <p>Current Tab: {currentNavItem}</p>}
     </>
   );
 };

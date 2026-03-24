@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import "../../styles/NavBar.css";
 import { Bell, Info, UserRoundPen } from "lucide-react";
 import { motion } from "framer-motion";
@@ -7,7 +6,7 @@ import { motion } from "framer-motion";
 const MotionNav = motion.nav;
 const MotionSpan = motion.span;
 
-const NavBar = () => {
+const NavBar = ({ components = [] }) => {
   return (
     <MotionNav
       className="navbar"
@@ -15,35 +14,40 @@ const NavBar = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
     >
-      <h2>Academic Editorial</h2>
-      <div className="navbar-links">
-        <div className="navbar-item">
-          <Link to="/reports" className="navbar-logo">
-            Reports
-          </Link>
-        </div>
-        <div className="navbar-item">
-          <Link to="/archive" className="navbar-link">
-            Archive
-          </Link>
-        </div>
-        <div className="navbar-item">
-          <Link to="/settings" className="navbar-link">
-            Settings
-          </Link>
-        </div>
+      <div className="nav-pages">
+        {components.length > 0 ? (
+          components.map((component, index) => (
+            <button
+              type="button"
+              key={index}
+              onClick={() => component.onClick?.()}
+              className={`navbar-page-btn ${component.active ? 'active' : ''}`}
+            >
+              {component.name}
+            </button>
+          ))
+        ) : (
+          <h2 className="navbar-title">MSA Quality System</h2>
+        )}
       </div>
+
       <div className="navbar-actions">
-        <input type="text" placeholder="Search..." />
+        <input className="navbar-search" type="text" placeholder="Search..." />
         <div className="navbar-icons">
           <MotionSpan whileHover={{ y: -1 }} transition={{ duration: 0.1 }}>
-            <Bell />
+            <button type="button" className="navbar-icon-btn" aria-label="Notifications">
+              <Bell />
+            </button>
           </MotionSpan>
           <MotionSpan whileHover={{ y: -1 }} transition={{ duration: 0.1 }}>
-            <Info />
+            <button type="button" className="navbar-icon-btn" aria-label="Info">
+              <Info />
+            </button>
           </MotionSpan>
           <MotionSpan whileHover={{ y: -1 }} transition={{ duration: 0.1 }}>
-            <UserRoundPen />
+            <button type="button" className="navbar-icon-btn" aria-label="Profile">
+              <UserRoundPen />
+            </button>
           </MotionSpan>
         </div>
       </div>
