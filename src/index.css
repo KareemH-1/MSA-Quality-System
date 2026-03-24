@@ -181,3 +181,19 @@ body {
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
+
+.app-main {
+  display: flex;
+  min-height: 100dvh;
+}
+
+.app-routes {
+  width: 100%;
+  transition: margin-left var(--anim-standard);
+}
+
+@media (min-width: 769px) {
+  .app-routes.app-routes-shifted {
+    margin-left: var(--sidebar-width);
+  }
+}

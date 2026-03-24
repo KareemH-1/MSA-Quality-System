@@ -7,10 +7,10 @@ import { motion } from "framer-motion";
 const MotionNav = motion.nav;
 const MotionSpan = motion.span;
 
-const NavBar = ({ isSidebarOpen }) => {
+const NavBar = () => {
   return (
     <MotionNav
-      className={isSidebarOpen ? "navbar navbar-shifted" : "navbar"}
+      className="navbar"
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}

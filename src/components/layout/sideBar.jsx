@@ -1,82 +1,60 @@
 import React from "react";
-import { useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link , useLocation} from "react-router-dom";
 import MSA_Logo from "../../assets/MSA_Logo.png";
 import user_image from "../../assets/user.jpg";
+import "../../styles/SideBar.css";
+import { Home, HomeIcon, User , Settings } from "lucide-react";
 
-const SideBar = ({ isOpen, onClose }) => {
-  const greetingName = useMemo(() => {
-    const storedUser = localStorage.getItem("user");
-
-    if (!storedUser) {
-      return "User";
-    }
-
-    try {
-      const parsedUser = JSON.parse(storedUser);
-
-      let candidate = "";
-
-      if (parsedUser?.name) {
-        candidate = parsedUser.name.trim().split(/\s+/)[0];
-      } else if (parsedUser?.email) {
-        const localPart = parsedUser.email.split("@")[0] ?? "";
-        candidate = localPart.split(/[._-]/)[0] ?? "";
-      }
-
-      if (!candidate) {
-        return "User";
-      }
-
-      return (
-        candidate.charAt(0).toUpperCase() + candidate.slice(1).toLowerCase()
-      );
-    } catch {
-      return "User";
-    }
-  }, []);
-
-  const role = useMemo(() => {
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) {
-      return "Unknown Role";
-    }
-    try {
-      const parsedUser = JSON.parse(storedUser);
-      return parsedUser.role || "Unknown Role";
-    } catch {
-      return "Unknown Role";
-    }
-  }, []);
+const SideBar = ({ isOpen }) => {
+  const location = useLocation();
+  const currentPath = location.pathname;
 
   return (
-    <>
-      <aside
-        className={isOpen ? "sidebar sidebar-open" : "sidebar"}
-        aria-hidden={!isOpen}
-      >
-        <div className="sidebar-header">
-          <h2>MSA Quality Assurance</h2>
-          <img src={MSA_Logo} className="logo-image" alt="MSA Logo" />
-        </div>
+    <aside
+      className={isOpen ? "sidebar sidebar-open" : "sidebar"}
+      aria-hidden={!isOpen}
+    >
+      <div className="sidebar-top">
+      <div className="sidebar-header">
+        <img src={MSA_Logo} className="logo-image" alt="MSA Logo" />
+        <h2>MSA Quality Assurance</h2>
+      </div>
 
-        <nav className="sidebar-nav">
-          <Link to="/dashboard">Dashboard</Link>
-          <Link to="/profile">Profile</Link>
-          <Link to="/settings">Settings</Link>
-          <Link to="/logout">Logout</Link>
-        </nav>
-
-        <div className="sidebar-footer">
-          <img src={user_image} className="user-image" alt="User Image" />
-          <div className="user-info">
-            <p className="welcome-message">Welcome, {greetingName}!</p>
-            <p className="user-role">{role}</p>
-          </div>
+      <nav className="sidebar-nav">
+        <div className={`sidebar-item ${currentPath === "/home" ? "active" : ""}`}>
+          <HomeIcon size={16} className="sideItemIcon"/>
+          <Link to="/home">
+            Home
+          </Link>
         </div>
-      </aside>
-      {isOpen && <div className="sidebar-overlay" onClick={onClose} />}
-    </>
+        <div className={`sidebar-item ${currentPath === "/profile" ? "active" : ""}`}>
+          <User size={16} className="sideItemIcon"/>
+          <Link to="/profile">
+            Profile
+          </Link>
+        </div>
+        <div className={`sidebar-item ${currentPath === "/settings" ? "active" : ""}`}>
+          <Settings size={16} className="sideItemIcon"/>
+          <Link to="/settings">
+            Settings
+          </Link>
+        </div>
+      </nav>
+      </div>
+      <div className="sidebar-bottom">
+      <div className="sidebar-divider"></div>
+      <div className="sidebar-footer">
+        <div className="info-container">
+        <img src={user_image} className="user-image" alt="User Image" />
+        <div className="user-info">
+          <p className="welcome-message">Welcome, Kareem!</p>
+          <p className="user-role">QA Adminstrator</p>
+        </div>
+        </div>
+        <button className="logout-btn">Logout</button>
+      </div>
+      </div>
+    </aside>
   );
 };
 
