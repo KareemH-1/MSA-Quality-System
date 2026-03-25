@@ -3,9 +3,9 @@ import { Link , useLocation} from "react-router-dom";
 import MSA_Logo from "../../assets/MSA_Logo.png";
 import user_image from "../../assets/user.jpg";
 import "../../styles/SideBar.css";
-import { Home, HomeIcon, User , Settings } from "lucide-react";
+import { HomeIcon } from "lucide-react";
 
-const SideBar = ({ isOpen }) => {
+const SideBar = ({ isOpen, pages = [] }) => {
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -21,24 +21,19 @@ const SideBar = ({ isOpen }) => {
       </div>
 
       <nav className="sidebar-nav">
-        <div className={`sidebar-item ${currentPath === "/home" ? "active" : ""}`}>
-          <HomeIcon size={16} className="sideItemIcon"/>
-          <Link to="/home">
-            Home
-          </Link>
-        </div>
-        <div className={`sidebar-item ${currentPath === "/profile" ? "active" : ""}`}>
-          <User size={16} className="sideItemIcon"/>
-          <Link to="/profile">
-            Profile
-          </Link>
-        </div>
-        <div className={`sidebar-item ${currentPath === "/settings" ? "active" : ""}`}>
-          <Settings size={16} className="sideItemIcon"/>
-          <Link to="/settings">
-            Settings
-          </Link>
-        </div>
+        {pages.map((page) => {
+          const SidebarIcon = page.sidebarIcon ?? HomeIcon;
+
+          return (
+            <div
+              key={page.path}
+              className={`sidebar-item ${currentPath === page.path ? "active" : ""}`}
+            >
+              <SidebarIcon size={16} className="sideItemIcon" />
+              <Link to={page.path}>{page.sidebarLabel ?? "Home"}</Link>
+            </div>
+          );
+        })}
       </nav>
       </div>
       <div className="sidebar-bottom">

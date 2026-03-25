@@ -4,6 +4,7 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import SideBar from "./components/layout/sideBar";
 import NavBar from "./components/layout/navBar";
 import { NOT_FOUND_PAGE, PAGE_CONFIG } from "./services/pagesConfig";
+import { ROLES } from "./constants/roles";
 
 const APP_PAGES = Object.values(PAGE_CONFIG);
 
@@ -21,8 +22,14 @@ function App() {
   const { pathname } = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [navSelections, setNavSelections] = useState(buildInitialNavSelections);
+  const currentUserRole = ROLES.QA; // change later when backend is done
 
-  const activePage = APP_PAGES.find((page) => page.path === pathname);
+  const accessiblePages = APP_PAGES.filter(
+    (page) => !page.roles || page.roles.includes(currentUserRole)
+  );
+  const sidebarPages = accessiblePages.filter((page) => page.showSidebar);
+
+  const activePage = accessiblePages.find((page) => page.path === pathname);
   const shouldShowSidebar = Boolean(activePage?.showSidebar);
 
   function toggleSidebar() {
@@ -47,7 +54,7 @@ function App() {
           >
             {isSidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
           </button>
-          <SideBar isOpen={isSidebarOpen} />
+          <SideBar isOpen={isSidebarOpen} pages={sidebarPages} />
         </>
       )}
 
@@ -59,7 +66,7 @@ function App() {
         }
       >
         <Routes>
-          {APP_PAGES.map((page) => {
+          {accessiblePages.map((page) => {
             const PageComponent = page.component;
             const currentItem = navSelections[page.path] ?? page.defaultNavItem;
             const navbarComponents = page.getNavbarComponents
