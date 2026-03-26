@@ -132,8 +132,8 @@
 }
 
 .sidebar-item:hover a {
-  background-color: var(--tint-color);
   color: var(--primary-color);
+  filter: brightness(1.5);
 }
 
 .sidebar-footer {

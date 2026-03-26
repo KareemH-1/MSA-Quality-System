@@ -19,7 +19,7 @@ export const PAGE_CONFIG = {
     sidebarLabel: "Home",
     sidebarIcon: HomeIcon,
     showNavbar: true,
-    defaultNavItem: "Insights",
+    defaultNavItem: "Overview",
     getNavbarComponents: getHomeNavbarComponents,
     wrapperClassName: "home-page",
     contentClassName: "home-content",

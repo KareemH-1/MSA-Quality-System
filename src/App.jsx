@@ -5,6 +5,7 @@ import SideBar from "./components/layout/sideBar";
 import NavBar from "./components/layout/navBar";
 import { NOT_FOUND_PAGE, PAGE_CONFIG } from "./services/pagesConfig";
 import { ROLES } from "./constants/roles";
+import Footer from "./components/Footer";
 
 const APP_PAGES = Object.values(PAGE_CONFIG);
 
@@ -18,9 +19,23 @@ const buildInitialNavSelections = () => {
   }, {});
 };
 
+const getSideBarStateLocalStorage = () => {
+  const storedState = localStorage.getItem("isSidebarOpen");
+  if (storedState === null) {
+    localStorage.setItem("isSidebarOpen", JSON.stringify(true));
+    return true;
+  }
+  return JSON.parse(storedState);
+}
+const setSideBarStateLocalStorage = (state) => {
+  if (state === null) {
+    localStorage.removeItem("isSidebarOpen");
+  }
+  localStorage.setItem("isSidebarOpen", JSON.stringify(state));
+}
 function App() {
   const { pathname } = useLocation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(getSideBarStateLocalStorage());
   const [navSelections, setNavSelections] = useState(buildInitialNavSelections);
   const currentUserRole = ROLES.QA; // change later when backend is done
 
@@ -34,6 +49,7 @@ function App() {
 
   function toggleSidebar() {
     setIsSidebarOpen((prev) => !prev);
+    setSideBarStateLocalStorage(!isSidebarOpen);
   }
 
   function setCurrentItemForPage(pagePath, item) {
@@ -105,6 +121,7 @@ function App() {
             element={<NOT_FOUND_PAGE.component />}
           />
         </Routes>
+        <Footer />
       </div>
     </main>
   );

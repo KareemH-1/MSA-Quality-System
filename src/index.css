@@ -185,9 +185,19 @@ body {
 .app-main {
   display: flex;
   min-height: 100dvh;
+  position: relative;
 }
-
+.app-footer{
+  background-color: var(--neutral-color);
+  box-shadow: var(--shadow-soft);
+  text-align: center;
+  padding: 1rem;
+  font-size: 14px;
+  margin-top: 2rem; 
+}
 .app-routes {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   transition: margin-left var(--anim-standard);
 }
