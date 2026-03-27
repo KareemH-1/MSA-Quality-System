@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import "../styles/Home.css";
+import "../../styles/Home.css";
 
 const Home = ({ currentNavItem }) => {
   const greetingName = useMemo(() => {

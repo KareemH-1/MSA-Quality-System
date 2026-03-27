@@ -1,0 +1,17 @@
+#overview{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 40px 20px 40px;
+}
+
+.content{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.row{
+    display: flex;
+    gap: 20px;
+}

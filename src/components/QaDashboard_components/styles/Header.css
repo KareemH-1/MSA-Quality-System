@@ -1,0 +1,27 @@
+
+.header{
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    --small-font-size: 14px;
+    --header-font-size: 24px;
+}
+.header:after{
+    content: "";
+    display: block;
+    width: 70px;
+    height: 2px;
+    background-color: var(--accent-color);
+}
+.header h4{
+    font-size: var(--small-font-size);
+    font-weight: 500;
+    text-transform: uppercase;
+    color: var(--accent-color);
+}
+.header h2{
+    font-size: var(--header-font-size);
+    font-weight: 600;
+    color: var(--primary-color);
+}

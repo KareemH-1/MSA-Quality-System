@@ -1,10 +1,10 @@
-import Home from "../pages/Home";
+import QaDashboard from "../pages/QA_Admin/QaDashboard";
 import Login from "../pages/Login";
 import NotFound from "../pages/NotFound";
-import { getHomeNavbarComponents } from "./homeNavbarComponents";
+import { getQaDashboardNavbarComponents } from "./QaDashboardNavbarComponents";
 
 import { ROLES } from "../constants/roles";
-import { FlaskConical, HomeIcon, TestTube } from "lucide-react";
+import { FlaskConical,LayoutDashboard} from "lucide-react";
 
 export const PAGE_CONFIG = {
   login: {
@@ -13,17 +13,15 @@ export const PAGE_CONFIG = {
     showSidebar: false,
   },
   home: {
-    path: "/home",
-    component: Home,
+    path: "/dashboard",
+    component: QaDashboard,
     showSidebar: true,
-    sidebarLabel: "Home",
-    sidebarIcon: HomeIcon,
+    sidebarLabel: "Dashboard",
+    sidebarIcon:LayoutDashboard ,
     showNavbar: true,
     defaultNavItem: "Overview",
-    getNavbarComponents: getHomeNavbarComponents,
-    wrapperClassName: "home-page",
-    contentClassName: "home-content",
-    roles: [ROLES.QA, ROLES.DEAN, ROLES.MODULE_LEADER, ROLES.INSTRUCTOR, ROLES.STUDENT]
+    getNavbarComponents: getQaDashboardNavbarComponents,
+    roles: [ROLES.QA]
   },
   testPage : {
     path: "/test",
