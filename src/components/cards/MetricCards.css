@@ -1,0 +1,106 @@
+.mini-metric-card,
+.ring-progress-card {
+  height: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(31, 85, 123, 0.18);
+  box-shadow: 0 10px 20px rgba(4, 36, 61, 0.1);
+  padding: 0.85rem 0.95rem;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef4fa 100%);
+}
+
+.mini-metric-card {
+  display: grid;
+  align-content: stretch;
+  gap: 0.26rem;
+}
+
+.mini-metric-card.warn {
+  background: linear-gradient(180deg, #fff8f4 0%, #fef0e7 100%);
+  border-color: rgba(170, 80, 41, 0.2);
+}
+
+.mini-metric-card.cool {
+  background: linear-gradient(180deg, #f8fbff 0%, #eef4fa 100%);
+}
+
+.mini-metric-label {
+  margin: 0;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #67829c;
+  font-weight: 700;
+}
+
+.mini-metric-value {
+  margin: 0;
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  color: #0e3b5d;
+  line-height: 1;
+}
+
+.mini-metric-description {
+  margin: 0;
+  font-size: 0.73rem;
+  line-height: 1.35;
+  color: #45637e;
+}
+
+.ring-progress-card {
+  display: grid;
+  gap: 0.5rem;
+  align-content: stretch;
+}
+
+.ring-progress-title {
+  margin: 0;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #67829c;
+  font-weight: 700;
+}
+
+.ring-progress-body {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ring-svg {
+  width: 58px;
+  height: 58px;
+}
+
+.ring-track,
+.ring-fill {
+  fill: none;
+  stroke-width: 8;
+}
+
+.ring-track {
+  stroke: rgba(14, 59, 93, 0.15);
+}
+
+.ring-fill {
+  stroke: #1f7aa6;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 42px 42px;
+  transition: stroke-dashoffset 0.2s linear;
+}
+
+.ring-progress-value {
+  margin: 0;
+  font-size: clamp(1.2rem, 2.1vw, 1.55rem);
+  color: #0e3b5d;
+  line-height: 1;
+}
+
+.ring-progress-note {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: #45637e;
+}

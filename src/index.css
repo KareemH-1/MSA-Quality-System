@@ -1,8 +1,10 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
 :root {
   --font-main:"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-secondary: "Lora", serif;
   --font-data: "JetBrains Mono", monospace;
+  --font-display: "Space Grotesk", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
   --bridge-teal: #004369;
   --warm-sand: #eae0d5;
@@ -73,7 +75,7 @@ h5,
 h6 {
   margin: 0;
   font-weight: 600;
-  font-family: var(--font-main);
+  font-family: var(--font-display);
 }
 
 p {

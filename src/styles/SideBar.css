@@ -189,7 +189,7 @@
 
 .user-info .welcome-message {
   font-weight: bold;
-  font-family: var(--font-main);
+  font-family: var(--font-display);
   color: var(--primary-color);
 }
 

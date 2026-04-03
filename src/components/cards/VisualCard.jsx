@@ -1,35 +1,47 @@
 import { useEffect, useState } from "react";
 
-export const VisualCard = ({ title, percentage, description, value, footer, icon, color , maxWidth , borderRadius}) => {
-  const showIconInFooter = Boolean(percentage && icon);
-  const rawValue = value ?? "N/A";
+export const VisualCard = ({ title, percentage, description, value, footer, icon, color , maxWidth , borderRadius, animationDuration = 1000}) => {
+  let showIconInFooter = false;
+  if (percentage && icon) {
+    showIconInFooter = true;
+  }
 
-  const parsedNumericValue =
-    typeof rawValue === "number"
-      ? rawValue
-      : typeof rawValue === "string"
-        ? Number(rawValue.replace(/,/g, ""))
-        : Number.NaN;
+  let rawValue = "N/A";
+  if (value !== undefined && value !== null) {
+    rawValue = value;
+  }
 
-  const shouldAnimateValue = Number.isFinite(parsedNumericValue);
-  const decimalPlaces = Number.isInteger(parsedNumericValue)
-    ? 0
-    : (() => {
-        const stringValue = String(rawValue);
-        const decimalPart = stringValue.split(".")[1];
-        return decimalPart ? decimalPart.length : 1;
-      })();
+  let parsedNumericValue = Number.NaN;
+  if (typeof rawValue === "number") {
+    parsedNumericValue = rawValue;
+  } else if (typeof rawValue === "string") {
+    parsedNumericValue = Number(rawValue.replace(/,/g, ""));
+  }
 
-  const [displayValue, setDisplayValue] = useState(
-    shouldAnimateValue ? 0 : rawValue
-  );
+  const shouldAnimateValue = !Number.isNaN(parsedNumericValue);
+  let decimalPlaces = 0;
+  if (!Number.isInteger(parsedNumericValue)) {
+    const stringValue = String(rawValue);
+    const decimalPart = stringValue.split(".")[1];
+    if (decimalPart) {
+      decimalPlaces = decimalPart.length;
+    } else {
+      decimalPlaces = 1;
+    }
+  }
+
+  let initialDisplayValue = rawValue;
+  if (shouldAnimateValue) {
+    initialDisplayValue = 0;
+  }
+
+  const [displayValue, setDisplayValue] = useState(initialDisplayValue);
 
   useEffect(() => {
     if (!shouldAnimateValue) {
       return;
     }
 
-    const animationDuration = 1000;
     const startValue = 0;
     const endValue = parsedNumericValue;
     let animationFrameId;
@@ -54,29 +66,48 @@ export const VisualCard = ({ title, percentage, description, value, footer, icon
     animationFrameId = requestAnimationFrame(animateValue);
 
     return () => cancelAnimationFrame(animationFrameId);
-  }, [shouldAnimateValue, parsedNumericValue]);
+  }, [shouldAnimateValue, parsedNumericValue, animationDuration]);
 
-  const formattedValue = shouldAnimateValue
-    ? Number(displayValue).toLocaleString(undefined, {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: decimalPlaces,
-      })
-    : displayValue;
+  let formattedValue = displayValue;
+  if (shouldAnimateValue) {
+    formattedValue = Number(displayValue).toLocaleString(undefined, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: decimalPlaces,
+    });
+  }
   
   let cardStyle = {};
   if (borderRadius !== undefined && borderRadius !== null) {
-    cardStyle.borderRadius = typeof borderRadius === 'number' ? `${borderRadius}px` : borderRadius;
+    if (typeof borderRadius === 'number') {
+      cardStyle.borderRadius = `${borderRadius}px`;
+    } else {
+      cardStyle.borderRadius = borderRadius;
+    }
   }
   if (maxWidth !== undefined && maxWidth !== null) {
-    cardStyle.maxWidth = typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth;
+    if (typeof maxWidth === 'number') {
+      cardStyle.maxWidth = `${maxWidth}px`;
+    } else {
+      cardStyle.maxWidth = maxWidth;
+    }
+  }
+
+  let cardClassName = 'visual-card dark';
+  if (color === 'white') {
+    cardClassName = 'visual-card white';
+  }
+
+  let percentageClassName = 'Perf negative';
+  if (percentage && percentage.startsWith('+')) {
+    percentageClassName = 'Perf positive';
   }
 
 
   return (
-    <div className={`visual-card ${color === 'white' ? 'white' : 'dark'}`} style={cardStyle}>
+    <div className={cardClassName} style={cardStyle}>
       <div className="card-header">
         <h3 className="card-title">{title}</h3>
-        {percentage ? <h4 className={`Perf ${percentage.startsWith('+') ? 'positive' : 'negative'}`}>{percentage}</h4> : null}
+        {percentage ? <h4 className={percentageClassName}>{percentage}</h4> : null}
         {!percentage && icon ? <div className="card-icon">{icon}</div> : null}
       </div>
       
@@ -85,7 +116,7 @@ export const VisualCard = ({ title, percentage, description, value, footer, icon
         <p>{description}</p>
       </div>
       <div className="card-footer">
-        {footer && <p>{footer}</p>}
+        {footer ? <p>{footer}</p> : null}
         {showIconInFooter ? <div className="card-icon">{icon}</div> : null}
       </div>
     </div>

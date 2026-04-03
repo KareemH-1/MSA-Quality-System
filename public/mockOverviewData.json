@@ -1,0 +1,84 @@
+{
+  "semester": {
+    "current": "2026-SPRING",
+    "previous": "2025-FALL"
+  },
+  "coverage": {
+    "allFaculties": true,
+    "faculties": [
+      "Faculty of DENTISTRY",
+      "Faculty of PHYSICAL THERAPY",
+      "Faculty of PHARMACY",
+      "Faculty of BIOTECHNOLOGY",
+      "Faculty of NUTRITION & FOOD TECHNOLOGY",
+      "Faculty of ENGINEERING",
+      "Faculty of COMPUTER SCIENCE",
+      "Faculty of ARTS & DESIGN",
+      "Faculty of MANAGMENT SCIENCES",
+      "Faculty of MASS COMMUNICATION",
+      "Faculty of LANGUAGES"
+    ]
+  },
+  "sessions": [
+    {
+      "sessionType": "appeals",
+      "isOpen": true,
+      "startedAt": "2026-03-10",
+      "endedAt": null
+    },
+    {
+      "sessionType": "surveys",
+      "isOpen": false,
+      "startedAt": "2026-02-15",
+      "endedAt": "2026-03-25"
+    }
+  ],
+  "metrics": {
+    "appealsSubmitted": {
+      "currentSemester": 1260,
+      "lastSemester": 1200
+    },
+    "satisfactionScore": {
+      "currentSemester": 79.8,
+      "lastSemester": 78.2,
+      "targetPercent": 85
+    },
+    "surveyCriticalIssues": {
+      "count": 34
+    },
+    "activeCoursesOpenToAppeal": {
+      "count": 180
+    },
+    "activeCoursesOpenToSurvey": {
+      "count": 120
+    },
+    "facultyResponseRates": {
+      "benchmarkPercent": 70,
+      "faculties": [
+        { "name": "Faculty of DENTISTRY", "responseRate": 73 },
+        { "name": "Faculty of PHYSICAL THERAPY", "responseRate": 71 },
+        { "name": "Faculty of PHARMACY", "responseRate": 61 },
+        { "name": "Faculty of BIOTECHNOLOGY", "responseRate": 66 },
+        {
+          "name": "Faculty of NUTRITION & FOOD TECHNOLOGY",
+          "responseRate": 68
+        },
+        { "name": "Faculty of ENGINEERING", "responseRate": 64 },
+        { "name": "Faculty of COMPUTER SCIENCE", "responseRate": 72 },
+        { "name": "Faculty of ARTS & DESIGN", "responseRate": 70 },
+        { "name": "Faculty of MANAGMENT SCIENCES", "responseRate": 67 },
+        { "name": "Faculty of MASS COMMUNICATION", "responseRate": 69 },
+        { "name": "Faculty of LANGUAGES", "responseRate": 74 }
+      ]
+    },
+    "surveyResponses": {
+      "currentSemester": 2100,
+      "lastSemester": 2280
+    },
+    "appealResolutionTime": {
+      "currentSemesterMinutes": 20,
+      "lastSemesterMinutes": 22,
+      "targetMinutes": 15
+    }
+  }
+}

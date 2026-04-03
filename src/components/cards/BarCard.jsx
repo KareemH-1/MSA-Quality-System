@@ -15,28 +15,33 @@ const BarCard = ({
   icon,
   animationDuration = 1000,
 }) => {
-  const rawValue = value ?? "N/A";
-  const parsedNumericValue =
-    typeof rawValue === "number"
-      ? rawValue
-      : typeof rawValue === "string"
-        ? Number(rawValue.replace(/,/g, ""))
-        : Number.NaN;
+  let rawValue = "N/A";
+  if (value !== undefined && value !== null) {
+    rawValue = value;
+  }
 
-  const shouldAnimateValue = Number.isFinite(parsedNumericValue);
-  const decimalPlaces = Number.isInteger(parsedNumericValue)
-    ? 0
-    : (() => {
-        const stringValue = String(rawValue);
-        const decimalPart = stringValue.split(".")[1];
-        return decimalPart ? decimalPart.length : 1;
-      })();
+  let parsedNumericValue = Number.NaN;
+  if (typeof rawValue === "number") {
+    parsedNumericValue = rawValue;
+  } else if (typeof rawValue === "string") {
+    parsedNumericValue = Number(rawValue.replace(/,/g, ""));
+  }
+
+  const shouldAnimateValue = !Number.isNaN(parsedNumericValue) && parsedNumericValue !== Infinity && parsedNumericValue !== -Infinity;
+  let decimalPlaces = 0;
+  if (!Number.isInteger(parsedNumericValue)) {
+    const stringValue = String(rawValue);
+    const decimalPart = stringValue.split(".")[1];
+    if (decimalPart) {
+      decimalPlaces = decimalPart.length;
+    } else {
+      decimalPlaces = 1;
+    }
+  }
 
   const clampedProgress = Math.max(0, Math.min(100, Number(progress) || 0));
 
-  const [displayValue, setDisplayValue] = useState(
-    shouldAnimateValue ? 0 : rawValue
-  );
+  const [animatedValue, setAnimatedValue] = useState(0);
   const [animatedProgress, setAnimatedProgress] = useState(0);
 
   useEffect(() => {
@@ -60,7 +65,7 @@ const BarCard = ({
 
       if (shouldAnimateValue) {
         const nextValue = startValue + (endValue - startValue) * phase;
-        setDisplayValue(nextValue);
+        setAnimatedValue(nextValue);
       }
 
       if (phase < 1) {
@@ -68,25 +73,38 @@ const BarCard = ({
       }
     };
 
-    if (!shouldAnimateValue) {
-      setDisplayValue(rawValue);
-    }
-
     animationFrameId = requestAnimationFrame(animate);
 
     return () => cancelAnimationFrame(animationFrameId);
   }, [clampedProgress, animationDuration, shouldAnimateValue, parsedNumericValue, rawValue]);
 
-  const formattedValue = shouldAnimateValue
-    ? Number(displayValue).toLocaleString(undefined, {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: decimalPlaces,
-      })
-    : rawValue;
-  const resolvedColor = color === "dark" ? "dark" : "white";
+  let displayValue = rawValue;
+  if (shouldAnimateValue) {
+    displayValue = animatedValue;
+  }
 
-  const TrendIcon = trendDirection === "down" ? TrendingDown : TrendingUp;
-  const HeaderIcon = icon || TrendIcon;
+  let formattedValue = displayValue;
+  if (shouldAnimateValue) {
+    formattedValue = Number(displayValue).toLocaleString(undefined, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: decimalPlaces,
+    });
+  }
+
+  let resolvedColor = "white";
+  if (color === "dark") {
+    resolvedColor = "dark";
+  }
+
+  let TrendIcon = TrendingUp;
+  if (trendDirection === "down") {
+    TrendIcon = TrendingDown;
+  }
+
+  let HeaderIcon = TrendIcon;
+  if (icon) {
+    HeaderIcon = icon;
+  }
 
   return (
     <article className={`bar-card ${resolvedColor}`}>
@@ -102,7 +120,7 @@ const BarCard = ({
 
         <div className="bar-card-meta">
           {trend ? (
-            <p className={`bar-card-trend ${trendDirection === "down" ? "down" : "up"}`}>
+            <p className={trendDirection === "down" ? "bar-card-trend down" : "bar-card-trend up"}>
               <HeaderIcon size={18} strokeWidth={2.2} />
               <span>{trend}</span>
             </p>
