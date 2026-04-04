@@ -1,10 +1,11 @@
 import QaDashboard from "../pages/QA_Admin/QaDashboard";
+import QASettings from "../pages/QA_Admin/QaSettings";
 import Login from "../pages/Login";
 import NotFound from "../pages/NotFound";
-import { getQaDashboardNavbarComponents } from "./QaDashboardNavbarComponents";
+import { getQaDashboardNavbarComponents } from "./NavbarConfigs/QaDashboardNavbarComponents";
 
 import { ROLES } from "../constants/roles";
-import { FlaskConical,LayoutDashboard} from "lucide-react";
+import { Settings, LayoutDashboard} from "lucide-react";
 
 export const PAGE_CONFIG = {
   login: {
@@ -23,16 +24,16 @@ export const PAGE_CONFIG = {
     getNavbarComponents: getQaDashboardNavbarComponents,
     roles: [ROLES.QA]
   },
-  testPage : {
-    path: "/test",
-    component: () => <div>Test Page</div>,
-    showSidebar: true,
-    sidebarLabel: "Test",
-    sidebarIcon: FlaskConical,
-    showNavbar: false,
-    roles : [ROLES.DEAN]
-    },
 
+  options: {
+    path: "/settings",
+    component: QASettings,
+    showSidebar: true,
+    sidebarLabel: "Settings",
+    sidebarIcon: Settings,
+    showNavbar: true,
+    roles: [ROLES.QA]
+  }
 };
 
 export const NOT_FOUND_PAGE = {

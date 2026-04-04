@@ -1,0 +1,41 @@
+{
+  "thresholds": {
+    "responseRateBenchmark": 70,
+    "satisfactionTarget": 85,
+    "appealSpikeMultiplier": 1.5,
+    "resolutionTimeTarget": 15,
+    "criticalIssuesHigh": 20,
+    "highAppealRatePercent": 10,
+    "appealsGrowthPercent": 15,
+    "surveyDropPercent": 10,
+    "satisfactionGapPercent": 5,
+    "responseBenchmarkGapPercent": 5
+  },
+  "insightSettings": {
+    "maxInsights": 8,
+    "globalMaxInsights": 8,
+    "chartMaxInsights": 2,
+    "enableSpikeDetection": true,
+    "enableCorrelationChecks": true,
+    "includeTrendInsights": true,
+    "includePerformanceInsights": true,
+    "includeThresholdInsights": true
+  },
+  "performanceWeights": {
+    "responseRate": 0.4,
+    "satisfaction": 0.4,
+    "appealRate": 0.2
+  },
+  "correlationRules": {
+    "lowSatisfactionHighAppeals": {
+      "enabled": true,
+      "satisfactionGapPercent": 5,
+      "appealsGrowthPercent": 15
+    },
+    "lowResponseUnreliableSurveys": {
+      "enabled": true,
+      "responseRateBelowBenchmarkCount": 3,
+      "surveyDropPercent": 10
+    }
+  }
+}

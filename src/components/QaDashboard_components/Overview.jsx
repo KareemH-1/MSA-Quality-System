@@ -1,10 +1,36 @@
 import { useEffect, useState } from "react";
+import { Hourglass } from "lucide-react";
 import "./styles/Overview.css";
 import { VisualCard } from "../cards/VisualCard";
 import BarCard from "../cards/BarCard";
 import MiniMetricCard from "../cards/MiniMetricCard";
 import RingProgressCard from "../cards/RingProgressCard";
-import { Hourglass } from "lucide-react";
+import generateInsights from "../../services/QAHelpers/generateInsights";
+import qaOptions from "../../services/QAHelpers/QAOptions.json";
+import OverviewCharts from "./OverviewCharts";
+
+const OverviewInsightPanel = ({ insight }) => {
+  const typeClass = insight.type || "info";
+  const metricLabel = insight.context?.metric ? insight.context.metric : null;
+  const facultyLabel = insight.context?.faculty ? insight.context.faculty : null;
+
+  return (
+    <article className={`dashboard-insight ${typeClass}`}>
+      <div className="dashboard-insight-top">
+        <span className={`dashboard-insight-badge ${typeClass}`}>{insight.type}</span>
+        <span className={`dashboard-insight-severity ${insight.severity}`}>{insight.severity}</span>
+      </div>
+      <h4>{insight.title}</h4>
+      <p>{insight.message}</p>
+      {(metricLabel || facultyLabel) ? (
+        <div className="dashboard-insight-context">
+          {metricLabel ? <span>Metric: {metricLabel}</span> : null}
+          {facultyLabel ? <span>Faculty: {facultyLabel}</span> : null}
+        </div>
+      ) : null}
+    </article>
+  );
+};
 
 const Overview = () => {
   const [overviewData, setOverviewData] = useState(null);
@@ -91,20 +117,12 @@ const Overview = () => {
   const appealsLast = Number(overviewData?.metrics?.appealsSubmitted?.lastSemester || 0);
   const appealsDeltaPercent = calculatePercentDelta(appealsCurrent, appealsLast);
 
-  const satisfactionCurrent = Number(
-    overviewData?.metrics?.satisfactionScore?.currentSemester || 0,
-  );
-  const satisfactionLast = Number(
-    overviewData?.metrics?.satisfactionScore?.lastSemester || 0,
-  );
+  const satisfactionCurrent = Number(overviewData?.metrics?.satisfactionScore?.currentSemester || 0);
+  const satisfactionLast = Number(overviewData?.metrics?.satisfactionScore?.lastSemester || 0);
   const satisfactionDeltaPercent = calculatePercentDelta(satisfactionCurrent, satisfactionLast);
 
-  const surveyResponsesCurrent = Number(
-    overviewData?.metrics?.surveyResponses?.currentSemester || 0,
-  );
-  const surveyResponsesLast = Number(
-    overviewData?.metrics?.surveyResponses?.lastSemester || 0,
-  );
+  const surveyResponsesCurrent = Number(overviewData?.metrics?.surveyResponses?.currentSemester || 0);
+  const surveyResponsesLast = Number(overviewData?.metrics?.surveyResponses?.lastSemester || 0);
   const surveyResponsesDeltaPercent = calculatePercentDelta(
     surveyResponsesCurrent,
     surveyResponsesLast,
@@ -113,18 +131,21 @@ const Overview = () => {
   const resolutionCurrent = Number(
     overviewData?.metrics?.appealResolutionTime?.currentSemesterMinutes || 0,
   );
-  const resolutionLast = Number(
-    overviewData?.metrics?.appealResolutionTime?.lastSemesterMinutes || 0,
-  );
+  const resolutionLast = Number(overviewData?.metrics?.appealResolutionTime?.lastSemesterMinutes || 0);
   const resolutionDeltaMinutes = calculateDeltaValue(resolutionCurrent, resolutionLast);
+
+  const generatedInsights = generateInsights(overviewData, qaOptions);
+  const globalInsights = generatedInsights.global || [];
+  const thresholds = qaOptions.thresholds || {};
 
   const facultyRates = overviewData?.metrics?.facultyResponseRates?.faculties || [];
   const benchmarkPercent = Number(
-    overviewData?.metrics?.facultyResponseRates?.benchmarkPercent || 70,
+    thresholds.responseRateBenchmark
+      ?? overviewData?.metrics?.facultyResponseRates?.benchmarkPercent
+      ?? 70,
   );
   const averageFacultyResponseRate = facultyRates.length
-    ? facultyRates.reduce((sum, item) => sum + Number(item.responseRate || 0), 0) /
-      facultyRates.length
+    ? facultyRates.reduce((sum, item) => sum + Number(item.responseRate || 0), 0) / facultyRates.length
     : 0;
   const belowBenchmarkCount = facultyRates.filter(
     (item) => Number(item.responseRate || 0) < benchmarkPercent,
@@ -165,8 +186,7 @@ const Overview = () => {
         color: "white",
         title: "Total Appeals Submitted",
         percentage: `${formatSignedPercent(appealsDeltaPercent.toFixed(1))} vs last semester`,
-        description:
-          "Appeals submitted across all faculties in the current appeal session",
+        description: "Appeals submitted across all faculties in the current appeal session",
         value: appealsCurrent,
         footer: "More details in the appeals section",
         borderRadius: 20,
@@ -180,9 +200,8 @@ const Overview = () => {
         value: satisfactionCurrent,
         valueSuffix: "%",
         trend: `${Math.abs(satisfactionDeltaPercent).toFixed(1)}%`,
-        trendDirection:
-          satisfactionDeltaPercent < 0 ? "down" : "up",
-        target: `${overviewData?.metrics?.satisfactionScore?.targetPercent || 0}%`,
+        trendDirection: satisfactionDeltaPercent < 0 ? "down" : "up",
+        target: `${Number(thresholds.satisfactionTarget ?? overviewData?.metrics?.satisfactionScore?.targetPercent ?? 0)}%`,
         progress: satisfactionCurrent,
         barColorClass: "info",
       },
@@ -191,10 +210,11 @@ const Overview = () => {
       type: "mini",
       tileClass: "tile-mini-alert",
       props: {
-        label: "Survey Critical Issues",
-        value: overviewData?.metrics?.surveyCriticalIssues?.count,
-        description: "Critical survey issues requiring immediate QA follow-up.",
-        tone: "warn",
+        label: "Coverage Health Score",
+        value: overviewData?.metrics?.coverageHealthScore?.currentSemester,
+        suffix: "%",
+        description: "A quick read on how balanced the current course coverage is.",
+        tone: "cool",
       },
     },
     {
@@ -232,10 +252,10 @@ const Overview = () => {
       type: "visual",
       tileClass: "tile-surveys",
       props: {
+        color: "dark",
         title: "Total Surveys Submitted",
         percentage: `${formatSignedPercent(surveyResponsesDeltaPercent.toFixed(1))} vs last semester`,
-        description:
-          "Surveys submitted across all faculties in the current survey session",
+        description: "Surveys submitted across all faculties in the current survey session",
         value: surveyResponsesCurrent,
         footer: "More details in the surveys section",
         icon: "hourglass",
@@ -251,11 +271,10 @@ const Overview = () => {
         valueSuffix: " min",
         trend: `${resolutionDeltaMinutes} min`,
         trendDirection: resolutionDeltaMinutes < 0 ? "down" : "up",
-        target: `${overviewData?.metrics?.appealResolutionTime?.targetMinutes || 0} minutes`,
+        target: `${Number(thresholds.resolutionTimeTarget ?? overviewData?.metrics?.appealResolutionTime?.targetMinutes ?? 0)} minutes`,
         progress:
           resolutionCurrent > 0
-            ? (Number(overviewData?.metrics?.appealResolutionTime?.targetMinutes || 0) /
-                resolutionCurrent) *
+            ? (Number(thresholds.resolutionTimeTarget ?? overviewData?.metrics?.appealResolutionTime?.targetMinutes ?? 0) / resolutionCurrent) *
               100
             : 0,
         barColorClass: "warning",
@@ -356,8 +375,7 @@ const Overview = () => {
                     <span>Started:</span> {formatDate(item.startedAt)}
                   </p>
                   <p>
-                    <span>{isOpen ? "Ends:" : "Ended:"}</span>{" "}
-                    {isOpen ? "Not announced" : formatDate(item.endedAt)}
+                    <span>{isOpen ? "Ends:" : "Ended:"}</span> {isOpen ? "Not announced" : formatDate(item.endedAt)}
                   </p>
                 </div>
               </article>
@@ -368,13 +386,35 @@ const Overview = () => {
         <div className="kpis">
           <div className="overview-mosaic">
             {uiCards.map((card) => (
-              <article className={`overview-tile ${card.tileClass}`} key={`${card.tileClass}-${card.props.title || card.props.label}`}>
+              <article
+                className={`overview-tile ${card.tileClass}`}
+                key={`${card.tileClass}-${card.props.title || card.props.label}`}
+              >
                 {renderCard(card)}
               </article>
             ))}
           </div>
         </div>
 
+        {globalInsights.length > 0 ? (
+          <section className="overview-insights" aria-label="Global dashboard insights">
+            <div className="overview-section-head">
+              <div>
+                <p className="section-eyebrow">Global Insights</p>
+                <h3>Top-priority findings</h3>
+              </div>
+              <p className="section-note">These are the most important dashboard signals derived from the current QA data.</p>
+            </div>
+
+            <div className="dashboard-insights-grid" aria-label="Global insights">
+              {globalInsights.map((insight) => (
+                <OverviewInsightPanel key={`${insight.type}-${insight.title}-${insight.message}`} insight={insight} />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        <OverviewCharts overviewData={overviewData} />
       </div>
     </div>
   );
