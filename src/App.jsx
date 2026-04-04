@@ -42,7 +42,9 @@ function App() {
   const accessiblePages = APP_PAGES.filter(
     (page) => !page.roles || page.roles.includes(currentUserRole)
   );
-  const sidebarPages = accessiblePages.filter((page) => page.showSidebar);
+  const sidebarPages = accessiblePages.filter(
+    (page) => page.showSidebar && page.showInSidebar !== false
+  );
 
   const activePage = accessiblePages.find((page) => page.path === pathname);
   const shouldShowSidebar = Boolean(activePage?.showSidebar);

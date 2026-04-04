@@ -6,6 +6,7 @@ import { getQaDashboardNavbarComponents } from "./NavbarConfigs/QaDashboardNavba
 
 import { ROLES } from "../constants/roles";
 import { Settings, LayoutDashboard} from "lucide-react";
+import Contact from "../pages/Contact";
 
 export const PAGE_CONFIG = {
   login: {
@@ -33,6 +34,14 @@ export const PAGE_CONFIG = {
     sidebarIcon: Settings,
     showNavbar: true,
     roles: [ROLES.QA]
+  },
+
+  contact:{
+    path: "/contact",
+    component: Contact,
+    showSidebar: false,
+    showInSidebar: false,
+    showNavbar: false,
   }
 };
 
