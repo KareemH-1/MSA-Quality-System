@@ -107,7 +107,32 @@
   cursor: pointer;
   transition: color var(--anim-fast), background-color var(--anim-fast), border-color var(--anim-fast);
 }
-
+.navbar-badge-container {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background-color: transparent;
+  color: var(--muted-color);
+  cursor: pointer;
+  transition: color var(--anim-fast), background-color var(--anim-fast), border-color var(--anim-fast);
+}
+.navbar-badge-container:hover {
+  background-color: rgba(0, 33, 71, 0.06);
+  border-color: rgba(173, 181, 189, 0.6);
+  color: var(--primary-color);
+}
+.navbar-badge-container .badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--muted-color);
+}
+.navbar-badge-container .navbar-icon-btn {
+  width: 18px;
+  height: 18px;
+}
 .navbar-icon-btn svg {
   width: 18px;
   height: 18px;

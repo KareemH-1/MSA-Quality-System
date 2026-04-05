@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "../../styles/NavBar.css";
 import { Bell, Info, UserRoundPen } from "lucide-react";
 import { motion } from "framer-motion";
@@ -40,14 +41,11 @@ const NavBar = ({ components = [] }) => {
             </button>
           </MotionSpan>
           <MotionSpan whileHover={{ y: -1 }} transition={{ duration: 0.1 }}>
-            <button type="button" className="navbar-icon-btn" aria-label="Info">
-              <Info />
-            </button>
-          </MotionSpan>
-          <MotionSpan whileHover={{ y: -1 }} transition={{ duration: 0.1 }}>
-            <button type="button" className="navbar-icon-btn" aria-label="Profile">
-              <UserRoundPen />
-            </button>
+            <Link to="/contact" className="navbar-badge-container" aria-label="Info">
+              <Info className="navbar-icon-btn"/>
+              <span className="badge"> Support</span>
+            </Link>
+            
           </MotionSpan>
         </div>
       </div>

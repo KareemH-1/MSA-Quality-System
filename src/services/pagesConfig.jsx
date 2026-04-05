@@ -4,7 +4,8 @@ import NotFound from "../pages/NotFound";
 import { getQaDashboardNavbarComponents } from "./QaDashboardNavbarComponents";
 
 import { ROLES } from "../constants/roles";
-import { FlaskConical,LayoutDashboard} from "lucide-react";
+import { Settings, LayoutDashboard} from "lucide-react";
+import Contact from "../pages/Contact";
 
 export const PAGE_CONFIG = {
   login: {
@@ -23,16 +24,15 @@ export const PAGE_CONFIG = {
     getNavbarComponents: getQaDashboardNavbarComponents,
     roles: [ROLES.QA]
   },
-  testPage : {
-    path: "/test",
-    component: () => <div>Test Page</div>,
-    showSidebar: true,
-    sidebarLabel: "Test",
-    sidebarIcon: FlaskConical,
-    showNavbar: false,
-    roles : [ROLES.DEAN]
-    },
 
+
+  contact:{
+    path: "/contact",
+    component: Contact,
+    showSidebar: false,
+    showInSidebar: false,
+    showNavbar: false,
+  }
 };
 
 export const NOT_FOUND_PAGE = {
