@@ -32,6 +32,20 @@
     margin-bottom: 0;
 }
 
+.charts-error-box {
+    align-items: flex-start;
+}
+
+.charts-error-message {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #b22b1d;
+    background: rgba(178, 43, 29, 0.08);
+    border: 1px solid rgba(178, 43, 29, 0.2);
+    border-radius: 10px;
+    padding: 0.6rem 0.75rem;
+}
+
 .charts .chart-wrapper {
     position: relative;
     width: 100%;

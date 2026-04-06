@@ -9,13 +9,25 @@ import {
   getAppealRate,
   thisSemestervsLastAppeals,
 } from "../../services/Helpers/QaOverviewHelpers";
+import OverviewCharts from "./OverviewCharts";
 const Overview = () => {
   const [overviewData, setOverviewData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [errors, setErrors] = useState(null);
+  const [overviewChartsData, setOverviewChartsData] = useState(null);
+  const [pendingLoads, setPendingLoads] = useState(0);
+  const [errors, setErrors] = useState([]);
+  const loading = pendingLoads > 0;
+
+  const startLoading = () => {
+    setPendingLoads((previous) => previous + 1);
+  };
+
+  const stopLoading = () => {
+    setPendingLoads((previous) => Math.max(0, previous - 1));
+  };
 
   useEffect(() => {
     const fetchOverviewData = async () => {
+      startLoading();
       try {
         const response = await fetch("/mockOverviewData.json");
         if (!response.ok) {
@@ -25,15 +37,39 @@ const Overview = () => {
         const data = await response.json();
         setOverviewData(data);
       } catch (fetchError) {
-        setErrors([
+        setErrors((previous) => [
+          ...previous,
           { location: "fetchOverviewData", message: fetchError.message },
         ]);
       } finally {
-        setLoading(false);
+        stopLoading();
+      }
+    };
+
+    const fetchOverviewChartsData = async () => {
+      startLoading();
+      try {
+        const response = await fetch("/OverviewChartsData.json");
+        if (!response.ok) {
+          throw new Error(
+            `Failed to load overview charts data: ${response.status}`,
+          );
+        }
+
+        const data = await response.json();
+        setOverviewChartsData(data);
+      } catch (fetchError) {
+        setErrors((previous) => [
+          ...previous,
+          { location: "fetchOverviewChartsData", message: fetchError.message },
+        ]);
+      } finally {
+        stopLoading();
       }
     };
 
     fetchOverviewData();
+    fetchOverviewChartsData();
   }, []);
 
   if (
@@ -257,6 +293,14 @@ const Overview = () => {
                     />
                   ))}
                 </div>
+                <OverviewCharts
+                  overviewChartsJson={overviewChartsData}
+                  errorMessage={
+                    errors.find(
+                      (error) => error.location === "fetchOverviewChartsData",
+                    )?.message
+                  }
+                />
               </>
             );
           })()}

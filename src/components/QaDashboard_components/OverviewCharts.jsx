@@ -25,29 +25,19 @@ ChartJS.register(
 import { Appealinsights } from "../../services/Helpers/QaOverviewHelperCharts";
 import { CircleMinus, TrendingUp , TrendingDown } from "lucide-react";
 
-const OverviewCharts = () => {
-  const [overviewChartsJson, setOverviewChartsJson] = React.useState(null);
-
-  React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("/OverviewChartsData.json");
-
-        if (!response.ok) {
-          throw new Error(
-            `Failed to load overview charts data: ${response.status}`,
-          );
-        }
-
-        const data = await response.json();
-        setOverviewChartsJson(data);
-      } catch (fetchError) {
-        console.error(fetchError);
-      }
-    };
-
-    fetchData();
-  }, []);
+const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
+  if (errorMessage) {
+    return (
+      <div className="charts">
+        <div className="section charts-error-box">
+          <h1 className="section-title">Overview Charts</h1>
+          <p className="charts-error-message">
+            Unable to load overview charts data. Please try again later.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (!overviewChartsJson) {
     return null;
