@@ -33,6 +33,85 @@ import {
 
 import { CircleMinus, TrendingUp, TrendingDown } from "lucide-react";
 
+const parseDateKey = (dateValue) => {
+  if (!dateValue) {
+    return null;
+  }
+
+  const [month, day, year] = String(dateValue).split("-").map(Number);
+
+  if (!month || !day || !year) {
+    return null;
+  }
+
+  const parsedDate = new Date(year, month - 1, day);
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+};
+
+const formatDateKey = (date) => {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${month}-${day}-${year}`;
+};
+
+const formatDayLabel = (dayIndex, dateKey) => `Day ${dayIndex} (${dateKey})`;
+
+const cleanResuotionTimeData = (
+  resolutionTimeByDay,
+  startedAt,
+  endedAt,
+) => {
+  const startDate = parseDateKey(startedAt);
+  const today = new Date();
+  const latestResolutionDate = Object.keys(resolutionTimeByDay || {})
+    .map(parseDateKey)
+    .filter(Boolean)
+    .reduce((latest, current) => (latest && latest > current ? latest : current), null);
+  const endDate = [parseDateKey(endedAt) || today, latestResolutionDate]
+    .filter(Boolean)
+    .reduce((latest, current) => (latest > current ? latest : current));
+
+  if (!startDate) {
+    return Object.entries(resolutionTimeByDay || {}).sort(([a], [b]) => {
+      const first = parseDateKey(a);
+      const second = parseDateKey(b);
+
+      if (!first || !second) {
+        return a.localeCompare(b);
+      }
+
+      return first - second;
+    });
+  }
+
+  const normalizedStartDate = new Date(startDate);
+  normalizedStartDate.setHours(0, 0, 0, 0);
+
+  const normalizedEndDate = new Date(endDate);
+  normalizedEndDate.setHours(0, 0, 0, 0);
+
+  if (normalizedEndDate < normalizedStartDate) {
+    normalizedEndDate.setTime(normalizedStartDate.getTime());
+  }
+
+  const entries = [];
+  const currentDate = new Date(normalizedStartDate);
+  let dayIndex = 1;
+
+  while (currentDate <= normalizedEndDate) {
+    const dayKey = formatDateKey(currentDate);
+    entries.push([
+      formatDayLabel(dayIndex, dayKey),
+      Number(resolutionTimeByDay?.[dayKey]) || 0,
+    ]);
+    currentDate.setDate(currentDate.getDate() + 1);
+    dayIndex += 1;
+  }
+
+  return entries;
+};
+
 const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
   if (errorMessage) {
     return (
@@ -69,35 +148,17 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
     ? `Last ${semesterCount} Semester${semesterCount > 1 ? "s" : ""}`
     : "No Historical Semesters";
   const latestSemester = semesters[semesters.length - 1] || "N/A";
+
   const currentAppealSession = overviewChartsJson?.currentAppealSession || {};
+
   const resolutionTimeByDay = currentAppealSession?.resolutionTimeByDay || {};
-  const resolutionEntries = Object.entries(resolutionTimeByDay);
-  const hasCurrentResolutionData = resolutionEntries.length > 0;
-  const sessionStartDateRaw = currentAppealSession?.startDate;
-  const sessionStartDate = sessionStartDateRaw
-    ? new Date(sessionStartDateRaw)
-    : null;
-  const hasValidSessionStartDate =
-    sessionStartDate instanceof Date &&
-    !Number.isNaN(sessionStartDate.getTime());
-  const daysSinceSessionStart = hasValidSessionStartDate
-    ? Math.floor((Date.now() - sessionStartDate.getTime()) / 86400000) + 1
-    : null;
-  const currentSessionDay =
-    typeof daysSinceSessionStart === "number" && daysSinceSessionStart > 0
-      ? daysSinceSessionStart
-      : new Date().getDate();
-  const resolutionEntriesToRender = resolutionEntries.filter(
-    ([dayLabel], index) => {
-      const dayMatch = String(dayLabel).match(/day\s*(\d+)/i);
-      if (dayMatch) {
-        return Number(dayMatch[1]) <= currentSessionDay;
-      }
-      return index + 1 <= currentSessionDay;
-    },
+  const resolutionEntriesToRender = cleanResuotionTimeData(
+    resolutionTimeByDay,
+    currentAppealSession?.startedAt,
+    currentAppealSession?.endedAt,
   );
-  const hasResolutionDataThroughCurrentDay =
-    resolutionEntriesToRender.length > 0;
+  const hasCurrentResolutionData = resolutionEntriesToRender.length > 0;
+  const hasResolutionDataThroughCurrentDay = hasCurrentResolutionData;
 
   if (!hasHistory) {
     return (
@@ -368,7 +429,7 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
             <h1 className="section-title">Resolution Time</h1>
             <p className="section-subtitle">
               {hasCurrentResolutionData
-                ? `Resolution time by day for ${currentAppealSession?.label || "the current appeal session"}`
+                ? `Resolution time by day for ${currentAppealSession.Session} appeal of semester ${currentAppealSession.semester}`
                 : `No current-session resolution-time data is available. Showing latest semester: ${latestSemester}`}
             </p>
             {hasResolutionDataThroughCurrentDay && (
