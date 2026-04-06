@@ -474,7 +474,10 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
           )}
         </div>
 
-        <section className=""
+         <div className="section small">
+            <h1 className="section-title">Appeals Breakdown</h1>
+         </div>
+        
       </div>
     </div>
   );
