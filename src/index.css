@@ -1,5 +1,4 @@
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
-@import "tailwindcss";
 :root {
   --font-main:"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-secondary: "Lora", serif;
@@ -35,9 +34,8 @@
   --gradient-visual-soul: linear-gradient(135deg, #001a38 0%, #0a0c0d 100%);
   --card-accent-line: #b22b1d;
 
-  --surface-low: #FFFFFFCC; /* in hexa: #f1f3f5 */
-  --surface-high: #f8f9fa; /* in hexa: #f8f9fa */
-  --elevation: var(--neutral-color); /* in hexa: #fbf9fa */
+  --surface-low: #FFFFFFCC;
+  --surface-high: #f8f9fa;
   --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.04);
 
   --anim-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
