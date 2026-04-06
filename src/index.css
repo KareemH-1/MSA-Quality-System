@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
 :root {
   --font-main:"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-secondary: "Lora", serif;
@@ -273,6 +273,10 @@ body {
   min-width: 0;
   width: 100%;
   transition: margin-left var(--anim-standard);
+}
+
+.page-cont{
+  position: relative;
 }
 
 @media (min-width: 769px) {

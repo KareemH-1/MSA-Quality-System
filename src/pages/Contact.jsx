@@ -179,7 +179,7 @@ const Contact = () => {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="kareem.ahme15@msa.edu.eg"
+                  placeholder="kareem.ahmed15@msa.edu.eg"
                   required
                 />
               </div>
