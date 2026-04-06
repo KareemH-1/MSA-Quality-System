@@ -70,7 +70,7 @@ const Appealinsights = (midterms , finals) => {
     }
     if (maxFinalSemester != null) {
       insights.push(
-          [`The semester with the highest final appeals is ${maxFinalSemester} with ${maxFinalAppeals} appeals.`, "neutral"]
+          [`The semester with the highest final appeals iis ${maxFinalSemester} with ${maxFinalAppeals} appeals.`, "neutral"]
       );
     }
 
@@ -81,5 +81,60 @@ const Appealinsights = (midterms , finals) => {
     return insights;
 }
 
+const SatisfactionInsights = (satisfactionData) => {
+  if(!satisfactionData) {
+    return [["No historical satisfaction survey data is available yet.", "neutral"]];
+  }
+    const insights = [];
+    const satisfactionValues = Object.values(satisfactionData).filter(
+      (value) => Number.isFinite(Number(value)),
+    );
+    if (satisfactionValues.length === 0) {
+      return [["No historical satisfaction survey data is available yet.", "neutral"]];
+    }
+    let totalSatisfaction = 0;
+    Object.values(satisfactionData).forEach((value) => {
+      totalSatisfaction += Number(value) || 0;
+    });
+    const averageSatisfaction = totalSatisfaction / satisfactionValues.length;
 
-export { Appealinsights };
+    insights.push([
+      `The average satisfaction survey score across semesters is ${averageSatisfaction.toFixed(2)}%.`,
+      "neutral",
+    ]);
+
+    let increase;
+    if(satisfactionValues.length >= 2) {
+        increase = satisfactionValues[satisfactionValues.length-1] - satisfactionValues[satisfactionValues.length-2];
+        const increasePercentage = formatPercentage(increase);
+        if(increase > 0) {
+            insights.push([
+                `The satisfaction survey score has increased by ${increasePercentage} compared to last semester.`,
+                "positive",
+              ]);
+        }
+        else if(increase < 0) {
+            insights.push([
+                `The satisfaction survey score has decreased by ${increasePercentage} compared to last semester.`,
+                "negative",
+              ]);
+        }
+        else {
+            insights.push([
+                `The satisfaction survey score has remained the same compared to last semester.`,
+                "neutral",
+              ]);
+        }
+    }
+
+    if (insights.length === 0) {
+      insights.push(["No historical satisfaction survey data is available yet.", "neutral"]);
+    }
+
+
+
+    return insights;
+}
+
+
+export { Appealinsights, SatisfactionInsights };
