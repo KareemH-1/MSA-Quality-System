@@ -43,6 +43,66 @@
     "totalResponses": 500
   },
 
+  "kpis": {
+    "totalAppeals": {
+      "value": 120,
+      "lastSemesterValue": 17843,
+      "deltaPercent": -99.33,
+      "description": "Total submitted in this semester",
+      "target": 150
+    },
+    "pendingAppeals": {
+      "value": 57,
+      "description": "Appeals awaiting decision",
+      "severity": "warn"
+    },
+    "approvedAppeals": {
+      "value": 10,
+      "ratePercent": 8.33,
+      "description": "Approved out of total appeals",
+      "severity": "cool"
+    },
+    "rejectedAppeals": {
+      "value": 53,
+      "ratePercent": 44.17,
+      "description": "Rejected out of total appeals",
+      "severity": "warn"
+    },
+    "surveyResponses": {
+      "value": 500,
+      "lastSemesterValue": 450,
+      "deltaPercent": 11.11,
+      "description": "Survey responses received this semester",
+      "target": 600
+    },
+    "satisfactionScore": {
+      "value": 67.5,
+      "scale": "1-5",
+      "calculationMethod": "normalizedAverage",
+      "description": "Overall student satisfaction score from survey ratings",
+      "lastSemesterValue": 64.2,
+      "deltaPercent": 3.3,
+      "target": 85,
+      "ratingDistribution": {
+        "1": 10,
+        "2": 20,
+        "3": 40,
+        "4": 80,
+        "5": 50
+      }
+    },
+    "facultyResponseRate": {
+      "value": 68,
+      "target": 70,
+      "belowBenchmarkFaculties": 5,
+      "description": "Average survey response rate across faculties"
+    },
+    "appealResolutionTime": {
+      "value": 5,
+      "target": 7,
+      "description": "Average days to resolve an appeal"
+    }
+  },
 
   "previousSemesterData": {
     "appeals": {
@@ -74,4 +134,3 @@
     }
   }
 }
-  
