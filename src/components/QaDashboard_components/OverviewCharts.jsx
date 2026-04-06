@@ -43,24 +43,49 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
     return null;
   }
 
-  const semesters = Object.keys(overviewChartsJson?.totals?.midterm || {});
+  const midtermTotals = overviewChartsJson?.totals?.midterm || {};
+  const finalTotals = overviewChartsJson?.totals?.final || {};
+  const satisfactionTotals = overviewChartsJson?.totals?.["Satisfaction-Survey"] || {};
+  const mergedSemesters = [
+    ...Object.keys(midtermTotals),
+    ...Object.keys(finalTotals),
+    ...Object.keys(satisfactionTotals),
+  ];
+  const semesters = mergedSemesters.filter(
+    (semester, index) => mergedSemesters.indexOf(semester) === index,
+  );
+  const semesterCount = semesters.length;
+  const hasHistory = semesterCount > 0;
+  const semesterLabel = hasHistory
+    ? `Last ${semesterCount} Semester${semesterCount > 1 ? "s" : ""}`
+    : "No Historical Semesters";
+
+  if (!hasHistory) {
+    return (
+      <div className="charts">
+        <div className="section charts-error-box">
+          <h1 className="section-title">Overview Charts</h1>
+          <p className="charts-error-message">
+            No historical semester data is available for charts yet.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const overviewChartsData = {
     labels: semesters,
     datasets: [
       {
         label: "Midterm Appeals",
-        data: semesters.map(
-          (semester) => overviewChartsJson.totals.midterm[semester] ?? 0,
-        ),
+        data: semesters.map((semester) => midtermTotals[semester] ?? 0),
         borderColor: "#1f77b4",
         backgroundColor: "rgba(31, 119, 180, 0.2)",
         tension: 0.35,
       },
       {
         label: "Final Appeals",
-        data: semesters.map(
-          (semester) => overviewChartsJson?.totals?.final?.[semester] ?? 0,
-        ),
+        data: semesters.map((semester) => finalTotals[semester] ?? 0),
         borderColor: "#b22b1d",
         backgroundColor: "rgba(61, 21, 0, 0.2)",
         tension: 0.35,
@@ -107,7 +132,7 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
         {
             label: "Satisfaction Score",
             data: semesters.map(
-                (semester) => overviewChartsJson?.totals?.["Satisfaction-Survey"]?.[semester] ?? 0
+              (semester) => satisfactionTotals[semester] ?? 0
             ),
             borderColor: "#004369",
             backgroundColor: "rgba(0, 67, 105, 0.2)",
@@ -121,9 +146,9 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
         <div className="row1">
         
         <div className="section big">
-          <h1 className="section-title">Total Appeals for Last 5 Semesters</h1>
+          <h1 className="section-title">Total Appeals for {semesterLabel}</h1>
           <p className="section-subtitle">
-            Appeal comparison across last 5 semesters for midterm and finals
+            Appeal comparison across available semesters for midterm and finals
           </p>
           <div className="chart-wrapper">
             <Line data={overviewChartsData} options={chartOptions(true)} />
@@ -147,9 +172,9 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
           </div>
 
           <div className="section small">
-            <h1 className="section-title">Satisfaction Score for Last 5 Semesters</h1>
+            <h1 className="section-title">Satisfaction Score for {semesterLabel}</h1>
             <p className="section-subtitle">
-                Student satisfaction scores from surveys across last 5 semesters
+              Student satisfaction scores from surveys across available semesters
             </p>
             <div className="chart-wrapper">
                 <Line data={satisfactionData} options={chartOptions(false)} />

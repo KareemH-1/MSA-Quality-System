@@ -143,6 +143,13 @@ const Overview = () => {
               overviewData.appeals,
               overviewData.previousSemesterData,
             );
+            const hasPreviousSemesterAppeals =
+              Number.isFinite(
+                Number(overviewData?.previousSemesterData?.appeals?.midterm?.total),
+              ) ||
+              Number.isFinite(
+                Number(overviewData?.previousSemesterData?.appeals?.final?.total),
+              );
             const midtermStatus = getAppealStatus(overviewData.appeals.midterm);
             const finalStatus = getAppealStatus(overviewData.appeals.final);
             const totalAppealsCurrent =
@@ -162,23 +169,37 @@ const Overview = () => {
                     totalAppealsLastSemester) *
                   100
                 : 0;
-            const totalAppealsDeltaLabel = `${totalAppealsDeltaPercent >= 0 ? "+" : ""}${totalAppealsDeltaPercent.toFixed(2)}% vs last semester`;
+            const totalAppealsDeltaLabel =
+              hasPreviousSemesterAppeals && totalAppealsLastSemester > 0
+                ? `${totalAppealsDeltaPercent >= 0 ? "+" : ""}${totalAppealsDeltaPercent.toFixed(2)}% vs last semester`
+                : "No last semester data";
             const satisfactionScoreValue =
               overviewData?.kpis?.satisfactionScore?.value ?? 0;
             const satisfactionTargetValue =
               overviewData?.kpis?.satisfactionScore?.target ?? 0;
             const satisfactionDeltaPercent =
-              overviewData?.kpis?.satisfactionScore?.deltaPercent ?? 0;
-            const satisfactionDeltaLabel = `${satisfactionDeltaPercent >= 0 ? "+" : ""}${Number(satisfactionDeltaPercent).toFixed(1)}% vs last semester`;
+              overviewData?.kpis?.satisfactionScore?.deltaPercent;
+            const hasSatisfactionLastSemester = Number.isFinite(
+              Number(overviewData?.kpis?.satisfactionScore?.lastSemesterValue),
+            );
+            const hasSatisfactionDelta = Number.isFinite(
+              Number(satisfactionDeltaPercent),
+            );
+            const satisfactionDeltaLabel =
+              hasSatisfactionLastSemester && hasSatisfactionDelta
+                ? `${Number(satisfactionDeltaPercent) >= 0 ? "+" : ""}${Number(satisfactionDeltaPercent).toFixed(1)}% vs last semester`
+                : "No last semester data";
             const satisfactionGapToTarget =
               satisfactionScoreValue - satisfactionTargetValue;
             const satisfactionTargetLabel = `${satisfactionGapToTarget >= 0 ? "+" : ""}${satisfactionGapToTarget.toFixed(1)} pts vs target`;
             const satisfactionFromLastSemester =
-              overviewData?.kpis?.satisfactionScore?.lastSemesterValue ?? 0;
+              overviewData?.kpis?.satisfactionScore?.lastSemesterValue;
             const satisfactionDescription =
               overviewData?.kpis?.satisfactionScore?.description ??
               "Average satisfaction score from surveys";
-            const satisfactionFooter = `Target: ${satisfactionTargetValue}% | Last semester: ${satisfactionFromLastSemester}% (${satisfactionDeltaLabel})`;
+            const satisfactionFooter = hasSatisfactionLastSemester
+              ? `Target: ${satisfactionTargetValue}% | Last semester: ${satisfactionFromLastSemester}% (${satisfactionDeltaLabel})`
+              : `Target: ${satisfactionTargetValue}% | Last semester: N/A`;
 
             return (
               <>
@@ -240,8 +261,9 @@ const Overview = () => {
                           <p
                             className={`rate-change ${semesterAppealDelta.midtermRate >= 0 ? "positive" : "negative"}`}
                           >
-                            {semesterAppealDelta.midtermRate.toFixed(2)}% vs
-                            last semesters midterm appeals
+                            {hasPreviousSemesterAppeals
+                              ? `${semesterAppealDelta.midtermRate.toFixed(2)}% vs last semester midterm appeals`
+                              : "No last semester data"}
                           </p>
                         </div>
                         <div className="final-total">
@@ -252,8 +274,9 @@ const Overview = () => {
                           <p
                             className={`rate-change ${semesterAppealDelta.finalRate >= 0 ? "positive" : "negative"}`}
                           >
-                            {semesterAppealDelta.finalRate.toFixed(2)}% vs last
-                            semesters final appeals
+                            {hasPreviousSemesterAppeals
+                              ? `${semesterAppealDelta.finalRate.toFixed(2)}% vs last semester final appeals`
+                              : "No last semester data"}
                           </p>
                         </div>
                       </div>
