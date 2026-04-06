@@ -37,5 +37,21 @@
             "Day 9": 5.5,
             "Day 10": 4.4
         }
+    },
+    
+    "satisfactionFaculties":{
+      "Dentistry": 91,
+      "Physical Therapy": 80,
+      "Pharmacy": 85,
+      "Biotechnology": 78,
+      "Nuitrition & Food Technology": 76,
+      "Engineering": 65,
+      "Computer Science": 69.5,
+      "Arts & Design": 79,
+      "Management Sciences": 82,
+      "Mass Communication": 78,
+      "Languages": 85
     }
+
+
 }

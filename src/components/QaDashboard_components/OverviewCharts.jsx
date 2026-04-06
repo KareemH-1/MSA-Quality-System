@@ -1,13 +1,14 @@
 import React from "react";
 import "./styles/Charts.css";
 
-import { Line } from "react-chartjs-2";
+import { Line, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend,
@@ -17,6 +18,7 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement,
+  BarElement,
   LineElement,
   Title,
   Tooltip,
@@ -25,7 +27,10 @@ ChartJS.register(
 import {
   Appealinsights,
   SatisfactionInsights,
+  generateFacultySatisfactionColors,
+  FacultySatisfactionInsights,
 } from "../../services/Helpers/QaOverviewHelperCharts";
+
 import { CircleMinus, TrendingUp, TrendingDown } from "lucide-react";
 
 const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
@@ -170,6 +175,40 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
         backgroundColor: "rgba(0, 67, 105, 0.2)",
         tension: 0.35,
       },
+      {
+        label: "Satisfaction Target",
+        data: semesters.map(() => 75),
+        borderColor: "#28a745",
+        backgroundColor: "rgba(40, 167, 69, 0.2)",
+        borderDash: [2, 4],
+      },
+    ],
+  };
+
+  const sortedFaculties = Object.keys(
+    overviewChartsJson.satisfactionFaculties || {},
+  ).sort(
+    (a, b) =>
+      (overviewChartsJson.satisfactionFaculties[b] || 0) -
+      (overviewChartsJson.satisfactionFaculties[a] || 0),
+  );
+
+  const colors = generateFacultySatisfactionColors(
+    overviewChartsJson.satisfactionFaculties,
+  );
+
+  const facultySatisfactionData = {
+    labels: sortedFaculties,
+    datasets: [
+      {
+        label: "Satisfaction Score",
+        data: sortedFaculties.map(
+          (faculty) => overviewChartsJson.satisfactionFaculties[faculty],
+        ),
+        backgroundColor: colors.backgroundColor,
+        borderColor: colors.borderColor,
+        borderWidth: 2,
+      },
     ],
   };
 
@@ -277,23 +316,73 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
             </ul>
           </div>
         </div>
+        </div>
 
-        <div className="section small">
-          <h1 className="section-title">Resolution Time</h1>
-          <p className="section-subtitle">
-            {hasCurrentResolutionData
-              ? `Resolution time by day for ${currentAppealSession?.label || "the current appeal session"}`
-              : `No current-session resolution-time data is available. Showing latest semester: ${latestSemester}`}
-          </p>
-          {hasResolutionDataThroughCurrentDay && (
-            <div className="chart-wrapper resolution-chart-wrapper">
-              <Line
-                data={resolutionData}
-                options={chartOptions("Resolution Time (Days)", "Session Day")}
+        <div className="row2">
+          <div className="section">
+            <h1 className="section-title">Satisfaction by Faculty</h1>
+            <p className="section-subtitle">
+              Sorted average satisfaction scores by faculty for the most recent
+              semester
+            </p>
+            <div className="chart-wrapper">
+              <Bar
+                data={facultySatisfactionData}
+                options={chartOptions(false)}
               />
             </div>
-          )}
+            <div className="insights">
+              <h2 className="insights-title">Insights</h2>
+              <ul className="insights-list">
+                {FacultySatisfactionInsights(
+                  overviewChartsJson.satisfactionFaculties,
+                ).map(([insight, type], index) => (
+                  <li key={index} className={`insight-item ${type}`}>
+                    <div className="insight-item-content">
+                      {type === "positive" && (
+                        <span className="insight-icon positive">
+                          <TrendingUp size={13} strokeWidth={2.25} />
+                        </span>
+                      )}
+                      {type === "negative" && (
+                        <span className="insight-icon negative">
+                          <TrendingDown size={13} strokeWidth={2.25} />
+                        </span>
+                      )}
+                      {type === "neutral" && (
+                        <span className="insight-icon neutral">
+                          <CircleMinus size={13} strokeWidth={2.25} />
+                        </span>
+                      )}
+                      <span className="insight-text">{insight}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
+
+        <div className="row3">
+          <div className="section small">
+            <h1 className="section-title">Resolution Time</h1>
+            <p className="section-subtitle">
+              {hasCurrentResolutionData
+                ? `Resolution time by day for ${currentAppealSession?.label || "the current appeal session"}`
+                : `No current-session resolution-time data is available. Showing latest semester: ${latestSemester}`}
+            </p>
+            {hasResolutionDataThroughCurrentDay && (
+              <div className="chart-wrapper resolution-chart-wrapper">
+                <Line
+                  data={resolutionData}
+                  options={chartOptions(
+                    "Resolution Time (Days)",
+                    "Session Day",
+                  )}
+                />
+              </div>
+            )}
+          </div>
       </div>
     </div>
   );

@@ -136,5 +136,57 @@ const SatisfactionInsights = (satisfactionData) => {
     return insights;
 }
 
+const FacultySatisfactionInsights = (satisfactionFaculties) => {
+  if(!satisfactionFaculties) {
+    return [["No historical satisfaction survey data by faculty is available yet.", "neutral"]];
+  }
+    const insights = [];
+    const satisfactionValues = Object.values(satisfactionFaculties).filter(
+      (value) => Number.isFinite(Number(value)),
+    );
+    if (satisfactionValues.length === 0) {
+      return [["No historical satisfaction survey data by faculty is available yet.", "neutral"]];
+    }
+    let totalSatisfaction = 0;
+    Object.values(satisfactionFaculties).forEach((value) => {
+      totalSatisfaction += Number(value) || 0;
+    });
+    const averageSatisfaction = totalSatisfaction / satisfactionValues.length;
+    insights.push([
+      `The average satisfaction survey score across faculties is ${averageSatisfaction.toFixed(2)}%.`,
+      "neutral",
+    ]);
+    const sortedFaculties = Object.entries(satisfactionFaculties).sort((a, b) => b[1] - a[1]);
+    const [topFaculty, topScore] = sortedFaculties[0];
+    const [bottomFaculty, bottomScore] = sortedFaculties[sortedFaculties.length - 1];
+    insights.push([
+      `The faculty with the highest satisfaction score is ${topFaculty} with a score of ${topScore}%.`,
+      "positive",
+    ]);
+    insights.push([
+      `The faculty with the lowest satisfaction score is ${bottomFaculty} with a score of ${bottomScore}%.`,
+      "negative",
+    ]);
+    if (insights.length === 0) {
+      insights.push(["No historical satisfaction survey data by faculty is available yet.", "neutral"]);
+    }
+    return insights;
 
-export { Appealinsights, SatisfactionInsights };
+}
+const generateFacultySatisfactionColors = (satisfactionFaculties) => {
+  const sortedFaculties = Object.keys(satisfactionFaculties || {}).sort((a, b) => 
+    (satisfactionFaculties[b] || 0) - (satisfactionFaculties[a] || 0)
+  );
+
+  const backgroundColor = sortedFaculties.map((faculty, index, arr) => {
+    const ratio = index / arr.length;
+    const alpha = 0.7 - (ratio * 0.4);
+    return `rgba(40, 167, 69, ${alpha})`;
+  });
+
+  const borderColor = "rgba(40, 167, 69, 1)";
+
+  return { backgroundColor, borderColor };
+};
+
+export { Appealinsights, SatisfactionInsights , generateFacultySatisfactionColors , FacultySatisfactionInsights };
