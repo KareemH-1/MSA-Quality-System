@@ -103,6 +103,9 @@
   display: inline-flex;
   align-items: center;
   opacity: 0.7;
+  fill: var(--primary-color);
+  width: 28px;
+  height: 28px;
 }
 .sidebar-item a{
   color: var(--text-color);

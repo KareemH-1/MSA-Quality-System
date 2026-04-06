@@ -7,16 +7,31 @@ import MiniMetricCard from "../cards/MiniMetricCard";
 import RingProgressCard from "../cards/RingProgressCard";
 import Loader from "../Loader";
 import { getAppealStatus , getAppealRate , thisSemestervsLastAppeals} from "../../services/Helpers/QaOverviewHelpers";
+import OverviewCharts from "./OverviewCharts";
 const Overview = () => {
   const [overviewData, setOverviewData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [pendingLoads, setPendingLoads] = useState(0);
   const [errors, setErrors] = useState(null);
+
+  const startLoading = () => {
+    setPendingLoads((previous) => previous + 1);
+  };
+
+  const stopLoading = () => {
+    setPendingLoads((previous) => Math.max(0, previous - 1));
+  };
+
+  useEffect(() => {
+    setLoading(pendingLoads > 0);
+  }, [pendingLoads]);
 
 
   
 
   useEffect(() => {
     const fetchOverviewData = async () => {
+      startLoading();
       try {
         const response = await fetch("/mockOverviewData.json");
         if (!response.ok) {
@@ -26,11 +41,12 @@ const Overview = () => {
         const data = await response.json();
         setOverviewData(data);
       } catch (fetchError) {
-        setErrors([
+        setErrors((previous) => [
+          ...(previous || []),
           { location: "fetchOverviewData", message: fetchError.message },
         ]);
       } finally {
-        setLoading(false);
+        stopLoading();
       }
     };
 
@@ -39,7 +55,11 @@ const Overview = () => {
 
   if (
     errors &&
-    errors.some((error) => error.location === "fetchOverviewData")
+    errors.some(
+      (error) =>
+        error.location === "fetchOverviewData" ||
+        error.location === "fetchOverviewChartsData"
+    )
   ) {
     return (
       <div id="overview" className="page-cont">
@@ -139,6 +159,12 @@ const Overview = () => {
                     </div>
                   </h3>
                 </div>
+                <OverviewCharts
+                  setErrors={setErrors}
+                  setLoading={setLoading}
+                  onLoadStart={startLoading}
+                  onLoadEnd={stopLoading}
+                />
               </>
             );
           })()}

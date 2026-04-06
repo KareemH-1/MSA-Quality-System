@@ -1,0 +1,26 @@
+{
+    "totals":{
+        "midterm":{
+            "2024-FALL": 5500,
+            "2025-SPRING": 4700,
+            "2025-SUMMER": 1100,
+            "2025-FALL": 4000,
+            "2026-SPRING": 120
+        },
+        "final":{
+            "2024-FALL": 6700,
+            "2025-SPRING": 6333,
+            "2025-SUMMER": 2733,
+            "2025-FALL": 7400,
+            "2026-SPRING": 0
+        },
+        "Satisfaction-Survey":{
+            "2024-FALL": 83,
+            "2025-SPRING": 84,
+            "2025-SUMMER": 81,
+            "2025-FALL": 79,
+            "2026-SPRING": 75
+        }
+
+    }
+}
