@@ -29,6 +29,7 @@ import {
   SatisfactionInsights,
   generateFacultySatisfactionColors,
   FacultySatisfactionInsights,
+  ResolutionTimeInsights,
 } from "../../services/Helpers/QaOverviewHelperCharts";
 
 import { CircleMinus, TrendingUp, TrendingDown } from "lucide-react";
@@ -334,9 +335,7 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
         </div>
 
         <div className="section small">
-          <h1 className="section-title">
-            Satisfaction Score for {semesterLabel}
-          </h1>
+          <h1 className="section-title">Satisfaction Score for {semesterLabel}</h1>
           <p className="section-subtitle">
             Student satisfaction scores from surveys across available semesters
           </p>
@@ -377,62 +376,61 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
             </ul>
           </div>
         </div>
-        </div>
+      </div>
 
-        <div className="row2">
-          <div className="section">
-            <h1 className="section-title">Satisfaction by Faculty</h1>
-            <p className="section-subtitle">
-              Sorted average satisfaction scores by faculty for the most recent
-              semester
-            </p>
-            <div className="chart-wrapper">
-              <Bar
-                data={facultySatisfactionData}
-                options={chartOptions(false)}
-              />
-            </div>
-            <div className="insights">
-              <h2 className="insights-title">Insights</h2>
-              <ul className="insights-list">
-                {FacultySatisfactionInsights(
-                  overviewChartsJson.satisfactionFaculties,
-                ).map(([insight, type], index) => (
-                  <li key={index} className={`insight-item ${type}`}>
-                    <div className="insight-item-content">
-                      {type === "positive" && (
-                        <span className="insight-icon positive">
-                          <TrendingUp size={13} strokeWidth={2.25} />
-                        </span>
-                      )}
-                      {type === "negative" && (
-                        <span className="insight-icon negative">
-                          <TrendingDown size={13} strokeWidth={2.25} />
-                        </span>
-                      )}
-                      {type === "neutral" && (
-                        <span className="insight-icon neutral">
-                          <CircleMinus size={13} strokeWidth={2.25} />
-                        </span>
-                      )}
-                      <span className="insight-text">{insight}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
+      <div className="row2">
+        <div className="section">
+          <h1 className="section-title">Satisfaction by Faculty</h1>
+          <p className="section-subtitle">
+            Sorted average satisfaction scores by faculty for the most recent
+            semester
+          </p>
+          <div className="chart-wrapper">
+            <Bar data={facultySatisfactionData} options={chartOptions(false)} />
+          </div>
+          <div className="insights">
+            <h2 className="insights-title">Insights</h2>
+            <ul className="insights-list">
+              {FacultySatisfactionInsights(
+                overviewChartsJson.satisfactionFaculties,
+              ).map(([insight, type], index) => (
+                <li key={index} className={`insight-item ${type}`}>
+                  <div className="insight-item-content">
+                    {type === "positive" && (
+                      <span className="insight-icon positive">
+                        <TrendingUp size={13} strokeWidth={2.25} />
+                      </span>
+                    )}
+                    {type === "negative" && (
+                      <span className="insight-icon negative">
+                        <TrendingDown size={13} strokeWidth={2.25} />
+                      </span>
+                    )}
+                    {type === "neutral" && (
+                      <span className="insight-icon neutral">
+                        <CircleMinus size={13} strokeWidth={2.25} />
+                      </span>
+                    )}
+                    <span className="insight-text">{insight}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
+      </div>
 
-        <div className="row3">
-          <div className="section small">
-            <h1 className="section-title">Resolution Time</h1>
-            <p className="section-subtitle">
-              {hasCurrentResolutionData
-                ? `Resolution time by day for ${currentAppealSession.Session} appeal of semester ${currentAppealSession.semester}`
-                : `No current-session resolution-time data is available. Showing latest semester: ${latestSemester}`}
-            </p>
-            {hasResolutionDataThroughCurrentDay && (
+      <div className="row3">
+
+        <div className="section small">
+          <h1 className="section-title">Resolution Time</h1>
+          <p className="section-subtitle">
+            {hasCurrentResolutionData
+              ? `Resolution time by day for ${currentAppealSession.Session} appeal of semester ${currentAppealSession.semester}`
+              : `No current-session resolution-time data is available. Showing latest semester: ${latestSemester}`}
+          </p>
+          {hasResolutionDataThroughCurrentDay && (
+            <div>
               <div className="chart-wrapper resolution-chart-wrapper">
                 <Line
                   data={resolutionData}
@@ -442,8 +440,41 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
                   )}
                 />
               </div>
-            )}
-          </div>
+
+              <div className="insights">
+                <h2 className="insights-title">Insights</h2>
+                <ul className="insights-list">
+                  {ResolutionTimeInsights(resolutionEntriesToRender).map(
+                    ([insight, type], index) => (
+                      <li key={index} className={`insight-item ${type}`}>
+                        <div className="insight-item-content">
+                          {type === "positive" && (
+                            <span className="insight-icon positive">
+                              <TrendingUp size={13} strokeWidth={2.25} />
+                            </span>
+                          )}
+                          {type === "negative" && (
+                            <span className="insight-icon negative">
+                              <TrendingDown size={13} strokeWidth={2.25} />
+                            </span>
+                          )}
+                          {type === "neutral" && (
+                            <span className="insight-icon neutral">
+                              <CircleMinus size={13} strokeWidth={2.25} />
+                            </span>
+                          )}
+                          <span className="insight-text">{insight}</span>
+                        </div>
+                      </li>
+                    ),
+                  )}
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <section className=""
       </div>
     </div>
   );
