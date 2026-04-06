@@ -124,12 +124,16 @@ const Overview = () => {
                         <div className="midTerm-total">
                           <h1 className="total-title">Midterm Appeals</h1>
                           <h2 className="total-value">{getAppealRate(overviewData.appeals.midterm)}</h2>
-                          <p className="rate-change">{semesterAppealDelta.midtermRate.toFixed(2)}%</p>
+                          <p className={`rate-change ${semesterAppealDelta.midtermRate >= 0 ? 'positive' : 'negative'}`}>
+                            {semesterAppealDelta.midtermRate.toFixed(2)}% from last semester
+                          </p>
                         </div>
                         <div className="final-total">
                           <h1 className="total-title">Final Appeals</h1>
                           <h2 className="total-value">{getAppealRate(overviewData.appeals.final)}</h2>
-                          <p className="rate-change">{semesterAppealDelta.finalRate.toFixed(2)}%</p>
+                          <p className={`rate-change ${semesterAppealDelta.finalRate >= 0 ? 'positive' : 'negative'}`}>
+                            {semesterAppealDelta.finalRate.toFixed(2)}% from last semester
+                          </p>
                         </div>
                       </div>
                     </div>

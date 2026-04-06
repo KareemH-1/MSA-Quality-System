@@ -150,6 +150,86 @@
     border-color: rgba(252, 211, 77, 0.58);
 }
 
+.appeal-totals{
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    border: 1px solid #d6e5f6;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(15, 53, 93, 0.10);
+    padding: 0.65rem 0.75rem;
+
+}
+.midTerm-total{
+    position: relative;
+    flex: 1;
+}
+.midTerm-total::after{
+    content: "";
+    width: 1px;
+    position: absolute;
+    top: 12%;
+    bottom: 12%;
+    right: -0.5rem;
+    background: #d2dfef;
+    z-index: 1;
+}
+.final-total, .midTerm-total {
+    background: transparent;
+    padding: 0.45rem 0.5rem;
+    border-radius: 8px;
+    border: none;
+    min-height: 68px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.2rem;
+}
+.final-total {
+    flex: 1;
+}
+.final-total h1, .midTerm-total h1 {
+    font-size: 0.75rem;
+    color: var(--text-color);
+    text-transform: uppercase;
+    margin: 0;
+}
+.final-total h2, .midTerm-total h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+.rate-change.positive {
+    font-size: 0.67rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    background: rgba(34, 197, 94, 0.25);
+    border: 1px solid rgba(134, 239, 172, 0.55);
+    padding: 0.12rem 0.48rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.rate-change.negative {
+    font-size: 0.67rem;
+    font-weight: 700;
+    color: var(--danger-color);
+    background: rgba(239, 68, 68, 0.24);
+    border: 1px solid rgba(252, 165, 165, 0.55);
+    padding: 0.12rem 0.48rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
 @media (max-width: 1024px) {
     .overview-header {
         gap: 0.8rem;
@@ -161,5 +241,14 @@
 
     .appeals {
         grid-template-columns: 1fr;
+    }
+
+    .appeal-totals {
+        flex-direction: column;
+        gap: 0.65rem;
+    }
+
+    .midTerm-total::after {
+        display: none;
     }
 }
