@@ -6,30 +6,30 @@
 
 .sidebar-toggle-btn {
   position: fixed;
-  top: 25px;
-  left: 8px;
+  top: 20px;
+  left: 10px;
   z-index: 60;
+  width: 28px;
+  height: 28px;
   padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 0;
-  border: 1px solid var(--soft-color);
-  border-radius: 4px;
-  
-  background: transparent;
-  color: var(--muted-color);
+  border: none;
+  border-radius: 6px;
+  background: var(--primary-color);
+  color: #fff;
   cursor: pointer;
   line-height: 1;
-  transition: left 0.4s ease, color 0.2s ease , filter 0.2s ease;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  transition:
+    left 0.4s ease,
+    background-color 0.2s ease;
 }
 
 .sidebar-toggle-btn:hover {
-  background: var(--tint-color);
-  color: var(--primary-color);
-  filter: brightness(1.05);
+  background: var(--secondary-color);
 }
-
 
 .sidebar-toggle-btn svg {
   width: 18px;
@@ -37,8 +37,7 @@
 }
 
 .sidebar-toggle-btn.open {
-  color: var(--primary-color);
-  left: calc(var(--sidebar-width) - 18px);
+  left: calc(var(--sidebar-width) - 14px);
 }
 .sidebar {
   position: fixed;
@@ -97,14 +96,13 @@
   gap: 10px;
 }
 
-
 .sidebar-item .sideItemIcon {
   margin-right: 8px;
   display: inline-flex;
   align-items: center;
   opacity: 0.7;
 }
-.sidebar-item a{
+.sidebar-item a {
   color: var(--text-color);
   text-decoration: none;
   font-size: var(--sidebar-item-font-size);
@@ -137,13 +135,12 @@
 }
 
 .sidebar-footer {
-    margin: 0 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
+  margin: 0 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
-
 
 .sidebar-divider {
   height: 1px;
@@ -151,7 +148,7 @@
   margin: 12px 10px;
   opacity: 0.2;
 }
-.info-container{
+.info-container {
   padding: 12px 0px;
   border-radius: 8px;
   display: flex;
@@ -255,19 +252,19 @@
   }
 
   .sidebar-toggle-btn {
-    top: 17px;
+    top: 14px;
     left: 8px;
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
   }
 
   .sidebar-toggle-btn svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
   }
 
   .sidebar-toggle-btn.open {
-    left: calc(var(--sidebar-width) - 15px);
+    left: calc(var(--sidebar-width) - 11px);
   }
 
   .sidebar {
@@ -342,6 +339,6 @@
   }
 
   .sidebar-toggle-btn.open {
-    left: calc(var(--sidebar-width) - 14px);
+    left: calc(var(--sidebar-width) - 10px);
   }
 }
