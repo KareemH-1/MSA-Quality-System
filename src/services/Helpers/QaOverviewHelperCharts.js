@@ -279,10 +279,56 @@ const ResolutionTimeInsights = (resolutionEntries) => {
   return insights;
 };
 
+const AppealBreakdownInsights = (lastAppealBreakdown) => {
+  if (!lastAppealBreakdown) {
+    return [["No appeal-breakdown data is available yet.", "neutral"]];
+  }
+
+  const total = Number(lastAppealBreakdown?.Total) || 0;
+  const accepted = Number(lastAppealBreakdown?.Accepted) || 0;
+  const pending = Number(lastAppealBreakdown?.Pending) || 0;
+  const rejected = Number(lastAppealBreakdown?.Rejected) || 0;
+  const resolved = accepted + rejected;
+
+  if (total <= 0) {
+    return [["No appeal-breakdown data is available yet.", "neutral"]];
+  }
+
+  const insights = [];
+  const acceptedRate = (accepted / resolved) * 100;
+  const pendingRate = (pending / total) * 100;
+  const rejectedRate = (rejected / resolved) * 100;
+
+  insights.push([
+    `Out of ${total} appeals, ${resolved} are resolved and ${pending} are pending.`,
+    "neutral",
+  ]);
+
+  insights.push([
+    `Acceptance rate is ${formatPercentage(acceptedRate)} and rejection rate is ${formatPercentage(rejectedRate)}.`,
+    acceptedRate >= rejectedRate ? "positive" : "negative",
+  ]);
+
+  if (pendingRate >= 40) {
+    insights.push([
+      `Pending cases are ${formatPercentage(pendingRate)} of total appeals, indicating a high unresolved workload.`,
+      "negative",
+    ]);
+  } else {
+    insights.push([
+      `Pending cases are ${formatPercentage(pendingRate)} of total appeals.`,
+      "neutral",
+    ]);
+  }
+
+  return insights;
+};
+
 export {
   Appealinsights,
   SatisfactionInsights,
   generateFacultySatisfactionColors,
   FacultySatisfactionInsights,
   ResolutionTimeInsights,
+  AppealBreakdownInsights,
 };
