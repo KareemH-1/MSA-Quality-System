@@ -43,7 +43,6 @@
     },
 
     "lastAppealBreakdown":{
-        "Total": 120,
         "Accepted": 6,
         "Pending": 50,
         "Rejected": 64

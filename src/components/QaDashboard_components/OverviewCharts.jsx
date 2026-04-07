@@ -1,7 +1,7 @@
 import React from "react";
 import "./styles/Charts.css";
 
-import { Line, Bar } from "react-chartjs-2";
+import { Line, Bar, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,6 +12,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  ArcElement,
 } from "chart.js";
 
 ChartJS.register(
@@ -23,6 +24,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
+  ArcElement,
 );
 import {
   Appealinsights,
@@ -58,17 +60,16 @@ const formatDateKey = (date) => {
 
 const formatDayLabel = (dayIndex, dateKey) => `Day ${dayIndex} (${dateKey})`;
 
-const cleanResuotionTimeData = (
-  resolutionTimeByDay,
-  startedAt,
-  endedAt,
-) => {
+const cleanResuotionTimeData = (resolutionTimeByDay, startedAt, endedAt) => {
   const startDate = parseDateKey(startedAt);
   const today = new Date();
   const latestResolutionDate = Object.keys(resolutionTimeByDay || {})
     .map(parseDateKey)
     .filter(Boolean)
-    .reduce((latest, current) => (latest && latest > current ? latest : current), null);
+    .reduce(
+      (latest, current) => (latest && latest > current ? latest : current),
+      null,
+    );
   const endDate = [parseDateKey(endedAt) || today, latestResolutionDate]
     .filter(Boolean)
     .reduce((latest, current) => (latest > current ? latest : current));
@@ -227,6 +228,20 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
     };
   };
 
+  const pieOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: "bottom",
+      },
+      title: {
+        display: false,
+      },
+    },
+  };
+
   const satisfactionData = {
     labels: semesters,
     datasets: [
@@ -287,6 +302,11 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
     ],
   };
 
+  const appealBreakdown = overviewChartsJson?.lastAppealBreakdown || {};
+  const acceptedAppeals = Number(appealBreakdown?.Accepted) || 0;
+  const rejectedAppeals = Number(appealBreakdown?.Rejected) || 0;
+  const pendingAppeals = Number(appealBreakdown?.Pending) || 0;
+
   return (
     <div className="charts">
       <div className="row1">
@@ -335,7 +355,9 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
         </div>
 
         <div className="section small">
-          <h1 className="section-title">Satisfaction Score for {semesterLabel}</h1>
+          <h1 className="section-title">
+            Satisfaction Score for {semesterLabel}
+          </h1>
           <p className="section-subtitle">
             Student satisfaction scores from surveys across available semesters
           </p>
@@ -386,7 +408,10 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
             semester
           </p>
           <div className="chart-wrapper">
-            <Bar data={facultySatisfactionData} options={chartOptions(false)} />
+            <Bar
+              data={facultySatisfactionData}
+              options={chartOptions("Satisfaction Score (%)", "Faculty")}
+            />
           </div>
           <div className="insights">
             <h2 className="insights-title">Insights</h2>
@@ -421,7 +446,6 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
       </div>
 
       <div className="row3">
-
         <div className="section small">
           <h1 className="section-title">Resolution Time</h1>
           <p className="section-subtitle">
@@ -474,10 +498,40 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
           )}
         </div>
 
-         <div className="section small">
-            <h1 className="section-title">Appeals Breakdown</h1>
-         </div>
-        
+        <div className="section big">
+          <h1 className="section-title">Appeals Breakdown</h1>
+          <p className="section-subtitle">
+            Breakdown of appeal results for the last {currentAppealSession.Session || "N/A"} session of semester {currentAppealSession.semester || "N/A"}
+          </p>
+          <div className="appeal-breakdown">
+          <h1 className="appeal-breakdown-title">
+            {acceptedAppeals + rejectedAppeals + pendingAppeals} Total Appeals
+           
+          </h1>
+          <span> {acceptedAppeals} Accepted Appeals</span>
+           <span>  {rejectedAppeals} Rejected Appeals</span>
+           <span>  {pendingAppeals} Pending Appeals</span>
+            
+          </div>
+          <div className="chart-wrapper">
+            <Pie
+              data={{
+                labels: ["Accepted", "Rejected", "Pending"],
+                datasets: [
+                  {
+                    data: [
+                      acceptedAppeals,
+                      rejectedAppeals,
+                      pendingAppeals,
+                    ],
+                    backgroundColor: ["#4CAF50", "#d74040", "#f2c94c"],
+                  },
+                ],
+              }}
+              options={pieOptions}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
