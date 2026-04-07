@@ -32,6 +32,7 @@ import {
   generateFacultySatisfactionColors,
   FacultySatisfactionInsights,
   ResolutionTimeInsights,
+  AppealBreakdownInsights,
 } from "../../services/Helpers/QaOverviewHelperCharts";
 
 import { CircleMinus, TrendingUp, TrendingDown } from "lucide-react";
@@ -531,6 +532,40 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
               options={pieOptions}
             />
           </div>
+          <div className="insights">
+                <h2 className="insights-title">Insights</h2>
+                <ul className="insights-list">
+                  {AppealBreakdownInsights({
+                    ...appealBreakdown,
+                    Total:
+                      Number(appealBreakdown?.Total) ||
+                      acceptedAppeals + rejectedAppeals + pendingAppeals,
+                  }).map(
+                    ([insight, type], index) => (
+                      <li key={index} className={`insight-item ${type}`}>
+                        <div className="insight-item-content">
+                          {type === "positive" && (
+                            <span className="insight-icon positive">
+                              <TrendingUp size={13} strokeWidth={2.25} />
+                            </span>
+                          )}
+                          {type === "negative" && (
+                            <span className="insight-icon negative">
+                              <TrendingDown size={13} strokeWidth={2.25} />
+                            </span>
+                          )}
+                          {type === "neutral" && (
+                            <span className="insight-icon neutral">
+                              <CircleMinus size={13} strokeWidth={2.25} />
+                            </span>
+                          )}
+                          <span className="insight-text">{insight}</span>
+                        </div>
+                      </li>
+                    ),
+                  )}
+                </ul>
+              </div>
         </div>
       </div>
     </div>
