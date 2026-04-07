@@ -98,9 +98,9 @@
       "description": "Average survey response rate across faculties"
     },
     "appealResolutionTime": {
-      "value": 5,
-      "target": 7,
-      "description": "Average days to resolve an appeal"
+      "value": 6.4,
+      "target": 6,
+      "description": "Average minutes to resolve an appeal"
     }
   },
 

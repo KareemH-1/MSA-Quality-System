@@ -131,7 +131,7 @@ const Overview = () => {
               {
                 label: "average resolution time",
                 value: overviewData?.kpis?.appealResolutionTime?.value ?? 0,
-                suffix: " days",
+                suffix: " Minutes",
                 description:
                   overviewData?.kpis?.appealResolutionTime?.description ??
                   "Average time to resolve an appeal",

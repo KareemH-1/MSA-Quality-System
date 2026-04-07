@@ -237,7 +237,7 @@ const ResolutionTimeInsights = (resolutionEntries) => {
   const average = total / parsedEntries.length;
 
   insights.push([
-    `The average resolution time so far is ${average.toFixed(2)} days.`,
+    `The average resolution time so far is ${average.toFixed(2)} minutes.`,
     "neutral",
   ]);
 
@@ -248,12 +248,12 @@ const ResolutionTimeInsights = (resolutionEntries) => {
 
     if (change < 0) {
       insights.push([
-        `Resolution time improved by ${Math.abs(change).toFixed(2)} days from ${firstLabel} to ${lastLabel}.`,
+        `Resolution time improved by ${Math.abs(change).toFixed(2)} minutes from ${firstLabel} to ${lastLabel}.`,
         "positive",
       ]);
     } else if (change > 0) {
       insights.push([
-        `Resolution time increased by ${change.toFixed(2)} days from ${firstLabel} to ${lastLabel}.`,
+        `Resolution time increased by ${change.toFixed(2)} minutes from ${firstLabel} to ${lastLabel}.`,
         "negative",
       ]);
     } else {
@@ -272,7 +272,7 @@ const ResolutionTimeInsights = (resolutionEntries) => {
   );
 
   insights.push([
-    `Fastest day: ${fastestEntry[0]} (${fastestEntry[1].toFixed(2)} days). Slowest day: ${slowestEntry[0]} (${slowestEntry[1].toFixed(2)} days).`,
+    `Fastest day: ${fastestEntry[0]} (${fastestEntry[1].toFixed(2)} minutes). Slowest day: ${slowestEntry[0]} (${slowestEntry[1].toFixed(2)} minutes).`,
     "neutral",
   ]);
 
