@@ -446,7 +446,7 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
       </div>
 
       <div className="row3">
-        <div className="section small">
+        <div className="section big">
           <h1 className="section-title">Resolution Time</h1>
           <p className="section-subtitle">
             {hasCurrentResolutionData
@@ -498,7 +498,7 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
           )}
         </div>
 
-        <div className="section big">
+        <div className="section small">
           <h1 className="section-title">Appeals Breakdown</h1>
           <p className="section-subtitle">
             Breakdown of appeal results for the last {currentAppealSession.Session || "N/A"} session of semester {currentAppealSession.semester || "N/A"}

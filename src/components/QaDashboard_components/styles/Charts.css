@@ -163,9 +163,16 @@
 }
 
 
-.row1 , .row3{
+.row1 {
     display: grid;
     grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: stretch;
+}
+
+.row3 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr);
     gap: 1rem;
     align-items: stretch;
 }
@@ -176,6 +183,14 @@
 .row3 .small{
     min-width: 0;
     height: 100%;
+}
+
+.row3 .small {
+    order: 1;
+}
+
+.row3 .big {
+    order: 2;
 }
 
 .row1 .section{
@@ -220,7 +235,8 @@
 }
 
 @media (max-width: 1024px) {
-    .row1{
+    .row1,
+    .row3 {
         grid-template-columns: 1fr;
         align-items: stretch;
     }
