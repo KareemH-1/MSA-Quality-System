@@ -1,0 +1,44 @@
+.appeals-page {
+  margin-top: 30px;
+  margin-bottom: 80px;
+  width: 100%;
+}
+
+.appeals-page .section {
+  background: linear-gradient(180deg, #ffffff 0%, rgba(241, 245, 249, 0.72) 100%);
+  border: 1px solid rgba(173, 181, 189, 0.35);
+  border-radius: 16px;
+  padding: 1rem 1.05rem;
+  box-shadow: 0 10px 24px rgba(9, 40, 63, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.appeals-page .section-title {
+  font-size: 0.84rem;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  margin: 0;
+}
+
+.appeals-page .section-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-color);
+  margin: 0;
+}
+
+.appeals-chart-shell {
+  margin-top: 0.25rem;
+}
+
+.appeals-error {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #b22b1d;
+  background: rgba(178, 43, 29, 0.08);
+  border: 1px solid rgba(178, 43, 29, 0.2);
+  border-radius: 12px;
+  padding: 0.7rem 0.85rem;
+}
