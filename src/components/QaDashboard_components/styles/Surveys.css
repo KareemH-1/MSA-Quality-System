@@ -1,7 +1,96 @@
-.top-status{
+.surveys-page {
+  display: grid;
+  gap: 1rem;
+  margin-top: 30px;
+  margin-bottom: 80px;
+}
+
+.surveys-title {
+  margin: 0;
+  font-size: clamp(1.45rem, 2.3vw, 2rem);
+  color: #153a56;
+  letter-spacing: -0.01em;
+}
+
+.error-message {
+  margin: 0;
+  color: #8d1f1f;
+  background: rgba(178, 43, 29, 0.1);
+  border: 1px solid rgba(178, 43, 29, 0.2);
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.top-status {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1rem;
+  margin: 0;
+}
 
-  margin: 1rem 0;
+.surveys-page .visual-card {
+  max-width: 100%;
+}
+
+.faculty-satisfaction {
+  display: grid;
+  gap: 0.75rem;
+  border-radius: 16px;
+  padding: 0.95rem;
+  border: 1px solid rgba(22, 53, 79, 0.15);
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(49, 96, 150, 0.1),
+      transparent 35%
+    ),
+    linear-gradient(180deg, #ffffff 0%, #f6f9fd 100%);
+  box-shadow: 0 10px 24px rgba(7, 33, 54, 0.08);
+}
+
+.satisfaction-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.75rem;
+  border-radius: 16px;
+  padding: 0.95rem;
+  border: 1px solid rgba(22, 53, 79, 0.15);
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(49, 96, 150, 0.1),
+      transparent 35%
+    ),
+    linear-gradient(180deg, #ffffff 0%, #f6f9fd 100%);
+  box-shadow: 0 10px 24px rgba(7, 33, 54, 0.08);
+}
+
+.section-heading {
+  margin: 0;
+  color: #173a56;
+  font-size: 1.02rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.section-note {
+  margin: -0.25rem 0 0.2rem;
+  font-size: 0.82rem;
+  color: #5f7284;
+}
+
+.faculty-satisfaction .chart-container {
+  padding: 0.9rem;
+  border-radius: 14px;
+}
+
+@media (max-width: 760px) {
+  .surveys-page {
+    gap: 0.85rem;
+  }
+
+  .faculty-satisfaction {
+    padding: 0.8rem;
+  }
 }

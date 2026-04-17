@@ -20,6 +20,7 @@
       "courseMaterialScore": 77.8,
       "instructorSatisfaction": 81.2,
       "responseRate": 68,
+      "targetResponseRate": 75,
       "lowScoreCourses": 4
     }
   },
