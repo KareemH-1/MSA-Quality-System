@@ -98,18 +98,19 @@
 }
 
 .support-card {
-  padding: 18px;
   background: #f2f3f5;
+  padding: 18px;
   border-radius: 4px;
   min-height: 236px;
   display: flex;
   flex-direction: column;
   box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+  transition: 0.3s ease;
 }
 
-.support-card.featured {
+.support-card:hover {
   background: #03153d;
-  color: #f3f5f9;
+  color: #f8f9fa;
   box-shadow: 0 12px 24px rgba(3, 21, 61, 0.2);
 }
 
@@ -125,10 +126,6 @@
   margin-bottom: 14px;
 }
 
-.support-card.featured .support-card-icon {
-  background: #c73a25;
-}
-
 .support-card h2 {
   margin: 0 0 10px;
   font-size: 0.96rem;
@@ -139,27 +136,26 @@
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.45;
-  color: #4a5667;
 }
 
-.support-card.featured p {
-  color: #e4e7ef;
+.support-card:hover p {
+  color: #d1d5db;
 }
 
 .support-card-contact,
 .support-card-ext {
-  margin-top: 10px;
+  margin-top: 15px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   font-size: 0.84rem;
-  color: #1f2732;
   text-decoration: none;
+  color: inherit;
 }
 
-.support-card.featured .support-card-contact,
-.support-card.featured .support-card-ext {
-  color: #f3f5f9;
+.support-card:hover .support-card-contact,
+.support-card:hover .support-card-ext {
+  color: #c7c7c7;
 }
 
 .support-card-contact:hover {
@@ -225,7 +221,9 @@
   font-size: 0.9rem;
   color: #232d3a;
   outline: none;
-  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .contact-field textarea {
@@ -257,7 +255,9 @@
   color: #f6f8fc;
   background: #02153d;
   cursor: pointer;
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
 }
 
 .contact-submit-btn:hover {
@@ -294,7 +294,11 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(14, 23, 36, 0.06) 0%, rgba(16, 26, 38, 0.38) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(14, 23, 36, 0.06) 0%,
+    rgba(16, 26, 38, 0.38) 100%
+  );
   z-index: 1;
 }
 
@@ -370,7 +374,9 @@
   background: #e7e9ed;
   border: 1px solid transparent;
   border-radius: 3px;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .faq-item.open {

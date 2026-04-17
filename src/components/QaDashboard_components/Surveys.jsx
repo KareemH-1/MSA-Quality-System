@@ -100,6 +100,18 @@ const Surveys = () => {
     return surveyMockData?.charts?.submissionTrend ?? [];
   }, [surveyMockData]);
 
+  const submissionFilters = useMemo(
+    () => [
+      {
+        key: "label",
+        label: "Week",
+        placeholder: "Choose Week",
+        multi: true,
+      },
+    ],
+    [],
+  );
+
   const buildSubmissionChartData = (records) => {
     if (!records.length) {
       return null;
@@ -195,6 +207,7 @@ const Surveys = () => {
           ChartComponent={Bar}
           sourceData={submissionSourceData}
           buildChartData={buildSubmissionChartData}
+          filters={submissionFilters}
           title="Weekly Survey Status"
           subtitle="Submitted vs Completed vs Pending (stacked)"
           chartProps={{ options: submissionChartOptions }}
