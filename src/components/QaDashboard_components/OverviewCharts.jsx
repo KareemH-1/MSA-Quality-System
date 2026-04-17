@@ -502,17 +502,17 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
         <div className="section small">
           <h1 className="section-title">Appeals Breakdown</h1>
           <p className="section-subtitle">
-            Breakdown of appeal results for the last {currentAppealSession.Session || "N/A"} session of semester {currentAppealSession.semester || "N/A"}
+            Breakdown of appeal results for the last{" "}
+            {currentAppealSession.Session || "N/A"} session of semester{" "}
+            {currentAppealSession.semester || "N/A"}
           </p>
           <div className="appeal-breakdown">
-          <h1 className="appeal-breakdown-title">
-            {acceptedAppeals + rejectedAppeals + pendingAppeals} Total Appeals
-           
-          </h1>
-          <span> {acceptedAppeals} Accepted Appeals</span>
-           <span>  {rejectedAppeals} Rejected Appeals</span>
-           <span>  {pendingAppeals} Pending Appeals</span>
-            
+            <h1 className="appeal-breakdown-title">
+              {acceptedAppeals + rejectedAppeals + pendingAppeals} Total Appeals
+            </h1>
+            <span> {acceptedAppeals} Accepted Appeals</span>
+            <span> {rejectedAppeals} Rejected Appeals</span>
+            <span> {pendingAppeals} Pending Appeals</span>
           </div>
           <div className="chart-wrapper">
             <Pie
@@ -520,11 +520,7 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
                 labels: ["Accepted", "Rejected", "Pending"],
                 datasets: [
                   {
-                    data: [
-                      acceptedAppeals,
-                      rejectedAppeals,
-                      pendingAppeals,
-                    ],
+                    data: [acceptedAppeals, rejectedAppeals, pendingAppeals],
                     backgroundColor: ["#4CAF50", "#d74040", "#f2c94c"],
                   },
                 ],
@@ -533,39 +529,37 @@ const OverviewCharts = ({ overviewChartsJson, errorMessage }) => {
             />
           </div>
           <div className="insights">
-                <h2 className="insights-title">Insights</h2>
-                <ul className="insights-list">
-                  {AppealBreakdownInsights({
-                    ...appealBreakdown,
-                    Total:
-                      Number(appealBreakdown?.Total) ||
-                      acceptedAppeals + rejectedAppeals + pendingAppeals,
-                  }).map(
-                    ([insight, type], index) => (
-                      <li key={index} className={`insight-item ${type}`}>
-                        <div className="insight-item-content">
-                          {type === "positive" && (
-                            <span className="insight-icon positive">
-                              <TrendingUp size={13} strokeWidth={2.25} />
-                            </span>
-                          )}
-                          {type === "negative" && (
-                            <span className="insight-icon negative">
-                              <TrendingDown size={13} strokeWidth={2.25} />
-                            </span>
-                          )}
-                          {type === "neutral" && (
-                            <span className="insight-icon neutral">
-                              <CircleMinus size={13} strokeWidth={2.25} />
-                            </span>
-                          )}
-                          <span className="insight-text">{insight}</span>
-                        </div>
-                      </li>
-                    ),
-                  )}
-                </ul>
-              </div>
+            <h2 className="insights-title">Insights</h2>
+            <ul className="insights-list">
+              {AppealBreakdownInsights({
+                ...appealBreakdown,
+                Total:
+                  Number(appealBreakdown?.Total) ||
+                  acceptedAppeals + rejectedAppeals + pendingAppeals,
+              }).map(([insight, type], index) => (
+                <li key={index} className={`insight-item ${type}`}>
+                  <div className="insight-item-content">
+                    {type === "positive" && (
+                      <span className="insight-icon positive">
+                        <TrendingUp size={13} strokeWidth={2.25} />
+                      </span>
+                    )}
+                    {type === "negative" && (
+                      <span className="insight-icon negative">
+                        <TrendingDown size={13} strokeWidth={2.25} />
+                      </span>
+                    )}
+                    {type === "neutral" && (
+                      <span className="insight-icon neutral">
+                        <CircleMinus size={13} strokeWidth={2.25} />
+                      </span>
+                    )}
+                    <span className="insight-text">{insight}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </div>

@@ -1,0 +1,219 @@
+{
+  "overview": {
+    "semester": {
+      "current": "2026-SPRING",
+      "previous": "2025-FALL"
+    },
+    "survey": {
+      "isOpen": true,
+      "isFinished": false,
+      "totalResponses": 500,
+      "totalInvited": 735,
+      "completionRate": 68
+    },
+    "kpis": {
+      "totalSubmitted": 500,
+      "completed": 472,
+      "pending": 28,
+      "averageSatisfaction": 79.4,
+      "targetSatisfaction": 85,
+      "courseMaterialScore": 77.8,
+      "instructorSatisfaction": 81.2,
+      "responseRate": 68,
+      "lowScoreCourses": 4
+    }
+  },
+  "facultySummary": [
+    {
+      "faculty": "Dentistry",
+      "bestCourse": "Dental Anatomy I",
+      "lowestCourse": "Oral Biology",
+      "averageScore": 88.5,
+      "submitted": 97,
+      "pending": 6
+    },
+    {
+      "faculty": "Physical Therapy",
+      "bestCourse": "Orthopedic Rehabilitation",
+      "lowestCourse": "Anatomy for Therapy",
+      "averageScore": 83.5,
+      "submitted": 88,
+      "pending": 7
+    },
+    {
+      "faculty": "Pharmacy",
+      "bestCourse": "Pharmacology II",
+      "lowestCourse": "Medicinal Chemistry",
+      "averageScore": 80.5,
+      "submitted": 99,
+      "pending": 7
+    },
+    {
+      "faculty": "Biotechnology",
+      "bestCourse": "Genetic Engineering",
+      "lowestCourse": "Bioinformatics",
+      "averageScore": 81,
+      "submitted": 79,
+      "pending": 9
+    },
+    {
+      "faculty": "Engineering",
+      "bestCourse": "Digital Logic Design",
+      "lowestCourse": "Thermodynamics",
+      "averageScore": 75,
+      "submitted": 119,
+      "pending": 13
+    },
+    {
+      "faculty": "Computer Science",
+      "bestCourse": "Web Development",
+      "lowestCourse": "Algorithms",
+      "averageScore": 81,
+      "submitted": 114,
+      "pending": 13
+    },
+    {
+      "faculty": "Languages",
+      "bestCourse": "Academic English",
+      "lowestCourse": "Translation Skills",
+      "averageScore": 82.5,
+      "submitted": 97,
+      "pending": 10
+    }
+  ],
+  "records": [
+    {
+      "id": "SV-001",
+      "faculty": "Dentistry",
+      "course": "Dental Anatomy I",
+      "instructor": "Dr. Sara Ahmed",
+      "semester": "2026-SPRING",
+      "submittedAt": "2026-04-01",
+      "status": "completed",
+      "overallScore": 91,
+      "courseMaterialScore": 94,
+      "instructorSatisfaction": 90,
+      "responseRate": 92,
+      "draftSummary": "Strong lab support and clear grading.",
+      "fullDraft": "Students praised the anatomy illustrations, weekly quizzes, and the instructor's pace."
+    },
+    {
+      "id": "SV-002",
+      "faculty": "Physical Therapy",
+      "course": "Anatomy for Therapy",
+      "instructor": "Dr. Mona Hassan",
+      "semester": "2026-SPRING",
+      "submittedAt": "2026-04-06",
+      "status": "pending",
+      "overallScore": 79,
+      "courseMaterialScore": 80,
+      "instructorSatisfaction": 78,
+      "responseRate": 87,
+      "draftSummary": "Students requested clearer practical instructions.",
+      "fullDraft": "The survey draft highlights a need for clearer lab instructions and more visual examples during theory sessions."
+    },
+    {
+      "id": "SV-003",
+      "faculty": "Pharmacy",
+      "course": "Medicinal Chemistry",
+      "instructor": "Dr. Nesma Adel",
+      "semester": "2026-SPRING",
+      "submittedAt": "2026-04-05",
+      "status": "completed",
+      "overallScore": 74,
+      "courseMaterialScore": 72,
+      "instructorSatisfaction": 75,
+      "responseRate": 83,
+      "draftSummary": "Students asked for more worked examples and revision sessions.",
+      "fullDraft": "Feedback suggests the course needs shorter slides, more worked examples, and a recap session before the exam."
+    },
+    {
+      "id": "SV-004",
+      "faculty": "Biotechnology",
+      "course": "Bioinformatics",
+      "instructor": "Dr. Amr Nabil",
+      "semester": "2026-SPRING",
+      "submittedAt": "2026-04-07",
+      "status": "pending",
+      "overallScore": 77,
+      "courseMaterialScore": 75,
+      "instructorSatisfaction": 79,
+      "responseRate": 85,
+      "draftSummary": "Students want more hands-on practice with the software tools.",
+      "fullDraft": "The strongest request was for a guided lab workbook and slower software demonstrations in class."
+    },
+    {
+      "id": "SV-005",
+      "faculty": "Engineering",
+      "course": "Thermodynamics",
+      "instructor": "Dr. Ahmed Mostafa",
+      "semester": "2026-SPRING",
+      "submittedAt": "2026-04-06",
+      "status": "completed",
+      "overallScore": 68,
+      "courseMaterialScore": 66,
+      "instructorSatisfaction": 70,
+      "responseRate": 78,
+      "draftSummary": "Course is challenging; students want simpler worked examples.",
+      "fullDraft": "Students felt the examples move too quickly and asked for more revision drills and a formula sheet."
+    },
+    {
+      "id": "SV-006",
+      "faculty": "Computer Science",
+      "course": "Web Development",
+      "instructor": "Dr. Youssef Adel",
+      "semester": "2026-SPRING",
+      "submittedAt": "2026-04-07",
+      "status": "completed",
+      "overallScore": 93,
+      "courseMaterialScore": 91,
+      "instructorSatisfaction": 95,
+      "responseRate": 96,
+      "draftSummary": "Strong practical project work and excellent support.",
+      "fullDraft": "Students strongly praised the live coding sessions, the project feedback, and the instructor's responsiveness."
+    },
+    {
+      "id": "SV-007",
+      "faculty": "Languages",
+      "course": "Translation Skills",
+      "instructor": "Dr. Hossam Omar",
+      "semester": "2026-SPRING",
+      "submittedAt": "2026-04-11",
+      "status": "pending",
+      "overallScore": 76,
+      "courseMaterialScore": 74,
+      "instructorSatisfaction": 78,
+      "responseRate": 82,
+      "draftSummary": "Students requested more translation practice and examples.",
+      "fullDraft": "The main feedback was to include more live translation examples and a clearer rubric for the assignments."
+    }
+  ],
+  "charts": {
+    "submissionTrend": [
+      { "label": "Week 1", "submitted": 92, "completed": 84, "pending": 8 },
+      { "label": "Week 2", "submitted": 101, "completed": 90, "pending": 11 },
+      { "label": "Week 3", "submitted": 112, "completed": 104, "pending": 8 },
+      { "label": "Week 4", "submitted": 128, "completed": 120, "pending": 8 },
+      { "label": "Week 5", "submitted": 143, "completed": 131, "pending": 12 },
+      { "label": "Week 6", "submitted": 167, "completed": 150, "pending": 17 }
+    ],
+    "statusBreakdown": [
+      { "label": "Completed", "value": 472 },
+      { "label": "Pending", "value": 28 },
+      { "label": "Draft", "value": 14 }
+    ],
+    "satisfactionByFaculty": {
+      "Dentistry": 91,
+      "Physical Therapy": 80,
+      "Pharmacy": 85,
+      "Biotechnology": 78,
+      "Nutrition & Food Technology": 76,
+      "Engineering": 65,
+      "Computer Science": 69.5,
+      "Arts & Design": 79,
+      "Management Sciences": 82,
+      "Mass Communication": 78,
+      "Languages": 85
+    }
+  }
+}
