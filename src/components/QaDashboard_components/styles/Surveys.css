@@ -12,6 +12,12 @@
   letter-spacing: -0.01em;
 }
 
+.surveys-subtitle {
+  margin: -0.25rem 0 0.75rem;
+  font-size: 0.9rem;
+  color: #5f7284;
+}
+
 .error-message {
   margin: 0;
   color: #8d1f1f;

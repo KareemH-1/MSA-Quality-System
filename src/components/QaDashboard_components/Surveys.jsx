@@ -48,28 +48,18 @@ const STATUS_SERIES = [
 const submissionChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
-  pluggins: {
-    legend: {
-      position: "top",
-    },
-    title: {
-      display: false,
-    },
+  plugins: {
+    legend: { position: "top" },
+    title: { display: false },
   },
   scales: {
     x: {
       stacked: true,
-      title: {
-        display: true,
-        text: "week",
-      },
+      title: { display: true, text: "Week" },
     },
     y: {
       stacked: true,
-      title: {
-        display: true,
-        text: "number of surveys",
-      },
+      title: { display: true, text: "Number of surveys" },
     },
   },
 };
@@ -77,6 +67,11 @@ const submissionChartOptions = {
 const Surveys = () => {
   const [surveyMockData, setSurveyMockData] = useState(null);
   const [error, setError] = useState("");
+  const [isCoursePickerOpen, setIsCoursePickerOpen] = useState(false);
+  const [draftFaculty, setDraftFaculty] = useState("");
+  const [draftCourse, setDraftCourse] = useState("");
+  const [selectedFaculty, setSelectedFaculty] = useState("");
+  const [selectedCourse, setSelectedCourse] = useState("");
 
   const totalSubmissions = surveyMockData?.overview?.kpis?.totalSubmitted ?? 0;
   const totalCompleted = surveyMockData?.overview?.kpis?.completed ?? 0;
@@ -91,26 +86,56 @@ const Surveys = () => {
   const targetSatisfaction =
     surveyMockData?.overview?.kpis?.targetSatisfaction ?? 85;
   const facultyCount = surveyMockData?.facultySummary?.length ?? 0;
+  const currentSemester = surveyMockData?.overview?.semester?.current ?? "N/A";
   const satisfactionDelta = averageSatisfaction - targetSatisfaction;
   const satisfactionDeltaLabel = `${satisfactionDelta >= 0 ? "+" : ""}${satisfactionDelta.toFixed(1)} pts vs target`;
 
-  const currentSemester = surveyMockData?.overview?.semester?.current ?? "N/A";
-
-  const submissionSourceData = useMemo(() => {
-    return surveyMockData?.charts?.submissionTrend ?? [];
-  }, [surveyMockData]);
-
+  const submissionSourceData = useMemo(
+    () => surveyMockData?.charts?.submissionTrend ?? [],
+    [surveyMockData],
+  );
   const submissionFilters = useMemo(
     () => [
-      {
-        key: "label",
-        label: "Week",
-        placeholder: "Choose Week",
-        multi: true,
-      },
+      { key: "label", label: "Week", placeholder: "Choose Week", multi: true },
     ],
     [],
   );
+
+  const allRecords = useMemo(
+    () => surveyMockData?.records ?? [],
+    [surveyMockData],
+  );
+
+  const facultyOptions = useMemo(() => {
+    return Array.from(
+      new Set(allRecords.map((record) => record?.faculty).filter(Boolean)),
+    ).sort((left, right) => String(left).localeCompare(String(right)));
+  }, [allRecords]);
+
+  const courseOptions = useMemo(() => {
+    const sourceRecords = draftFaculty
+      ? allRecords.filter((record) => record?.faculty === draftFaculty)
+      : allRecords;
+
+    return Array.from(
+      new Set(sourceRecords.map((record) => record?.course).filter(Boolean)),
+    ).sort((left, right) => String(left).localeCompare(String(right)));
+  }, [allRecords, draftFaculty]);
+
+  const selectedRecord = useMemo(() => {
+    if (!selectedCourse) {
+      return null;
+    }
+
+    return (
+      allRecords.find((record) => {
+        const facultyMatches = selectedFaculty
+          ? record?.faculty === selectedFaculty
+          : true;
+        return record?.course === selectedCourse && facultyMatches;
+      }) ?? null
+    );
+  }, [allRecords, selectedCourse, selectedFaculty]);
 
   const buildSubmissionChartData = (records) => {
     if (!records.length) {
@@ -118,10 +143,10 @@ const Surveys = () => {
     }
 
     return {
-      labels: records.map((r) => r.label),
+      labels: records.map((record) => record.label),
       datasets: STATUS_SERIES.map((series) => ({
         label: series.label,
-        data: records.map((r) => Number(r[series.key]) || 0),
+        data: records.map((record) => Number(record[series.key]) || 0),
         backgroundColor: series.color,
         borderColor: series.border,
         borderWidth: 1,
@@ -151,69 +176,236 @@ const Surveys = () => {
     fetchSurveyMockData();
   }, []);
 
+  useEffect(() => {
+    if (draftCourse && !courseOptions.includes(draftCourse)) {
+      setDraftCourse("");
+    }
+  }, [courseOptions, draftCourse]);
+
+  const openCoursePicker = () => {
+    setDraftFaculty(selectedFaculty || facultyOptions[0] || "");
+    setDraftCourse(selectedCourse || "");
+    setIsCoursePickerOpen(true);
+  };
+
+  const closeCoursePicker = () => {
+    setIsCoursePickerOpen(false);
+  };
+
+  const applyCourseSelection = () => {
+    if (!draftCourse) {
+      return;
+    }
+
+    setSelectedFaculty(draftFaculty);
+    setSelectedCourse(draftCourse);
+    setIsCoursePickerOpen(false);
+  };
+
+  const clearCourseSelection = () => {
+    setSelectedFaculty("");
+    setSelectedCourse("");
+  };
+
   return (
     <div className="surveys-page page-cont">
-      <h1 className="surveys-title">Surveys Analytics</h1>
+      <div className="surveys-topbar">
+        <div>
+          <h1 className="surveys-title">Surveys Analytics</h1>
+          <p className="surveys-subtitle">
+            Semester {currentSemester} overview with drill-down access to each
+            faculty and course.
+          </p>
+        </div>
+        <button
+          type="button"
+          className="course-picker-btn"
+          onClick={openCoursePicker}
+        >
+          Browse Course Details
+        </button>
+      </div>
+
       {error && <p className="error-message">{error}</p>}
-      <div className="top-status">
-        <MiniMetricCard
-          label="total submissions"
-          value={totalSubmissions}
-          description={`Current semester: ${currentSemester}`}
-          tone="cool"
-        />
-        <MiniMetricCard
-          label="total completed surveys"
-          value={totalCompleted}
-          description={`Current semester: ${currentSemester}`}
-          tone="cool"
-        />
-        <MiniMetricCard
-          label="total pending surveys"
-          value={totalPending}
-          description={`Current semester: ${currentSemester}`}
-          tone="cool"
-        />
-        <RingProgressCard
-          title="Survey Completion Rate"
-          value={averageCompletionRate}
-          suffix="%"
-        />
-      </div>
-      <div className="satisfaction-overview">
-        <VisualCard
-          title="Satisfaction Scores"
-          description="Comparison of average and target satisfaction scores for the current semester."
-          value={averageSatisfaction.toFixed(1)}
-          percentage={satisfactionDeltaLabel}
-          footer={`Target: ${targetSatisfaction}`}
-          color="default"
-        />
-        <VisualCard
-          title="Response Rate"
-          description="Percentage of surveys that have been submitted."
-          value={averageResponseRate.toFixed(1)}
-          percentage={`${averageResponseRate - targetResponseRate >= 0 ? "+" : ""}${(averageResponseRate - targetResponseRate).toFixed(1)} pts vs target`}
-          footer={`Target: ${targetResponseRate}%`}
-          suffix="%"
-          color="default"
-        />
-      </div>
-      <div className="faculty-satisfaction">
-        <h2 className="section-heading">Faculty Satisfaction</h2>
-        <p className="section-note">{facultyCount} faculties included</p>
-        <Chart
-          className="appeals-chart-shell"
-          ChartComponent={Bar}
-          sourceData={submissionSourceData}
-          buildChartData={buildSubmissionChartData}
-          filters={submissionFilters}
-          title="Weekly Survey Status"
-          subtitle="Submitted vs Completed vs Pending (stacked)"
-          chartProps={{ options: submissionChartOptions }}
-          emptyMessage="No weekly survey data found."
-        />
-      </div>
+
+      {!selectedRecord ? (
+        <>
+          <div className="top-status">
+            <MiniMetricCard
+              label="total submissions"
+              value={totalSubmissions}
+              description={`Current semester: ${currentSemester}`}
+              tone="cool"
+            />
+            <MiniMetricCard
+              label="total completed surveys"
+              value={totalCompleted}
+              description={`Current semester: ${currentSemester}`}
+              tone="cool"
+            />
+            <MiniMetricCard
+              label="total pending surveys"
+              value={totalPending}
+              description={`Current semester: ${currentSemester}`}
+              tone="cool"
+            />
+            <RingProgressCard
+              title="Survey Completion Rate"
+              value={averageCompletionRate}
+              suffix="%"
+            />
+          </div>
+
+          <div className="satisfaction-overview">
+            <VisualCard
+              title="Satisfaction Scores"
+              description="Average satisfaction compared with the semester target."
+              value={averageSatisfaction.toFixed(1)}
+              percentage={satisfactionDeltaLabel}
+              footer={`Target: ${targetSatisfaction}`}
+              color="default"
+            />
+            <VisualCard
+              title="Response Rate"
+              description="Percentage of surveys that have been submitted."
+              value={averageResponseRate.toFixed(1)}
+              percentage={`${averageResponseRate - targetResponseRate >= 0 ? "+" : ""}${(averageResponseRate - targetResponseRate).toFixed(1)} pts vs target`}
+              footer={`Target: ${targetResponseRate}%`}
+              suffix="%"
+              color="default"
+            />
+          </div>
+
+          <div className="faculty-satisfaction">
+            <h2 className="section-heading">Faculty Satisfaction</h2>
+            <p className="section-note">{facultyCount} faculties included</p>
+            <Chart
+              className="appeals-chart-shell"
+              ChartComponent={Bar}
+              sourceData={submissionSourceData}
+              buildChartData={buildSubmissionChartData}
+              filters={submissionFilters}
+              title="Weekly Survey Status"
+              subtitle="Submitted vs Completed vs Pending (stacked)"
+              chartProps={{ options: submissionChartOptions }}
+              emptyMessage="No weekly survey data found."
+            />
+          </div>
+        </>
+      ) : (
+        <section className="course-detail-view">
+          <div className="course-detail-header">
+            <div>
+              <p className="course-detail-kicker">Detailed course survey</p>
+              <h2 className="section-heading">{selectedRecord.course}</h2>
+              <p className="section-note">
+                {selectedRecord.faculty} | {selectedRecord.instructor} |{" "}
+                {selectedRecord.semester}
+              </p>
+            </div>
+            <button
+              type="button"
+              className="course-back-btn"
+              onClick={clearCourseSelection}
+            >
+              Back To Overview
+            </button>
+          </div>
+
+          <div className="course-detail-grid">
+            <article className="course-detail-card">
+              <h3>Core Metrics</h3>
+              <ul>
+                <li>Overall score: {selectedRecord.overallScore}%</li>
+                <li>
+                  Course material score: {selectedRecord.courseMaterialScore}%
+                </li>
+                <li>
+                  Instructor satisfaction:{" "}
+                  {selectedRecord.instructorSatisfaction}%
+                </li>
+                <li>Response rate: {selectedRecord.responseRate}%</li>
+                <li>Status: {selectedRecord.status}</li>
+              </ul>
+            </article>
+
+            <article className="course-detail-card">
+              <h3>Survey Summary</h3>
+              <p>{selectedRecord.draftSummary}</p>
+              <h3>Detailed Notes</h3>
+              <p>{selectedRecord.fullDraft}</p>
+            </article>
+
+            <article className="course-detail-card">
+              <h3>Course Context</h3>
+              <ul>
+                <li>Faculty: {selectedRecord.faculty}</li>
+                <li>Course: {selectedRecord.course}</li>
+                <li>Instructor: {selectedRecord.instructor}</li>
+                <li>Submitted at: {selectedRecord.submittedAt}</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+      )}
+
+      {isCoursePickerOpen && (
+        <div className="course-picker-overlay" role="dialog" aria-modal="true">
+          <div className="course-picker-modal">
+            <h3>Choose a faculty and course</h3>
+            <div className="course-picker-fields">
+              <label htmlFor="faculty-select">Faculty</label>
+              <select
+                id="faculty-select"
+                value={draftFaculty}
+                onChange={(event) => {
+                  setDraftFaculty(event.target.value);
+                  setDraftCourse("");
+                }}
+              >
+                <option value="">All faculties</option>
+                {facultyOptions.map((faculty) => (
+                  <option key={faculty} value={faculty}>
+                    {faculty}
+                  </option>
+                ))}
+              </select>
+
+              <label htmlFor="course-select">Course</label>
+              <select
+                id="course-select"
+                value={draftCourse}
+                onChange={(event) => setDraftCourse(event.target.value)}
+              >
+                <option value="">Choose course</option>
+                {courseOptions.map((course) => (
+                  <option key={course} value={course}>
+                    {course}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="course-picker-actions">
+              <button
+                type="button"
+                className="course-picker-cancel"
+                onClick={closeCoursePicker}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="course-picker-apply"
+                onClick={applyCourseSelection}
+                disabled={!draftCourse}
+              >
+                Open course
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
