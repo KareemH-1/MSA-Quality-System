@@ -74,6 +74,8 @@ const Surveys = () => {
   const [selectedCourse, setSelectedCourse] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [isFacultyMenuOpen, setIsFacultyMenuOpen] = useState(false);
+  const [isCourseMenuOpen, setIsCourseMenuOpen] = useState(false);
 
   const totalSubmissions = surveyMockData?.overview?.kpis?.totalSubmitted ?? 0;
   const totalCompleted = surveyMockData?.overview?.kpis?.completed ?? 0;
@@ -219,6 +221,8 @@ const Surveys = () => {
     setIsCoursePickerOpen(false);
     setSearchInput("");
     setSearchResults([]);
+    setIsFacultyMenuOpen(false);
+    setIsCourseMenuOpen(false);
   };
 
   useEffect(() => {
@@ -252,12 +256,34 @@ const Surveys = () => {
     setDraftFaculty(selectedFaculty || facultyOptions[0] || "");
     setDraftCourse(selectedCourse || "");
     setIsCoursePickerOpen(true);
+    setIsFacultyMenuOpen(false);
+    setIsCourseMenuOpen(false);
   };
 
   const closeCoursePicker = () => {
     setIsCoursePickerOpen(false);
     setSearchInput("");
     setSearchResults([]);
+    setIsFacultyMenuOpen(false);
+    setIsCourseMenuOpen(false);
+  };
+
+  const handleOverlayMouseDown = (event) => {
+    if (event.target === event.currentTarget) {
+      closeCoursePicker();
+    }
+  };
+
+  const selectFaculty = (faculty) => {
+    setDraftFaculty(faculty);
+    setDraftCourse("");
+    setIsFacultyMenuOpen(false);
+    setIsCourseMenuOpen(false);
+  };
+
+  const selectCourse = (course) => {
+    setDraftCourse(course);
+    setIsCourseMenuOpen(false);
   };
 
   const applyCourseSelection = () => {
@@ -468,7 +494,12 @@ const Surveys = () => {
         </section>
       )}
       {isCoursePickerOpen && (
-        <div className="course-picker-overlay" role="dialog" aria-modal="true">
+        <div
+          className="course-picker-overlay"
+          role="dialog"
+          aria-modal="true"
+          onMouseDown={handleOverlayMouseDown}
+        >
           <div className="course-picker-modal">
             <div className="course-picker-header">
               <h2>Search Courses</h2>
@@ -525,42 +556,108 @@ const Surveys = () => {
               </div>
             )}
             <div className="course-picker-filters">
-              <hr />
               <span>OR</span>
-              <hr />
             </div>
             <h3>Choose a faculty and course</h3>
             <div className="course-picker-fields">
-              <label htmlFor="faculty-select">Faculty</label>
-              <select
-                id="faculty-select"
-                value={draftFaculty}
-                onChange={(event) => {
-                  setDraftFaculty(event.target.value);
-                  setDraftCourse("");
-                }}
-              >
-                <option value="">All faculties</option>
-                {facultyOptions.map((faculty) => (
-                  <option key={faculty} value={faculty}>
-                    {faculty}
-                  </option>
-                ))}
-              </select>
+              <div className="course-picker-field-group">
+                <label htmlFor="faculty-trigger">Faculty</label>
+                <button
+                  id="faculty-trigger"
+                  type="button"
+                  className="course-picker-dropdown-trigger"
+                  aria-haspopup="listbox"
+                  aria-expanded={isFacultyMenuOpen}
+                  onClick={() => {
+                    setIsFacultyMenuOpen((current) => !current);
+                    setIsCourseMenuOpen(false);
+                  }}
+                >
+                  <span>{draftFaculty || "All faculties"}</span>
+                  <span
+                    className="course-picker-dropdown-caret"
+                    aria-hidden="true"
+                  >
+                    ▾
+                  </span>
+                </button>
 
-              <label htmlFor="course-select">Course</label>
-              <select
-                id="course-select"
-                value={draftCourse}
-                onChange={(event) => setDraftCourse(event.target.value)}
-              >
-                <option value="">Choose course</option>
-                {courseOptions.map((course) => (
-                  <option key={course} value={course}>
-                    {course}
-                  </option>
-                ))}
-              </select>
+                {isFacultyMenuOpen && (
+                  <div className="course-picker-dropdown-menu" role="listbox">
+                    <button
+                      type="button"
+                      className={`course-picker-dropdown-item ${!draftFaculty ? "is-selected" : ""}`}
+                      onClick={() => selectFaculty("")}
+                    >
+                      All faculties
+                    </button>
+                    {facultyOptions.map((faculty) => (
+                      <button
+                        key={faculty}
+                        type="button"
+                        className={`course-picker-dropdown-item ${draftFaculty === faculty ? "is-selected" : ""}`}
+                        onClick={() => selectFaculty(faculty)}
+                      >
+                        {faculty}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="course-picker-field-group">
+                <label htmlFor="course-trigger">Course</label>
+                <button
+                  id="course-trigger"
+                  type="button"
+                  className={`course-picker-dropdown-trigger ${!courseOptions.length ? "is-disabled" : ""}`}
+                  aria-haspopup="listbox"
+                  aria-expanded={isCourseMenuOpen}
+                  disabled={!courseOptions.length}
+                  onClick={() => {
+                    setIsCourseMenuOpen((current) => !current);
+                    setIsFacultyMenuOpen(false);
+                  }}
+                >
+                  <span>{draftCourse || "Choose course"}</span>
+                  <span
+                    className="course-picker-dropdown-caret"
+                    aria-hidden="true"
+                  >
+                    ▾
+                  </span>
+                </button>
+
+                {isCourseMenuOpen && (
+                  <div className="course-picker-dropdown-menu" role="listbox">
+                    {!courseOptions.length ? (
+                      <div className="course-picker-dropdown-empty">
+                        No courses available
+                      </div>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          className={`course-picker-dropdown-item ${!draftCourse ? "is-selected" : ""}`}
+                          onClick={() => selectCourse("")}
+                        >
+                          Choose course
+                        </button>
+                        {courseOptions.map((course) => (
+                          <button
+                            key={course}
+                            type="button"
+                            className={`course-picker-dropdown-item ${draftCourse === course ? "is-selected" : ""}`}
+                            onClick={() => selectCourse(course)}
+                          >
+                            {course}
+                          </button>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="course-picker-actions">
