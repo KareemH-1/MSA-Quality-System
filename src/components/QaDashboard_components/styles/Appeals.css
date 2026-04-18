@@ -2,6 +2,133 @@
   margin-top: 30px;
   margin-bottom: 80px;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.appeals-page .info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.appeals-page .info h1 {
+  margin: 0;
+  color: #153a56;
+  font-size: clamp(1.45rem, 2.3vw, 2rem);
+  letter-spacing: -0.01em;
+}
+
+.appeals-page .info p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #5f7284;
+}
+
+.filterHeader {
+  padding: 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(173, 181, 189, 0.35);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(241, 245, 249, 0.9));
+  box-shadow: 0 10px 24px rgba(9, 40, 63, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.appeals-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.85rem;
+}
+
+.appeals-date-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(173, 181, 189, 0.25);
+}
+
+.appeals-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 190px;
+  flex: 1 1 190px;
+}
+
+.appeals-filter-field span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #496175;
+}
+
+.appeals-filter-field input,
+.appeals-filter-field select {
+  min-height: 42px;
+  padding: 0.65rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid rgba(23, 53, 79, 0.16);
+  background: #ffffff;
+  color: #17354f;
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.appeals-filter-field input:focus,
+.appeals-filter-field select:focus {
+  border-color: rgba(0, 67, 105, 0.45);
+  box-shadow: 0 0 0 3px rgba(0, 67, 105, 0.12);
+}
+
+.appeals-filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.appeals-filter-count {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(23, 53, 79, 0.08);
+  color: #17354f;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.appeals-filter-reset {
+  min-height: 32px;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(178, 43, 29, 0.22);
+  background: rgba(178, 43, 29, 0.08);
+  color: #8a1f15;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.appeals-filter-reset:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: rgba(178, 43, 29, 0.12);
+  border-color: rgba(178, 43, 29, 0.3);
+}
+
+.appeals-filter-reset:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .appeals-page .section {
@@ -13,6 +140,43 @@
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
+}
+
+.appeals-kpi-section {
+  display: grid;
+  gap: 1.05rem;
+}
+
+.appeals-kpi-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.appeals-kpi-heading h2 {
+  margin: 0;
+  color: #153a56;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.appeals-kpi-heading p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #5f7284;
+}
+
+.appeals-kpi-heading--risk h2 {
+  color: #8f2218;
+}
+
+.appeals-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.95rem;
+  padding: 0.25rem;
+  border-radius: 18px;
 }
 
 .appeals-page .section-title {
@@ -41,4 +205,36 @@
   border: 1px solid rgba(178, 43, 29, 0.2);
   border-radius: 12px;
   padding: 0.7rem 0.85rem;
+}
+
+@media (max-width: 720px) {
+  .appeals-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .appeals-date-row {
+    grid-template-columns: 1fr;
+  }
+
+  .appeals-filter-actions {
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+
+  .appeals-filter-field {
+    min-width: 0;
+  }
+
+  .appeals-kpi-grid {
+    grid-template-columns: 1fr;
+    padding: 0;
+    background: transparent;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1080px) {
+  .appeals-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

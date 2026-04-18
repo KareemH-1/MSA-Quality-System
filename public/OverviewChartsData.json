@@ -60,5 +60,17 @@
       "Management Sciences": 82,
       "Mass Communication": 78,
       "Languages": 85
-    }
+    },
+    "appealRecords": [
+        {"semester":"2024-FALL","session":"Midterm","date":"2024-09-18","status":"Closed","count":5500,"acceptedCount":1760,"pendingCount":0,"inProgressCount":0,"activeCount":0,"overdueCount":19,"unassignedCount":24,"avgResolutionMinutes":19.2,"gradeChangeAverage":2.4,"failToPassCount":140},
+        {"semester":"2024-FALL","session":"Final","date":"2024-12-03","status":"Closed","count":6700,"acceptedCount":2412,"pendingCount":0,"inProgressCount":0,"activeCount":0,"overdueCount":22,"unassignedCount":28,"avgResolutionMinutes":17.6,"gradeChangeAverage":3.1,"failToPassCount":188},
+        {"semester":"2025-SPRING","session":"Midterm","date":"2025-03-12","status":"Closed","count":4700,"acceptedCount":1504,"pendingCount":0,"inProgressCount":0,"activeCount":0,"overdueCount":11,"unassignedCount":16,"avgResolutionMinutes":15.9,"gradeChangeAverage":2.7,"failToPassCount":132},
+        {"semester":"2025-SPRING","session":"Final","date":"2025-05-22","status":"Closed","count":6333,"acceptedCount":2533,"pendingCount":0,"inProgressCount":0,"activeCount":0,"overdueCount":9,"unassignedCount":14,"avgResolutionMinutes":14.4,"gradeChangeAverage":3.6,"failToPassCount":204},
+        {"semester":"2025-SUMMER","session":"Midterm","date":"2025-07-08","status":"Closed","count":1100,"acceptedCount":418,"pendingCount":0,"inProgressCount":0,"activeCount":0,"overdueCount":3,"unassignedCount":8,"avgResolutionMinutes":12.8,"gradeChangeAverage":1.9,"failToPassCount":33},
+        {"semester":"2025-SUMMER","session":"Final","date":"2025-08-18","status":"Closed","count":2733,"acceptedCount":1093,"pendingCount":0,"inProgressCount":0,"activeCount":0,"overdueCount":4,"unassignedCount":11,"avgResolutionMinutes":11.3,"gradeChangeAverage":2.4,"failToPassCount":81},
+        {"semester":"2025-FALL","session":"Midterm","date":"2025-10-11","status":"Closed","count":4000,"acceptedCount":1440,"pendingCount":0,"inProgressCount":0,"activeCount":0,"overdueCount":10,"unassignedCount":19,"avgResolutionMinutes":16.2,"gradeChangeAverage":2.9,"failToPassCount":110},
+        {"semester":"2025-FALL","session":"Final","date":"2025-12-09","status":"Closed","count":7400,"acceptedCount":2960,"pendingCount":0,"inProgressCount":0,"activeCount":0,"overdueCount":17,"unassignedCount":25,"avgResolutionMinutes":15.1,"gradeChangeAverage":3.4,"failToPassCount":262},
+        {"semester":"2026-SPRING","session":"Midterm","date":"2026-04-01","status":"Open","count":120,"acceptedCount":10,"pendingCount":57,"inProgressCount":12,"activeCount":69,"overdueCount":8,"unassignedCount":14,"avgResolutionMinutes":6.4,"gradeChangeAverage":1.6,"failToPassCount":6},
+        {"semester":"2026-SPRING","session":"Final","date":"2026-05-10","status":"Closed","count":0,"acceptedCount":0,"pendingCount":0,"inProgressCount":0,"activeCount":0,"overdueCount":0,"unassignedCount":0,"avgResolutionMinutes":0,"gradeChangeAverage":0,"failToPassCount":0}
+    ]
 }

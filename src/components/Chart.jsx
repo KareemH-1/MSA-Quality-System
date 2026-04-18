@@ -1,6 +1,8 @@
 import React from "react";
 import "../styles/Chart.css";
 
+const EMPTY_FILTERS = [];
+
 const isValidDate = (value) => {
         const parsedDate = new Date(value);
         return !Number.isNaN(parsedDate.getTime());
@@ -88,7 +90,7 @@ const Chart = ({
         data,
         sourceData = [],
         buildChartData,
-        filters = [],
+        filters = EMPTY_FILTERS,
         title,
         subtitle,
         emptyMessage = "No chart data matches the current filters.",
