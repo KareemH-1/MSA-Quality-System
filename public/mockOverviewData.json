@@ -76,7 +76,7 @@
       "target": 600
     },
     "satisfactionScore": {
-      "value": 67.5,
+      "value": 94,
       "scale": "1-5",
       "calculationMethod": "normalizedAverage",
       "description": "Overall student satisfaction score from survey ratings",

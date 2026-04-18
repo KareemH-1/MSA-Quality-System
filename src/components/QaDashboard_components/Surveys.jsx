@@ -72,6 +72,8 @@ const Surveys = () => {
   const [draftCourse, setDraftCourse] = useState("");
   const [selectedFaculty, setSelectedFaculty] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
 
   const totalSubmissions = surveyMockData?.overview?.kpis?.totalSubmitted ?? 0;
   const totalCompleted = surveyMockData?.overview?.kpis?.completed ?? 0;
@@ -140,6 +142,12 @@ const Surveys = () => {
   const score = selectedRecord?.overallScore ?? 0;
   const label =
     score >= 80 ? "HIGHLY POSITIVE" : score >= 60 ? "GOOD" : "NEEDS REVIEW";
+  const instructorRate =
+    score >= 80
+      ? "Excellent Instructor"
+      : score >= 60
+        ? "Good Instructor"
+        : "Instructor Needs Improvement";
 
   const supportMetrics = selectedRecord
     ? [
@@ -179,6 +187,40 @@ const Surveys = () => {
     };
   };
 
+  const performSearch = (query) => {
+    const trimmedQuery = query.trim();
+
+    if (!trimmedQuery) {
+      setSearchResults([]);
+      return;
+    }
+
+    const lowerQuery = trimmedQuery.toLowerCase();
+
+    const results = allRecords.filter((record) => {
+      const courseNameMatch = record?.course
+        ?.toLowerCase()
+        .includes(lowerQuery);
+      const courseCodeMatch = record?.courseCode
+        ?.toLowerCase()
+        .includes(lowerQuery);
+      const instructorMatch = record?.instructor
+        ?.toLowerCase()
+        .includes(lowerQuery);
+
+      return courseNameMatch || courseCodeMatch || instructorMatch;
+    });
+    setSearchResults(results);
+  };
+
+  const handleSearchResultClick = (record) => {
+    setSelectedFaculty(record.faculty);
+    setSelectedCourse(record.course);
+    setIsCoursePickerOpen(false);
+    setSearchInput("");
+    setSearchResults([]);
+  };
+
   useEffect(() => {
     const fetchSurveyMockData = async () => {
       try {
@@ -214,6 +256,8 @@ const Surveys = () => {
 
   const closeCoursePicker = () => {
     setIsCoursePickerOpen(false);
+    setSearchInput("");
+    setSearchResults([]);
   };
 
   const applyCourseSelection = () => {
@@ -339,9 +383,7 @@ const Surveys = () => {
           <div className="course-detail-grid">
             <article className="course-performance-card">
               <p className="course-performance-kicker">Core Performance</p>
-              <h3 className="course-performance-title">
-                Instructor Excellence
-              </h3>
+              <h3 className="course-performance-title">{instructorRate}</h3>
               <div className="overall-score-ring">
                 <svg viewBox="0 0 100 100" className="ring-svg">
                   <circle className="ring-track" cx="50" cy="50" r="42" />
@@ -425,10 +467,68 @@ const Surveys = () => {
           </div>
         </section>
       )}
-
       {isCoursePickerOpen && (
         <div className="course-picker-overlay" role="dialog" aria-modal="true">
           <div className="course-picker-modal">
+            <div className="course-picker-header">
+              <h2>Search Courses</h2>
+              <div className="course-picker-search">
+                <input
+                  type="text"
+                  placeholder="Enter Course Name or Code"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      performSearch(searchInput);
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  className="course-picker-search-btn"
+                  onClick={() => performSearch(searchInput)}
+                >
+                  Search
+                </button>
+              </div>
+            </div>
+            {searchInput.trim() && (
+              <div className="course-picker-search-results">
+                {searchResults.length > 0 ? (
+                  <>
+                    <p className="course-picker-search-summary">
+                      {searchResults.length} result
+                      {searchResults.length === 1 ? "" : "s"} found
+                    </p>
+                    <div className="course-picker-results-list">
+                      {searchResults.map((record) => (
+                        <button
+                          key={record.id}
+                          type="button"
+                          className="course-picker-result-item"
+                          onClick={() => handleSearchResultClick(record)}
+                        >
+                          <strong>{record.course}</strong>
+                          <span>
+                            {record.faculty} | {record.instructor}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <p className="course-picker-search-empty">
+                    No courses found for “{searchInput.trim()}”.
+                  </p>
+                )}
+              </div>
+            )}
+            <div className="course-picker-filters">
+              <hr />
+              <span>OR</span>
+              <hr />
+            </div>
             <h3>Choose a faculty and course</h3>
             <div className="course-picker-fields">
               <label htmlFor="faculty-select">Faculty</label>
