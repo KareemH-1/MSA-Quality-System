@@ -563,7 +563,7 @@ const Surveys = () => {
                       </span>
                       {(() => {
                         const starRating =
-                          overallRatings[index] ?? initializeStarRating(score); // if 
+                          overallRatings[index] ?? initializeStarRating(score); // if
 
                         return (
                           <div className="course-rating-row">
@@ -617,7 +617,7 @@ const Surveys = () => {
               <div className="course-picker-search">
                 <input
                   type="text"
-                  placeholder="Enter Course Name or Code"
+                  placeholder="Enter Course Name, Code, or Instructor"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   onKeyDown={(e) => {

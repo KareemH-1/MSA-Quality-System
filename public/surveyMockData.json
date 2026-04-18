@@ -97,6 +97,32 @@
       "instructorSatisfaction": 90,
       "responseRate": 92,
       "draftSummary": "Strong lab support and clear grading.",
+      "comments": [
+        {
+          "commenter": "Student A",
+          "comment": "The anatomy illustrations were very helpful for understanding the material.",
+          "submittedAt": "2026-04-02T10:00:00Z",
+          "studentOverallScore": 95
+        },
+        {
+          "commenter": "Student B",
+          "comment": "Weekly quizzes kept me on track and helped me prepare for exams.",
+          "submittedAt": "2026-04-03T14:30:00Z",
+          "studentOverallScore": 92
+        },
+        {
+          "commenter": "Student C",
+          "comment": "The instructor's pace was just right, allowing us to absorb the material without feeling rushed.",
+          "submittedAt": "2026-04-04T09:45:00Z",
+          "studentOverallScore": 90
+        },
+        {
+          "commenter": "Student D",
+          "comment": "I appreciated the detailed feedback on our lab work, it really helped me improve.",
+          "submittedAt": "2026-04-05T16:20:00Z",
+          "studentOverallScore": 88
+        }
+      ],
       "fullDraft": "Students praised the anatomy illustrations, weekly quizzes, and the instructor's pace."
     },
     {
@@ -113,6 +139,32 @@
       "instructorSatisfaction": 78,
       "responseRate": 87,
       "draftSummary": "Students requested clearer practical instructions.",
+      "comments": [
+        {
+          "commenter": "Student A",
+          "comment": "The lab instructions were sometimes unclear, making it hard to complete the exercises.",
+          "submittedAt": "2026-04-07T11:00:00Z",
+          "studentOverallScore": 70
+        },
+        {
+          "commenter": "Student B",
+          "comment": "More visual examples during theory sessions would help me understand the concepts better.",
+          "submittedAt": "2026-04-08T15:30:00Z",
+          "studentOverallScore": 75
+        },
+        {
+          "commenter": "Student C",
+          "comment": "I found some of the practical demonstrations too fast-paced, which made it difficult to follow along.",
+          "submittedAt": "2026-04-09T10:45:00Z",
+          "studentOverallScore": 80
+        },
+        {
+          "commenter": "Student D",
+          "comment": "The instructor was responsive to questions, but I think more detailed explanations during labs would be beneficial.",
+          "submittedAt": "2026-04-10T17:20:00Z",
+          "studentOverallScore": 82
+        }
+      ],
       "fullDraft": "The survey draft highlights a need for clearer lab instructions and more visual examples during theory sessions."
     },
     {
@@ -129,6 +181,32 @@
       "instructorSatisfaction": 75,
       "responseRate": 83,
       "draftSummary": "Students asked for more worked examples and revision sessions.",
+      "comments": [
+        {
+          "commenter": "Student A",
+          "comment": "The lectures were informative, but I struggled to apply the concepts without more worked examples.",
+          "submittedAt": "2026-04-06T12:00:00Z",
+          "studentOverallScore": 68
+        },
+        {
+          "commenter": "Student B",
+          "comment": "A recap session before the exam would have been really helpful to consolidate our understanding.",
+          "submittedAt": "2026-04-07T16:30:00Z",
+          "studentOverallScore": 70
+        },
+        {
+          "commenter": "Student C",
+          "comment": "I found some of the material quite dense and would have appreciated more step-by-step examples.",
+          "submittedAt": "2026-04-08T11:45:00Z",
+          "studentOverallScore": 75
+        },
+        {
+          "commenter": "Student D",
+          "comment": "The instructor was knowledgeable, but I think incorporating more practical examples in lectures would enhance learning.",
+          "submittedAt": "2026-04-09T18:20:00Z",
+          "studentOverallScore": 80
+        }
+      ],
       "fullDraft": "Feedback suggests the course needs shorter slides, more worked examples, and a recap session before the exam."
     },
     {
@@ -145,6 +223,32 @@
       "instructorSatisfaction": 79,
       "responseRate": 85,
       "draftSummary": "Students want more hands-on practice with the software tools.",
+      "comments": [
+        {
+          "commenter": "Student A",
+          "comment": "The software demonstrations were helpful, but I wish we had more time to practice using the tools ourselves.",
+          "submittedAt": "2026-04-08T13:00:00Z",
+          "studentOverallScore": 70
+        },
+        {
+          "commenter": "Student B",
+          "comment": "A guided lab workbook with step-by-step exercises would really enhance our learning experience.",
+          "submittedAt": "2026-04-09T17:30:00Z",
+          "studentOverallScore": 75
+        },
+        {
+          "commenter": "Student C",
+          "comment": "The pace of the software demonstrations was a bit too fast for me to fully grasp the concepts.",
+          "submittedAt": "2026-04-10T12:45:00Z",
+          "studentOverallScore": 80
+        },
+        {
+          "commenter": "Student D",
+          "comment": "I think slower, more detailed demonstrations in class would help me understand how to use the software effectively.",
+          "submittedAt": "2026-04-11T19:20:00Z",
+          "studentOverallScore": 82
+        }
+      ],
       "fullDraft": "The strongest request was for a guided lab workbook and slower software demonstrations in class."
     },
     {
@@ -161,6 +265,32 @@
       "instructorSatisfaction": 70,
       "responseRate": 78,
       "draftSummary": "Course is challenging; students want simpler worked examples.",
+      "comments": [
+        {
+          "commenter": "Student A",
+          "comment": "The course content is quite challenging, and I struggled to keep up with the pace.",
+          "submittedAt": "2026-04-07T14:00:00Z",
+          "studentOverallScore": 60
+        },
+        {
+          "commenter": "Student B",
+          "comment": "More simplified worked examples would help me understand the complex concepts better.",
+          "submittedAt": "2026-04-08T18:30:00Z",
+          "studentOverallScore": 65
+        },
+        {
+          "commenter": "Student C",
+          "comment": "I found some of the lectures too theoretical and would have appreciated more practical applications.",
+          "submittedAt": "2026-04-09T13:45:00Z",
+          "studentOverallScore": 70
+        },
+        {
+          "commenter": "Student D",
+          "comment": "The instructor was knowledgeable, but I think breaking down the material into simpler examples would enhance learning.",
+          "submittedAt": "2026-04-10T20:20:00Z",
+          "studentOverallScore": 75
+        }
+      ],
       "fullDraft": "Students felt the examples move too quickly and asked for more revision drills and a formula sheet."
     },
     {
@@ -219,6 +349,32 @@
       "instructorSatisfaction": 78,
       "responseRate": 82,
       "draftSummary": "Students requested more translation practice and examples.",
+      "comments": [
+        {
+          "commenter": "Student A",
+          "comment": "I would have liked more in-class translation exercises to practice the skills we were learning.",
+          "submittedAt": "2026-04-12T11:00:00Z",
+          "studentOverallScore": 70
+        },
+        {
+          "commenter": "Student B",
+          "comment": "More examples of different translation styles would help me understand the nuances better.",
+          "submittedAt": "2026-04-13T15:30:00Z",
+          "studentOverallScore": 75
+        },
+        {
+          "commenter": "Student C",
+          "comment": "The lectures were informative, but I think more practical exercises would enhance learning.",
+          "submittedAt": "2026-04-14T10:45:00Z",
+          "studentOverallScore": 80
+        },
+        {
+          "commenter": "Student D",
+          "comment": "I found some of the material quite theoretical and would have appreciated more real-world translation examples.",
+          "submittedAt": "2026-04-15T16:20:00Z",
+          "studentOverallScore": 82
+        }
+      ],
       "fullDraft": "The main feedback was to include more live translation examples and a clearer rubric for the assignments."
     }
   ],
