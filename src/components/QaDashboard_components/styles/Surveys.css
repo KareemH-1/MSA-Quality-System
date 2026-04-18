@@ -434,15 +434,34 @@
   gap: 0.35rem;
 }
 
+.course-detail-comments{
+  display: grid;
+  gap: 0.75rem;
+  border-top: 1px solid rgba(54, 82, 110, 0.477);
+  padding-top: 1rem;
+}
+
 .course-comment-card {
   padding: 1rem;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 3px solid transparent;
   background: #ffffff;
   box-shadow: 0 2px 8px rgba(15, 44, 67, 0.05);
   display: grid;
   gap: 0.55rem;
+  transition: 0.3s ease;
 }
+.course-comment-card:hover {
+  transform: translateY(-1px);
+  border-top: 3px solid #0f2c43;
+  background: #f1f5f9b0;
+  box-shadow: 0 4px 12px rgba(15, 44, 67, 0.1);
+}
+
+.comment-icon {
+  color: #551717bc;
+}
+
 .course-comment-card h3 {
   margin: 0;
   font-size: 0.82rem;
@@ -460,6 +479,41 @@
   font-size: 0.75rem;
   color: #64748b;
   text-align: right;
+}
+
+.comment-meta{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.course-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.12rem;
+}
+
+.course-star {
+  position: relative;
+  display: inline-block;
+  font-size: 1.02rem;
+  line-height: 1;
+  color: #cbd5e1;
+}
+
+.course-star.full {
+  color: #f59e0b;
+}
+
+.course-star.half::before {
+  content: "★";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 50%;
+  overflow: hidden;
+  color: #f59e0b;
 }
 
 .course-performance-card {

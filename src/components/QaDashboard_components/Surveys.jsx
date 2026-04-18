@@ -78,6 +78,7 @@ const Surveys = () => {
   const [isFacultyMenuOpen, setIsFacultyMenuOpen] = useState(false);
   const [isCourseMenuOpen, setIsCourseMenuOpen] = useState(false);
   const [sortedComments, setSortedComments] = useState([]);
+  const [overallRatings, setOverallRatings] = useState([]);
 
   const totalSubmissions = surveyMockData?.overview?.kpis?.totalSubmitted ?? 0;
   const totalCompleted = surveyMockData?.overview?.kpis?.completed ?? 0;
@@ -231,6 +232,37 @@ const Surveys = () => {
     return sortedComments.slice(0, count);
   };
 
+  const initializeStarRating = (score) => {
+    if (score >= 90) return 5;
+    if (score >= 80) return 4.5;
+    if (score >= 70) return 4;
+    if (score >= 60) return 3.5;
+    if (score >= 50) return 3;
+    if (score >= 40) return 2.5;
+    if (score >= 30) return 2;
+    if (score >= 20) return 1.5;
+    if (score >= 10) return 1;
+    return 0.5;
+  };
+
+  const getOverallRatingPerStudent = (record) => {
+    if (!record?.comments?.length) {
+      return [];
+    }
+
+    return [...record.comments]
+      .sort((a, b) => {
+        const dateA = new Date(a.submittedAt);
+        const dateB = new Date(b.submittedAt);
+        return dateB - dateA;
+      })
+      .map((comment) => {
+        const rawScore =
+          comment?.studentOverallScore ?? comment?.sutdentOverallScore;
+        return initializeStarRating(Number(rawScore) || 0);
+      });
+  };
+
   const handleSearchResultClick = (record) => {
     setSelectedFaculty(record.faculty);
     setSelectedCourse(record.course);
@@ -270,6 +302,7 @@ const Surveys = () => {
 
   useEffect(() => {
     setSortedComments(getLatestComments(selectedRecord));
+    setOverallRatings(getOverallRatingPerStudent(selectedRecord));
   }, [selectedRecord]);
 
   const openCoursePicker = () => {
@@ -524,10 +557,44 @@ const Surveys = () => {
                     <Quote size={24} className="comment-icon" />
                     <h3>Representative Comment</h3>
                     <p>{comment.comment}</p>
-                    <span className="comment-date">
-                      {new Date(comment.submittedAt).toLocaleDateString()}
-                    </span>
-                    {/*  */}
+                    <div className="comment-meta">
+                      <span className="comment-date">
+                        {new Date(comment.submittedAt).toLocaleDateString()}
+                      </span>
+                      {(() => {
+                        const starRating =
+                          overallRatings[index] ?? initializeStarRating(score); // if 
+
+                        return (
+                          <div className="course-rating-row">
+                            <div
+                              className="course-stars"
+                              aria-label={`${starRating} out of 5 stars`}
+                            >
+                              {Array.from({ length: 5 }, (_, starIndex) => {
+                                const position = starIndex + 1;
+                                let starClass = "empty";
+
+                                if (starRating >= position) {
+                                  starClass = "full";
+                                } else if (starRating >= position - 0.5) {
+                                  starClass = "half";
+                                }
+
+                                return (
+                                  <span
+                                    key={position}
+                                    className={`course-star ${starClass}`}
+                                  >
+                                    ★
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
                   </article>
                 ))
               ) : (

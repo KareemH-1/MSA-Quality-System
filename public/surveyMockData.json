@@ -181,22 +181,26 @@
         {
           "commenter": "Student A",
           "comment": "The live coding sessions were incredibly helpful for understanding the concepts.",
-          "submittedAt": "2026-04-08T10:15:00Z"
+          "submittedAt": "2026-04-08T10:15:00Z",
+          "sutdentOverallScore": 95
         },
         {
           "commenter": "Student B",
           "comment": "I appreciated the detailed feedback on our projects, it really helped me improve.",
-          "submittedAt": "2026-04-09T14:30:00Z"
+          "submittedAt": "2026-04-09T14:30:00Z",
+          "sutdentOverallScore": 92
         },
         {
           "commenter": "Student C",
           "comment": "The instructor was always responsive to questions, which made a big difference.",
-          "submittedAt": "2026-04-10T09:45:00Z"
+          "submittedAt": "2026-04-10T09:45:00Z",
+          "sutdentOverallScore": 73
         },
         {
           "commenter": "Student D",
           "comment": "The course materials were well-organized and easy to follow.",
-          "submittedAt": "2026-04-10T16:20:00Z"
+          "submittedAt": "2026-04-10T16:20:00Z",
+          "sutdentOverallScore": 88
         }
       ],
       "fullDraft": "Students strongly praised the live coding sessions, the project feedback, and the instructor's responsiveness."
