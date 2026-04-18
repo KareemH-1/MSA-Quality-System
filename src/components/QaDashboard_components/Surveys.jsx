@@ -14,6 +14,7 @@ import {
   Title,
 } from "chart.js";
 import Chart from "../Chart";
+import { Quote } from "lucide-react";
 
 ChartJS.register(
   CategoryScale,
@@ -76,6 +77,7 @@ const Surveys = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [isFacultyMenuOpen, setIsFacultyMenuOpen] = useState(false);
   const [isCourseMenuOpen, setIsCourseMenuOpen] = useState(false);
+  const [sortedComments, setSortedComments] = useState([]);
 
   const totalSubmissions = surveyMockData?.overview?.kpis?.totalSubmitted ?? 0;
   const totalCompleted = surveyMockData?.overview?.kpis?.completed ?? 0;
@@ -215,6 +217,20 @@ const Surveys = () => {
     setSearchResults(results);
   };
 
+  const getLatestComments = (record, count = 4) => {
+    if (!record?.comments?.length) {
+      return [];
+    }
+
+    const sortedComments = [...record.comments].sort((a, b) => {
+      const dateA = new Date(a.submittedAt);
+      const dateB = new Date(b.submittedAt);
+      return dateB - dateA;
+    });
+
+    return sortedComments.slice(0, count);
+  };
+
   const handleSearchResultClick = (record) => {
     setSelectedFaculty(record.faculty);
     setSelectedCourse(record.course);
@@ -251,6 +267,10 @@ const Surveys = () => {
       setDraftCourse("");
     }
   }, [courseOptions, draftCourse]);
+
+  useEffect(() => {
+    setSortedComments(getLatestComments(selectedRecord));
+  }, [selectedRecord]);
 
   const openCoursePicker = () => {
     setDraftFaculty(selectedFaculty || facultyOptions[0] || "");
@@ -299,6 +319,7 @@ const Surveys = () => {
   const clearCourseSelection = () => {
     setSelectedFaculty("");
     setSelectedCourse("");
+    setSortedComments([]);
   };
 
   return (
@@ -307,8 +328,8 @@ const Surveys = () => {
         <div>
           <h1 className="surveys-title">Surveys Analytics</h1>
           <p className="surveys-subtitle">
-            Semester {currentSemester} overview with drill-down access to each
-            faculty and course.
+            Semester <span>{currentSemester}</span> overview with drill-down
+            access to each faculty and course.
           </p>
         </div>
         <button
@@ -387,80 +408,83 @@ const Surveys = () => {
           </div>
         </>
       ) : (
-        <section className="course-detail-view">
-          <div className="course-detail-header">
-            <div>
-              <p className="course-detail-kicker">Detailed course survey</p>
-              <h2 className="section-heading">{selectedRecord.course}</h2>
-              <p className="section-note">
-                {selectedRecord.faculty} | {selectedRecord.instructor} |{" "}
-                {selectedRecord.semester}
-              </p>
+        <>
+          <section className="course-detail-view">
+            <div className="course-detail-header">
+              <div>
+                <p className="course-detail-kicker">Detailed course survey</p>
+                <h2 className="section-heading">{selectedRecord.course}</h2>
+                <p className="section-note">
+                  {selectedRecord.faculty} | {selectedRecord.instructor} |{" "}
+                  {selectedRecord.semester}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="course-back-btn"
+                onClick={clearCourseSelection}
+              >
+                Back To Overview
+              </button>
             </div>
-            <button
-              type="button"
-              className="course-back-btn"
-              onClick={clearCourseSelection}
-            >
-              Back To Overview
-            </button>
-          </div>
 
-          <div className="course-detail-grid">
-            <article className="course-performance-card">
-              <p className="course-performance-kicker">Core Performance</p>
-              <h3 className="course-performance-title">{instructorRate}</h3>
-              <div className="overall-score-ring">
-                <svg viewBox="0 0 100 100" className="ring-svg">
-                  <circle className="ring-track" cx="50" cy="50" r="42" />
-                  <circle
-                    className="ring-fill"
-                    cx="50"
-                    cy="50"
-                    r="42"
-                    strokeDasharray={2 * Math.PI * 42}
-                    strokeDashoffset={2 * Math.PI * 42 * (1 - score / 100)}
-                  />
-                </svg>
+            <div className="course-detail-grid">
+              <article className="course-performance-card">
+                <p className="course-performance-kicker">Core Performance</p>
+                <h3 className="course-performance-title">{instructorRate}</h3>
+                <div className="overall-score-ring">
+                  <svg viewBox="0 0 100 100" className="ring-svg">
+                    <circle className="ring-track" cx="50" cy="50" r="42" />
+                    <circle
+                      className="ring-fill"
+                      cx="50"
+                      cy="50"
+                      r="42"
+                      strokeDasharray={2 * Math.PI * 42}
+                      strokeDashoffset={2 * Math.PI * 42 * (1 - score / 100)}
+                    />
+                  </svg>
 
-                <div className="ring-center">
-                  <strong>{score}%</strong>
-                  <span>{label}</span>
-                </div>
-              </div>
-
-              <div className="course-performance-summary">
-                <div className="course-performance-row">
-                  <span>Clarity of Delivery</span>
-                  <strong>{selectedRecord.courseMaterialScore} / 100</strong>
-                </div>
-                <div className="course-performance-row">
-                  <span>Responsiveness</span>
-                  <strong>{selectedRecord.instructorSatisfaction} / 100</strong>
-                </div>
-              </div>
-            </article>
-
-            <article className="support-metrics-card">
-              <h3>Support Metrics</h3>
-              <div className="support-metrics-list">
-                {supportMetrics.map((metric) => (
-                  <div key={metric.label} className="support-metric-row">
-                    <div className="support-metric-header">
-                      <span>{metric.label}</span>
-                      <strong>{metric.value}%</strong>
-                    </div>
-                    <div className="support-metric-track" aria-hidden="true">
-                      <div
-                        className={`support-metric-fill ${metric.tone}`}
-                        style={{ width: `${Math.min(100, metric.value)}%` }}
-                      />
-                    </div>
+                  <div className="ring-center">
+                    <strong>{score}%</strong>
+                    <span>{label}</span>
                   </div>
-                ))}
-              </div>
-            </article>
-            {/* <ul>
+                </div>
+
+                <div className="course-performance-summary">
+                  <div className="course-performance-row">
+                    <span>Clarity of Delivery</span>
+                    <strong>{selectedRecord.courseMaterialScore} / 100</strong>
+                  </div>
+                  <div className="course-performance-row">
+                    <span>Responsiveness</span>
+                    <strong>
+                      {selectedRecord.instructorSatisfaction} / 100
+                    </strong>
+                  </div>
+                </div>
+              </article>
+
+              <article className="support-metrics-card">
+                <h3>Support Metrics</h3>
+                <div className="support-metrics-list">
+                  {supportMetrics.map((metric) => (
+                    <div key={metric.label} className="support-metric-row">
+                      <div className="support-metric-header">
+                        <span>{metric.label}</span>
+                        <strong>{metric.value}%</strong>
+                      </div>
+                      <div className="support-metric-track" aria-hidden="true">
+                        <div
+                          className={`support-metric-fill ${metric.tone}`}
+                          style={{ width: `${Math.min(100, metric.value)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </article>
+              {/* <ul>
                 <li>Overall score: {selectedRecord.overallScore}%</li>
                 <li>
                   Course material score: {selectedRecord.courseMaterialScore}%
@@ -472,26 +496,46 @@ const Surveys = () => {
                 <li>Response rate: {selectedRecord.responseRate}%</li>
                 <li>Status: {selectedRecord.status}</li>
               </ul> */}
-          </div>
-          <div className="course-detail-grid course-detail-notes">
-            <article className="course-detail-card">
-              <h3>Survey Summary</h3>
-              <p>{selectedRecord.draftSummary}</p>
-              <h3>Detailed Notes</h3>
-              <p>{selectedRecord.fullDraft}</p>
-            </article>
+            </div>
+            <div className="course-detail-grid course-detail-notes">
+              <article className="course-detail-card">
+                <h3>Survey Summary</h3>
+                <p>{selectedRecord.draftSummary}</p>
+                <h3>Detailed Notes</h3>
+                <p>{selectedRecord.fullDraft}</p>
+              </article>
 
-            <article className="course-detail-card">
-              <h3>Course Context</h3>
-              <ul>
-                <li>Faculty: {selectedRecord.faculty}</li>
-                <li>Course: {selectedRecord.course}</li>
-                <li>Instructor: {selectedRecord.instructor}</li>
-                <li>Submitted at: {selectedRecord.submittedAt}</li>
-              </ul>
-            </article>
-          </div>
-        </section>
+              <article className="course-detail-card">
+                <h3>Course Context</h3>
+                <ul>
+                  <li>Faculty: {selectedRecord.faculty}</li>
+                  <li>Course: {selectedRecord.course}</li>
+                  <li>Instructor: {selectedRecord.instructor}</li>
+                  <li>Submitted at: {selectedRecord.submittedAt}</li>
+                </ul>
+              </article>
+            </div>
+          </section>
+          <section>
+            <div className="course-detail-grid--2 course-detail-comments">
+              {sortedComments.length > 0 ? (
+                sortedComments.map((comment, index) => (
+                  <article className="course-comment-card" key={index}>
+                    <Quote size={24} className="comment-icon" />
+                    <h3>Representative Comment</h3>
+                    <p>{comment.comment}</p>
+                    <span className="comment-date">
+                      {new Date(comment.submittedAt).toLocaleDateString()}
+                    </span>
+                    {/*  */}
+                  </article>
+                ))
+              ) : (
+                <p>No representative comments found.</p>
+              )}
+            </div>
+          </section>
+        </>
       )}
       {isCoursePickerOpen && (
         <div
