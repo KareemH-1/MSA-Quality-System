@@ -137,6 +137,30 @@ const Surveys = () => {
     );
   }, [allRecords, selectedCourse, selectedFaculty]);
 
+  const score = selectedRecord?.overallScore ?? 0;
+  const label =
+    score >= 80 ? "HIGHLY POSITIVE" : score >= 60 ? "GOOD" : "NEEDS REVIEW";
+
+  const supportMetrics = selectedRecord
+    ? [
+        {
+          label: "Course material score",
+          value: selectedRecord.courseMaterialScore,
+          tone: "cool",
+        },
+        {
+          label: "Instructor satisfaction",
+          value: selectedRecord.instructorSatisfaction,
+          tone: "cool",
+        },
+        {
+          label: "Response rate",
+          value: selectedRecord.responseRate,
+          tone: "accent",
+        },
+      ]
+    : [];
+
   const buildSubmissionChartData = (records) => {
     if (!records.length) {
       return null;
@@ -313,9 +337,62 @@ const Surveys = () => {
           </div>
 
           <div className="course-detail-grid">
-            <article className="course-detail-card">
-              <h3>Core Metrics</h3>
-              <ul>
+            <article className="course-performance-card">
+              <p className="course-performance-kicker">Core Performance</p>
+              <h3 className="course-performance-title">
+                Instructor Excellence
+              </h3>
+              <div className="overall-score-ring">
+                <svg viewBox="0 0 100 100" className="ring-svg">
+                  <circle className="ring-track" cx="50" cy="50" r="42" />
+                  <circle
+                    className="ring-fill"
+                    cx="50"
+                    cy="50"
+                    r="42"
+                    strokeDasharray={2 * Math.PI * 42}
+                    strokeDashoffset={2 * Math.PI * 42 * (1 - score / 100)}
+                  />
+                </svg>
+
+                <div className="ring-center">
+                  <strong>{score}%</strong>
+                  <span>{label}</span>
+                </div>
+              </div>
+
+              <div className="course-performance-summary">
+                <div className="course-performance-row">
+                  <span>Clarity of Delivery</span>
+                  <strong>{selectedRecord.courseMaterialScore} / 100</strong>
+                </div>
+                <div className="course-performance-row">
+                  <span>Responsiveness</span>
+                  <strong>{selectedRecord.instructorSatisfaction} / 100</strong>
+                </div>
+              </div>
+            </article>
+
+            <article className="support-metrics-card">
+              <h3>Support Metrics</h3>
+              <div className="support-metrics-list">
+                {supportMetrics.map((metric) => (
+                  <div key={metric.label} className="support-metric-row">
+                    <div className="support-metric-header">
+                      <span>{metric.label}</span>
+                      <strong>{metric.value}%</strong>
+                    </div>
+                    <div className="support-metric-track" aria-hidden="true">
+                      <div
+                        className={`support-metric-fill ${metric.tone}`}
+                        style={{ width: `${Math.min(100, metric.value)}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </article>
+            {/* <ul>
                 <li>Overall score: {selectedRecord.overallScore}%</li>
                 <li>
                   Course material score: {selectedRecord.courseMaterialScore}%
@@ -326,9 +403,9 @@ const Surveys = () => {
                 </li>
                 <li>Response rate: {selectedRecord.responseRate}%</li>
                 <li>Status: {selectedRecord.status}</li>
-              </ul>
-            </article>
-
+              </ul> */}
+          </div>
+          <div className="course-detail-grid course-detail-notes">
             <article className="course-detail-card">
               <h3>Survey Summary</h3>
               <p>{selectedRecord.draftSummary}</p>
