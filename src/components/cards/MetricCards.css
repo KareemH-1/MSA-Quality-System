@@ -17,6 +17,40 @@
   gap: 0.4rem;
 }
 
+.mini-metric-card.has-trend,
+.appeal-kpi-card.has-trend {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 40px;
+  column-gap: 0.6rem;
+  align-items: stretch;
+}
+
+.kpi-card-main-col {
+  min-width: 0;
+  display: grid;
+}
+
+.mini-metric-card.has-trend .kpi-card-main-col {
+  grid-template-rows: auto auto 1fr;
+  gap: 0.3rem;
+}
+
+.appeal-kpi-card.has-trend .kpi-card-main-col {
+  grid-template-rows: auto 1fr auto;
+  gap: 0.7rem;
+}
+
+.kpi-card-trend-col {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding-left: 0.42rem;
+  border-left: 1px solid rgba(23, 53, 79, 0.16);
+}
+
 .mini-metric-card:hover {
   border-color: #d0dae8;
   box-shadow: 0 4px 12px rgba(10, 33, 51, 0.08);
@@ -57,11 +91,53 @@
 }
 
 .mini-metric-description {
-  margin: 0.3rem 0 0 0;
+  margin: 0.22rem 0 0 0;
   font-size: 0.71rem;
   line-height: 1.4;
   color: #5a7289;
   font-weight: 500;
+}
+
+.kpi-trend-separator {
+  width: 1px;
+  height: 42%;
+  min-height: 20px;
+  background: rgba(23, 53, 79, 0.26);
+}
+
+.kpi-trend-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  box-shadow: 0 2px 6px rgba(10, 33, 51, 0.08);
+}
+
+.kpi-trend-icon svg {
+  width: 13.5px;
+  height: 13.5px;
+  stroke-width: 2.4;
+}
+
+.kpi-trend-icon.up {
+  color: #1f6a45;
+  background: rgba(31, 139, 87, 0.12);
+  border-color: rgba(31, 139, 87, 0.28);
+}
+
+.kpi-trend-icon.down {
+  color: #9f1f15;
+  background: rgba(178, 43, 29, 0.12);
+  border-color: rgba(178, 43, 29, 0.3);
+}
+
+.kpi-trend-icon.same {
+  color: #4f6a7f;
+  background: rgba(96, 113, 124, 0.12);
+  border-color: rgba(96, 113, 124, 0.24);
 }
 
 .ring-progress-card {
@@ -129,9 +205,7 @@
 }
 
 .appeal-kpi-card {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 0.7rem;
+  display: block;
   padding: 0.92rem 0.95rem 0.88rem;
   border-radius: 18px;
   border: 1px solid rgba(20, 55, 85, 0.14);
@@ -236,6 +310,18 @@
   z-index: 1;
   border-top: 1px dashed rgba(23, 53, 79, 0.2);
   padding-top: 0.46rem;
+}
+
+@media (max-width: 720px) {
+  .mini-metric-card.has-trend,
+  .appeal-kpi-card.has-trend {
+    grid-template-columns: minmax(0, 1fr) 36px;
+    column-gap: 0.45rem;
+  }
+
+  .kpi-card-trend-col {
+    padding-left: 0.34rem;
+  }
 }
 
 .appeal-kpi-footer {

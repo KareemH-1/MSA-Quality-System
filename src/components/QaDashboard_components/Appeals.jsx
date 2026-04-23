@@ -13,6 +13,7 @@ import Chart from "../Chart";
 import AppealKpiCard from "../cards/AppealKpiCard";
 import MiniMetricCard from "../cards/MiniMetricCard";
 import "./styles/Appeals.css";
+import {Search , SearchCheck , SearchX} from "lucide-react";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Title);
 
@@ -20,27 +21,7 @@ const TERM_ORDER = {
   SPRING: 1,
   SUMMER: 2,
   FALL: 3,
-  WINTER: 4,
 };
-
-const SEMESTER_OPTIONS = [
-  { label: "All Semesters", value: "" },
-  { label: "Fall", value: "FALL" },
-  { label: "Spring", value: "SPRING" },
-  { label: "Summer", value: "SUMMER" },
-];
-
-const SESSION_OPTIONS = [
-  { label: "All Assessments", value: "" },
-  { label: "Midterm", value: "Midterm" },
-  { label: "Final", value: "Final" },
-];
-
-const STATUS_OPTIONS = [
-  { label: "All Statuses", value: "" },
-  { label: "Open", value: "Open" },
-  { label: "Closed", value: "Closed" },
-];
 
 const toDateKey = (value) => {
   if (!value) {
@@ -105,9 +86,9 @@ const sortSemesters = (first, second) => {
   return (TERM_ORDER[parsedFirst.term] || 99) - (TERM_ORDER[parsedSecond.term] || 99);
 };
 
-const buildAppealsRecords = (overviewChartsData, overviewData) => {
-  const appealRecords = Array.isArray(overviewChartsData?.appealRecords)
-    ? overviewChartsData.appealRecords
+const buildAppealsRecords = (appealsData, overviewData) => {
+  const appealRecords = Array.isArray(appealsData?.appealRecords)
+    ? appealsData.appealRecords
     : [];
 
   if (appealRecords.length > 0) {
@@ -135,8 +116,8 @@ const buildAppealsRecords = (overviewChartsData, overviewData) => {
     });
   }
 
-  const midtermTotals = overviewChartsData?.totals?.midterm || {};
-  const finalTotals = overviewChartsData?.totals?.final || {};
+  const midtermTotals = appealsData?.totals?.midterm || {};
+  const finalTotals = appealsData?.totals?.final || {};
   const currentSemester = overviewData?.semester?.current;
   const currentMidtermStatus = getStatusFromSessionData(overviewData?.appeals?.midterm);
   const currentFinalStatus = getStatusFromSessionData(overviewData?.appeals?.final);
@@ -360,16 +341,248 @@ const buildChartData = (records) => {
   };
 };
 
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+const WEEK_IN_MS = 7 * DAY_IN_MS;
+
+const normalizeToDate = (value) => {
+  if (!value) {
+    return null;
+  }
+
+  const parsed = new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+
+  parsed.setHours(0, 0, 0, 0);
+  return parsed;
+};
+
+const startOfWeek = (dateValue) => {
+  const date = new Date(dateValue);
+  const day = date.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  date.setDate(date.getDate() + diff);
+  date.setHours(0, 0, 0, 0);
+  return date;
+};
+
+const getSessionWindow = (record, appealsData, overviewData) => {
+  const sessionKey = String(record.session || "").toLowerCase();
+  const currentSemester = overviewData?.semester?.current;
+  const previousSemester = overviewData?.semester?.previous;
+  const recordSessionWindowKey = `${record.semester}::${record.session}`;
+
+  let sessionMeta = null;
+  const sessionWindowFromAppeals = appealsData?.sessionWindows?.[recordSessionWindowKey] || null;
+
+  if (record.semester === currentSemester) {
+    sessionMeta = overviewData?.appeals?.[sessionKey];
+  } else if (record.semester === previousSemester) {
+    sessionMeta = overviewData?.previousSemesterData?.appeals?.[sessionKey];
+  }
+
+  const fallbackStart = normalizeToDate(record.date) || new Date();
+  const startedAt = normalizeToDate(sessionWindowFromAppeals?.startedAt)
+    || normalizeToDate(sessionMeta?.startedAt)
+    || fallbackStart;
+
+  const isOpen =
+    sessionWindowFromAppeals?.isOpen
+    ?? sessionMeta?.isOpen
+    ?? false;
+
+  const endedAt = isOpen
+    ? null
+    : normalizeToDate(sessionWindowFromAppeals?.endedAt)
+    || normalizeToDate(sessionMeta?.endedAt);
+
+  const fallbackEnd = normalizeToDate(record.date) || normalizeToDate(new Date());
+  const endDate = isOpen ? normalizeToDate(new Date()) : (endedAt || fallbackEnd);
+
+  if (endDate < startedAt) {
+    return {
+      start: startedAt,
+      end: startedAt,
+    };
+  }
+
+  return {
+    start: startedAt,
+    end: endDate,
+  };
+};
+
+const buildWeeklyAppealsChartData = (records, appealsData, overviewData) => {
+  if (!records.length) {
+    return null;
+  }
+
+  const weekTotals = new Map();
+
+  records.forEach((record) => {
+    const { start, end } = getSessionWindow(record, appealsData, overviewData);
+    const rangeMs = Math.max(end.getTime() - start.getTime(), 0);
+    const weekCount = Math.max(Math.ceil((rangeMs + DAY_IN_MS) / WEEK_IN_MS), 1);
+    const countPerWeek = (Number(record.count) || 0) / weekCount;
+
+    for (let weekIndex = 0; weekIndex < weekCount; weekIndex += 1) {
+      const weekDate = new Date(start.getTime() + weekIndex * WEEK_IN_MS);
+      const weekStart = startOfWeek(weekDate);
+      const weekKey = weekStart.toISOString().slice(0, 10);
+      weekTotals.set(weekKey, (weekTotals.get(weekKey) || 0) + countPerWeek);
+    }
+  });
+
+  const sortedWeeks = Array.from(weekTotals.entries()).sort(
+    ([left], [right]) => new Date(left).getTime() - new Date(right).getTime(),
+  );
+
+  return {
+    labels: sortedWeeks.map(([weekKey]) => {
+      const date = new Date(weekKey);
+      return `${date.toLocaleString("en-US", { month: "short" })} ${String(date.getDate()).padStart(2, "0")}`;
+    }),
+    datasets: [
+      {
+        label: "Appeals",
+        data: sortedWeeks.map(([, value]) => Math.round(value)),
+        backgroundColor: "rgba(120, 128, 140, 0.82)",
+        borderColor: "rgba(65, 76, 92, 0.95)",
+        borderWidth: 1,
+        borderRadius: 6,
+      },
+    ],
+  };
+};
+
+const weeklyAppealsChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      display: false,
+    },
+    tooltip: {
+      callbacks: {
+        label: (context) => `${context.parsed.y.toLocaleString()} appeals`,
+      },
+    },
+  },
+  scales: {
+    x: {
+      grid: {
+        display: false,
+      },
+      ticks: {
+        color: "#7d8796",
+        font: {
+          size: 10,
+          weight: "700",
+        },
+      },
+    },
+    y: {
+      beginAtZero: true,
+      grid: {
+        color: "rgba(23, 53, 79, 0.08)",
+      },
+      ticks: {
+        color: "#7d8796",
+        precision: 0,
+      },
+    },
+  },
+};
+
 const normalizeStatus = (status) => {
-  return String(status || "").toLowerCase() === "open" ? "Open" : "Closed";
+  const normalizedStatus = String(status || "").trim().toLowerCase();
+
+  if (normalizedStatus === "open") {
+    return "Open";
+  }
+
+  if (normalizedStatus === "closed") {
+    return "Closed";
+  }
+
+  if (normalizedStatus === "not started" || normalizedStatus === "not-started") {
+    return "Not Started";
+  }
+
+  return "Closed";
+};
+
+const getStatusClassName = (status) => {
+  const normalizedStatus = String(status || "").toLowerCase();
+
+  if (normalizedStatus === "open") {
+    return "is-open";
+  }
+
+  if (normalizedStatus === "closed") {
+    return "is-closed";
+  }
+
+  return "is-not-started";
 };
 
 const toMiniTone = (tone) => {
   return tone === "danger" || tone === "warning" ? "warn" : "cool";
 };
 
+const normalizeSearchText = (value) => String(value || "").trim().toLowerCase();
+
+const getCourseMatchScore = (course, query) => {
+  const normalizedQuery = normalizeSearchText(query);
+
+  if (!normalizedQuery) {
+    return 0;
+  }
+
+  const code = normalizeSearchText(course.code);
+  const name = normalizeSearchText(course.name);
+  const combined = `${code} ${name}`;
+
+  if (code === normalizedQuery || name === normalizedQuery) {
+    return 150;
+  }
+
+  if (code.startsWith(normalizedQuery) || name.startsWith(normalizedQuery)) {
+    return 120;
+  }
+
+  if (code.includes(normalizedQuery) || name.includes(normalizedQuery)) {
+    return 90;
+  }
+
+  const queryTokens = normalizedQuery.split(/\s+/).filter(Boolean);
+  const matchingTokens = queryTokens.filter((token) => combined.includes(token)).length;
+
+  if (matchingTokens > 0) {
+    return 55 + matchingTokens * 8;
+  }
+
+  return 0;
+};
+
+const getTrendDirection = (delta, invert = false) => {
+  const numericDelta = Number(delta) || 0;
+
+  if (Math.abs(numericDelta) < 0.05) {
+    return "same";
+  }
+
+  if (invert) {
+    return numericDelta < 0 ? "up" : "down";
+  }
+
+  return numericDelta > 0 ? "up" : "down";
+};
+
 const Appeals = () => {
-  const [overviewChartsData, setOverviewChartsData] = useState(null);
+  const [appealsData, setAppealsData] = useState(null);
   const [overviewData, setOverviewData] = useState(null);
   const [error, setError] = useState("");
   const [filters, setFilters] = useState({
@@ -380,32 +593,35 @@ const Appeals = () => {
     dateStart: "",
     dateEnd: "",
   });
+  const [selectedFaculty, setSelectedFaculty] = useState("");
+  const [courseSearchText, setCourseSearchText] = useState("");
+  const [selectedCourseId, setSelectedCourseId] = useState("");
 
   useEffect(() => {
     const fetchAppealsData = async () => {
       try {
-        const [chartsResponse, overviewResponse] = await Promise.all([
-          fetch("/OverviewChartsData.json"),
+        const [appealsResponse, overviewResponse] = await Promise.all([
+          fetch("/appealsMockData.json"),
           fetch("/mockOverviewData.json"),
         ]);
 
-        if (!chartsResponse.ok) {
-          throw new Error(`Failed to load appeals chart data: ${chartsResponse.status}`);
+        if (!appealsResponse.ok) {
+          throw new Error(`Failed to load appeals data: ${appealsResponse.status}`);
         }
 
         if (!overviewResponse.ok) {
           throw new Error(`Failed to load overview data for filters: ${overviewResponse.status}`);
         }
 
-        const [chartsData, overviewDataResponse] = await Promise.all([
-          chartsResponse.json(),
+        const [appealsDataResponse, overviewDataResponse] = await Promise.all([
+          appealsResponse.json(),
           overviewResponse.json(),
         ]);
 
-        setOverviewChartsData(chartsData);
+        setAppealsData(appealsDataResponse);
         setOverviewData(overviewDataResponse);
       } catch (fetchError) {
-        setError(fetchError.message || "Unable to load appeals chart data.");
+        setError(fetchError.message || "Unable to load appeals data.");
       }
     };
 
@@ -413,8 +629,8 @@ const Appeals = () => {
   }, []);
 
   const sourceData = useMemo(
-    () => buildAppealsRecords(overviewChartsData, overviewData),
-    [overviewChartsData, overviewData],
+    () => buildAppealsRecords(appealsData, overviewData),
+    [appealsData, overviewData],
   );
 
   const filteredRecords = useMemo(() => {
@@ -426,6 +642,164 @@ const Appeals = () => {
       new Set(sourceData.map((record) => String(record.year || "")).filter(Boolean)),
     ).sort((left, right) => Number(right) - Number(left));
   }, [sourceData]);
+
+  const semesterOptions = useMemo(() => {
+    const semesters = Array.from(
+      new Set(sourceData.map((record) => record.semester).filter(Boolean)),
+    ).sort(sortSemesters);
+
+    return [
+      { label: "All Semesters", value: "" },
+      ...semesters.map((semester) => ({
+        label: formatSemesterLabel(semester),
+        value: semester,
+      })),
+    ];
+  }, [sourceData]);
+
+  const sessionOptions = useMemo(() => {
+    const sessions = Array.from(new Set(sourceData.map((record) => record.session).filter(Boolean)));
+    const preferredOrder = ["Midterm", "Final"];
+
+    sessions.sort((left, right) => {
+      const leftIndex = preferredOrder.indexOf(left);
+      const rightIndex = preferredOrder.indexOf(right);
+
+      if (leftIndex !== -1 && rightIndex !== -1) {
+        return leftIndex - rightIndex;
+      }
+
+      if (leftIndex !== -1) {
+        return -1;
+      }
+
+      if (rightIndex !== -1) {
+        return 1;
+      }
+
+      return left.localeCompare(right);
+    });
+
+    return [
+      { label: "All Assessments", value: "" },
+      ...sessions.map((session) => ({
+        label: session,
+        value: session,
+      })),
+    ];
+  }, [sourceData]);
+
+  const statusOptions = useMemo(() => {
+    const statuses = Array.from(
+      new Set(sourceData.map((record) => normalizeStatus(record.status)).filter(Boolean)),
+    );
+    const preferredOrder = ["Open", "Closed", "Not Started"];
+
+    statuses.sort((left, right) => {
+      const leftIndex = preferredOrder.indexOf(left);
+      const rightIndex = preferredOrder.indexOf(right);
+
+      if (leftIndex !== -1 && rightIndex !== -1) {
+        return leftIndex - rightIndex;
+      }
+
+      if (leftIndex !== -1) {
+        return -1;
+      }
+
+      if (rightIndex !== -1) {
+        return 1;
+      }
+
+      return left.localeCompare(right);
+    });
+
+    return [
+      { label: "All Statuses", value: "" },
+      ...statuses.map((status) => ({
+        label: status,
+        value: status,
+      })),
+    ];
+  }, [sourceData]);
+
+  const courseCatalog = useMemo(() => {
+    const courses = Array.isArray(appealsData?.courseCatalog) ? appealsData.courseCatalog : [];
+    return courses.map((course) => ({
+      ...course,
+      id: course.id || course.code,
+    }));
+  }, [appealsData]);
+
+  const facultyOptions = useMemo(() => {
+    const faculties = Array.from(new Set(courseCatalog.map((course) => course.faculty).filter(Boolean))).sort(
+      (left, right) => left.localeCompare(right),
+    );
+
+    return [{ label: "All Faculties", value: "" }, ...faculties.map((faculty) => ({ label: faculty, value: faculty }))];
+  }, [courseCatalog]);
+
+  const courseDropdownOptions = useMemo(() => {
+    const facultyScopedCourses = selectedFaculty
+      ? courseCatalog.filter((course) => course.faculty === selectedFaculty)
+      : courseCatalog;
+
+    const rankedCourses = [...facultyScopedCourses].sort((left, right) => {
+      const scoreDiff = getCourseMatchScore(right, courseSearchText) - getCourseMatchScore(left, courseSearchText);
+
+      if (scoreDiff !== 0) {
+        return scoreDiff;
+      }
+
+      return left.code.localeCompare(right.code);
+    });
+
+    return rankedCourses;
+  }, [courseCatalog, courseSearchText, selectedFaculty]);
+
+  const closestCourse = useMemo(() => {
+    if (!courseSearchText.trim()) {
+      return null;
+    }
+
+    const [firstCourse] = courseDropdownOptions;
+
+    if (!firstCourse || getCourseMatchScore(firstCourse, courseSearchText) <= 0) {
+      return null;
+    }
+
+    return firstCourse;
+  }, [courseDropdownOptions, courseSearchText]);
+
+  useEffect(() => {
+    if (closestCourse) {
+      setSelectedCourseId(closestCourse.id);
+    }
+  }, [closestCourse]);
+
+  const hasCourseInput = Boolean(courseSearchText.trim());
+  const hasCourseSelection = Boolean(selectedCourseId);
+  const shouldSearchByCourse = hasCourseInput;
+  const isCourseSearchDisabled = !selectedFaculty && !hasCourseSelection && !hasCourseInput;
+
+  const handleCourseSearch = () => {
+    if (isCourseSearchDisabled) {
+      return;
+    }
+
+    if (!shouldSearchByCourse) {
+      return;
+    }
+
+    const nextCourse = closestCourse || courseDropdownOptions[0] || null;
+
+    if (!nextCourse) {
+      return;
+    }
+
+    setSelectedCourseId(nextCourse.id);
+    setCourseSearchText(`${nextCourse.code} ${nextCourse.name}`);
+  };
 
   const activeSemester = useMemo(() => {
     return getActiveSemester(filteredRecords.length > 0 ? filteredRecords : sourceData, filters.semester);
@@ -461,7 +835,6 @@ const Appeals = () => {
 
   const chartData = useMemo(() => buildChartData(filteredRecords), [filteredRecords]);
 
-  const activeCycleLabel = formatCycleLabel(activeSemester, filters.session || "");
   const previousCycleLabel = previousSemester
     ? formatCycleLabel(previousSemester, filters.session || "")
     : "";
@@ -489,6 +862,7 @@ const Appeals = () => {
             ? `${formatSigned(totalAppealsDelta, 0)} vs ${comparisonSuffix}`
             : "No previous cycle data",
           tone: totalAppealsDelta >= 0 ? "warning" : "positive",
+          trend: hasPreviousData ? getTrendDirection(totalAppealsDelta) : "same",
         },
         {
           label: "acceptance rate",
@@ -498,6 +872,7 @@ const Appeals = () => {
             ? `${formatSigned(acceptanceDelta, 1)} from ${comparisonSuffix}`
             : "No previous cycle data",
           tone: acceptanceDelta >= 0 ? "positive" : "warning",
+          trend: hasPreviousData ? getTrendDirection(acceptanceDelta) : "same",
         },
         {
           label: "avg resolution time",
@@ -509,6 +884,7 @@ const Appeals = () => {
               : `Slower than ${comparisonSuffix} by ${resolutionDelta.toFixed(1)} min`
             : "No previous cycle data",
           tone: resolutionDelta <= 0 ? "positive" : "warning",
+          trend: hasPreviousData ? getTrendDirection(resolutionDelta, true) : "same",
         },
         {
           label: "active appeals",
@@ -517,6 +893,9 @@ const Appeals = () => {
             ? `${formatSigned(currentSummary.activeAppeals - previousSummary.activeAppeals, 0)} vs ${comparisonSuffix}`
             : "Current workload snapshot",
           tone: currentSummary.activeAppeals > 0 ? "warning" : "positive",
+          trend: hasPreviousData
+            ? getTrendDirection(currentSummary.activeAppeals - previousSummary.activeAppeals, true)
+            : "same",
         },
       ],
       risk: [
@@ -543,6 +922,7 @@ const Appeals = () => {
             ? `${formatSigned(gradeChangeDelta, 1)} vs ${comparisonSuffix}`
             : "No previous cycle data",
           tone: gradeChangeDelta >= 0 ? "positive" : "warning",
+          trend: hasPreviousData ? getTrendDirection(gradeChangeDelta) : "same",
         },
         {
           title: "Fail then Pass Count",
@@ -572,6 +952,8 @@ const Appeals = () => {
   ]);
 
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
+  const midtermStatus = getStatusFromSessionData(overviewData?.appeals?.midterm);
+  const finalStatus = getStatusFromSessionData(overviewData?.appeals?.final);
 
   const handleFilterChange = (filterKey) => (event) => {
     const value = event.target.value;
@@ -593,18 +975,109 @@ const Appeals = () => {
     });
   };
 
+  const firstColMetrics = useMemo(() => {
+    const currentVolume = sumByKey(activeCycleRecords, "count");
+    const previousVolume = sumByKey(previousCycleRecords, "count");
+    const growthPercent = previousVolume > 0
+      ? ((currentVolume - previousVolume) / previousVolume) * 100
+      : 0;
+
+    const currentResolution = currentSummary.avgResolutionMinutes;
+    const previousResolution = previousSummary.avgResolutionMinutes;
+    const speedChangePercent = previousResolution > 0
+      ? ((currentResolution - previousResolution) / previousResolution) * 100
+      : 0;
+
+    const approvedCount = sumByKey(activeCycleRecords, "acceptedCount");
+    const pendingCount = sumByKey(activeCycleRecords, "pendingCount") + sumByKey(activeCycleRecords, "inProgressCount");
+    const rejectedCount = Math.max(currentVolume - approvedCount - pendingCount, 0);
+    const safeTotal = currentVolume > 0 ? currentVolume : 1;
+
+    const trendWidth = (value) => {
+      const absoluteValue = Math.abs(Number(value) || 0);
+      return Math.max(8, Math.min(absoluteValue, 100));
+    };
+
+    const weeklyChartData = buildWeeklyAppealsChartData(activeCycleRecords, appealsData, overviewData);
+
+    return {
+      currentSemesterLabel: formatSemesterLabel(activeSemester || "").toUpperCase(),
+      previousSemesterLabel: previousSemester ? formatSemesterLabel(previousSemester).toUpperCase() : "NO BASELINE",
+      currentVolume,
+      previousVolume,
+      growthPercent,
+      growthWidth: trendWidth(growthPercent),
+      currentResolution,
+      previousResolution,
+      speedChangePercent,
+      speedWidth: trendWidth(speedChangePercent),
+      statusItems: [
+        {
+          key: "approved",
+          label: "Approved",
+          value: approvedCount,
+          subtitle: `${approvedCount.toLocaleString()} cases updated`,
+          percent: (approvedCount / safeTotal) * 100,
+        },
+        {
+          key: "rejected",
+          label: "Rejected",
+          value: rejectedCount,
+          subtitle: `${rejectedCount.toLocaleString()} cases upheld`,
+          percent: (rejectedCount / safeTotal) * 100,
+        },
+        {
+          key: "pending",
+          label: "Pending",
+          value: pendingCount,
+          subtitle: `${pendingCount.toLocaleString()} in queue`,
+          percent: (pendingCount / safeTotal) * 100,
+        },
+      ],
+      weeklyChartData,
+    };
+  }, [
+    activeCycleRecords,
+    activeSemester,
+    appealsData,
+    currentSummary.avgResolutionMinutes,
+    overviewData,
+    previousCycleRecords,
+    previousSemester,
+    previousSummary.avgResolutionMinutes,
+  ]);
+
   return (
     <div className="appeals-page page-cont">
+      <div className="appeals-top-header">
       <div className="info">
         <h1>Appeals Analytics</h1>
         <p>Filter the appeal workload by semester, assessment, and status.</p>
+      </div>
+      <div className="appeals-status-panel">
+        <h2>Assessment status</h2>
+        <div className="appeals-status-items">
+          <div className="appeals-status-item">
+            <span className="appeals-status-label">Midterm</span>
+            <span className={`appeals-status-badge ${getStatusClassName(midtermStatus)}`}>
+              {midtermStatus}
+            </span>
+          </div>
+          <div className="appeals-status-item">
+            <span className="appeals-status-label">Final</span>
+            <span className={`appeals-status-badge ${getStatusClassName(finalStatus)}`}>
+              {finalStatus}
+            </span>
+          </div>
+        </div>
+      </div>
       </div>
       <div className="filterHeader" aria-label="Appeals filters">
         <div className="appeals-filter-bar">
           <label className="appeals-filter-field">
             <span>Semester</span>
             <select value={filters.semester} onChange={handleFilterChange("semester")}>
-              {SEMESTER_OPTIONS.map((option) => (
+              {semesterOptions.map((option) => (
                 <option key={option.value || "all-semesters"} value={option.value}>
                   {option.label}
                 </option>
@@ -615,7 +1088,7 @@ const Appeals = () => {
           <label className="appeals-filter-field">
             <span>Assessment</span>
             <select value={filters.session} onChange={handleFilterChange("session")}>
-              {SESSION_OPTIONS.map((option) => (
+              {sessionOptions.map((option) => (
                 <option key={option.value || "all-sessions"} value={option.value}>
                   {option.label}
                 </option>
@@ -641,7 +1114,7 @@ const Appeals = () => {
           <label className="appeals-filter-field">
             <span>Status</span>
             <select value={filters.status} onChange={handleFilterChange("status")}>
-              {STATUS_OPTIONS.map((option) => (
+              {statusOptions.map((option) => (
                 <option key={option.value || "all-statuses"} value={option.value}>
                   {option.label}
                 </option>
@@ -693,6 +1166,7 @@ const Appeals = () => {
               value={card.value}
               suffix={card.suffix}
               description={card.description}
+              trend={card.trend}
               tone={toMiniTone(card.tone)}
             />
           ))}
@@ -705,13 +1179,13 @@ const Appeals = () => {
         </div>
       </section>
 
-      <div className="section">
+      <div className="section ">
 
         {error ? (
           <p className="appeals-error">{error}</p>
         ) : (
           <Chart
-            className="appeals-chart-shell"
+            className="appeals-chart-shell first-chart"
             ChartComponent={Bar}
             data={chartData}
             title="Midterm vs Final Appeals"
@@ -721,6 +1195,200 @@ const Appeals = () => {
           />
         )}
       </div>
+      <div className="appeals-contrast-section">
+        <div className="appeals-first-col">
+          <div className="appeals-contrast-grid">
+            <article className="appeals-insight-card">
+              <div className="appeals-insight-head">
+                <h3>Semester Contrast</h3>
+                <span className="appeals-insight-badge">Volume Metrics</span>
+              </div>
+
+              <div className="appeals-insight-values">
+                <div>
+                  <p>{firstColMetrics.currentSemesterLabel} (CURRENT)</p>
+                  <strong>{firstColMetrics.currentVolume.toLocaleString()}</strong>
+                </div>
+                <div className="is-muted">
+                  <p>{firstColMetrics.previousSemesterLabel}</p>
+                  <strong>{firstColMetrics.previousVolume.toLocaleString()}</strong>
+                </div>
+              </div>
+
+              <div className="appeals-progress-wrap">
+                <div className="appeals-progress-label">
+                  <span>Growth Intensity</span>
+                  <span className={firstColMetrics.growthPercent >= 0 ? "is-up" : "is-down"}>
+                    {firstColMetrics.growthPercent >= 0 ? "+" : ""}{firstColMetrics.growthPercent.toFixed(1)}%
+                  </span>
+                </div>
+                <div className="appeals-progress-track">
+                  <div
+                    className={`appeals-progress-fill ${firstColMetrics.growthPercent >= 0 ? "is-up" : "is-down"}`}
+                    style={{ width: `${firstColMetrics.growthWidth}%` }}
+                  />
+                </div>
+              </div>
+            </article>
+
+            <article className="appeals-insight-card">
+              <div className="appeals-insight-head">
+                <h3>Efficiency in Resolution Time</h3>
+                <span className="appeals-insight-badge">Resolution Speed</span>
+              </div>
+
+              <div className="appeals-insight-values">
+                <div>
+                  <p>{firstColMetrics.currentSemesterLabel}</p>
+                  <strong>{firstColMetrics.currentResolution.toFixed(1)}m</strong>
+                </div>
+                <div className="is-muted">
+                  <p>{firstColMetrics.previousSemesterLabel}</p>
+                  <strong>{firstColMetrics.previousResolution.toFixed(1)}m</strong>
+                </div>
+              </div>
+
+              <div className="appeals-progress-wrap">
+                <div className="appeals-progress-label">
+                  <span>Processing Speed Improvement</span>
+                  <span className={firstColMetrics.speedChangePercent <= 0 ? "is-up" : "is-down"}>
+                    {firstColMetrics.speedChangePercent >= 0 ? "+" : ""}{firstColMetrics.speedChangePercent.toFixed(1)}%
+                  </span>
+                </div>
+                <div className="appeals-progress-track">
+                  <div
+                    className={`appeals-progress-fill ${firstColMetrics.speedChangePercent <= 0 ? "is-up" : "is-down"}`}
+                    style={{ width: `${firstColMetrics.speedWidth}%` }}
+                  />
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div className="appeals-bottom-grid">
+            <article className="appeals-status-weight-card">
+              <h3>Status Weighting</h3>
+              {firstColMetrics.statusItems.map((item) => (
+                <div key={item.key} className={`appeals-status-row ${item.key}`}>
+                  <div className="appeals-status-percent">{item.percent.toFixed(0)}%</div>
+                  <div className="appeals-status-copy">
+                    <h4>{item.label}</h4>
+                    <p>{item.subtitle}</p>
+                  </div>
+                </div>
+              ))}
+            </article>
+
+            <article className="appeals-temporal-card">
+              <div className="appeals-temporal-head">
+                <h3>Total appeals per week</h3>
+                <span>Volume</span>
+              </div>
+              <div className="appeals-temporal-chart">
+                {firstColMetrics.weeklyChartData ? (
+                  <Bar data={firstColMetrics.weeklyChartData} options={weeklyAppealsChartOptions} />
+                ) : (
+                  <p className="appeals-empty-note">No weekly appeal data available.</p>
+                )}
+              </div>
+            </article>
+          </div>
+        </div>
+        <div className="appeals-second-col">
+          <div className="AppealsByCourse">
+            <div className="backgroundSVG">
+              {courseDropdownOptions.length === 0 || isCourseSearchDisabled
+              ? <SearchX/>
+               :<SearchCheck/>}
+            </div>
+            <h1>Find appeal trends by course/Faculty</h1>
+
+            <label htmlFor="faculty-select">Choose Faculty:</label>
+            <select
+              id="faculty-select"
+              value={selectedFaculty}
+              onChange={(event) => setSelectedFaculty(event.target.value)}
+            >
+              {facultyOptions.map((option) => (
+                <option key={option.value || "all-faculties"} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+
+            <label htmlFor="course-type-search">Course Name:</label>
+            <div className="course-combo">
+              <input
+                type="text"
+                id="course-type-search"
+                name="course-type-search"
+                value={courseSearchText}
+                onChange={(event) => {
+                  const nextValue = event.target.value;
+                  setCourseSearchText(nextValue);
+
+                  if (!nextValue.trim()) {
+                    setSelectedCourseId("");
+                  }
+                }}
+                placeholder="e.g. Data Structures or CS203"
+              />
+
+              <span className="course-combo-separator" aria-hidden="true" />
+              <button
+                type="button"
+                className="course-combo-trigger"
+                tabIndex={-1}
+                aria-hidden="true"
+              >
+                v
+              </button>
+
+              <select
+                id="course-dropdown"
+                className="course-combo-native"
+                value={selectedCourseId || ""}
+                onChange={(event) => {
+                  const nextCourseId = event.target.value;
+                  setSelectedCourseId(nextCourseId);
+
+                  if (!nextCourseId) {
+                    setCourseSearchText("");
+                    return;
+                  }
+
+                  const nextCourse = courseCatalog.find((course) => course.id === nextCourseId);
+
+                  if (nextCourse) {
+                    setCourseSearchText(`${nextCourse.code} ${nextCourse.name}`);
+                  }
+                }}
+                aria-label="Course dropdown"
+              >
+                <option value="">Select course</option>
+                {courseDropdownOptions.map((course, index) => {
+                  const isClosest = closestCourse?.id === course.id && index === 0;
+                  return (
+                    <option key={course.id} value={course.id}>
+                      {isClosest ? "Closest - " : ""}
+                      {course.code} - {course.name}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+
+            <button
+              type="button"
+              className="course-search-btn"
+              onClick={handleCourseSearch}
+              disabled={courseDropdownOptions.length === 0 || isCourseSearchDisabled}
+            >
+              {shouldSearchByCourse ? "Search by course" : "Search by faculty"}
+            </button>
+          </div>
+        </div>
+        </div>
     </div>
   );
 };

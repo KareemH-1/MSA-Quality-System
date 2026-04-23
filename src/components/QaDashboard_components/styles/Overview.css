@@ -38,10 +38,8 @@
     border-radius: 18px;
     padding: 1rem 1.05rem;
     margin-bottom: 1.5rem;
-    background:
-        radial-gradient(circle at 95% 5%, rgba(212, 163, 115, 0.2), transparent 44%),
-        radial-gradient(circle at 0% 100%, rgba(0, 0, 0, 0.16), transparent 46%),
-        var(--gradient-visual-soul);
+    background: var(--gradient-visual-soul);
+    border: 1px solid rgba(173, 181, 189, 0.35);
     box-shadow: 0 16px 30px rgba(10, 28, 46, 0.22);
 }
 

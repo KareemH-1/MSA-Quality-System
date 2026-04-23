@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 import "./MetricCards.css";
 
 const AppealKpiCard = ({
@@ -7,6 +8,7 @@ const AppealKpiCard = ({
   suffix = "",
   description,
   footer,
+  trend,
   tone = "neutral",
   animationDuration = 700,
 }) => {
@@ -50,23 +52,38 @@ const AppealKpiCard = ({
       })
     : value;
 
-  return (
-    <article className={`appeal-kpi-card ${tone}`}>
-      <header className="appeal-kpi-top">
-        <p className="appeal-kpi-label">{title}</p>
-      </header>
+  const hasTrend = trend === "up" || trend === "down" || trend === "same";
 
-      <div className="appeal-kpi-main">
-        <h3 className="appeal-kpi-value">
-          {displayValue}
-          <span className="appeal-kpi-suffix">{suffix}</span>
-        </h3>
-        <p className="appeal-kpi-description">{description}</p>
+  const TrendIcon = trend === "up" ? TrendingUp : trend === "down" ? TrendingDown : Minus;
+
+  return (
+    <article className={`appeal-kpi-card ${tone} ${hasTrend ? "has-trend" : ""}`}>
+      <div className="kpi-card-main-col">
+        <header className="appeal-kpi-top">
+          <p className="appeal-kpi-label">{title}</p>
+        </header>
+
+        <div className="appeal-kpi-main">
+          <h3 className="appeal-kpi-value">
+            {displayValue}
+            <span className="appeal-kpi-suffix">{suffix}</span>
+          </h3>
+          <p className="appeal-kpi-description">{description}</p>
+        </div>
+
+        <footer className="appeal-kpi-bottom">
+          <p className="appeal-kpi-footer">{footer}</p>
+        </footer>
       </div>
 
-      <footer className="appeal-kpi-bottom">
-        <p className="appeal-kpi-footer">{footer}</p>
-      </footer>
+      {hasTrend && (
+        <aside className="kpi-card-trend-col" aria-label={`Trend ${trend}`}>
+          <span className="kpi-trend-separator" aria-hidden="true" />
+          <span className={`kpi-trend-icon ${trend}`} aria-hidden="true">
+            <TrendIcon />
+          </span>
+        </aside>
+      )}
     </article>
   );
 };

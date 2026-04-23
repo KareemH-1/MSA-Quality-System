@@ -26,6 +26,89 @@
   color: #5f7284;
 }
 
+.appeals-top-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.appeals-status-panel {
+  min-width: 250px;
+  padding: 0.8rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(21, 58, 86, 0.16);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.appeals-status-panel h2 {
+  margin: 0;
+  color: #153a56;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+}
+
+.appeals-status-items {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.appeals-status-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.appeals-status-item:first-child {
+  padding-bottom: 1rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(21, 58, 86, 0.12);
+}
+
+.appeals-status-label {
+  color: #4d6478;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.appeals-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+  min-height: 28px;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+
+.appeals-status-badge.is-open {
+  color: #0f5b34;
+  background: rgba(44, 179, 111, 0.16);
+  border-color: rgba(33, 136, 84, 0.35);
+}
+
+.appeals-status-badge.is-closed {
+  color: #5f6f7c;
+  background: rgba(96, 113, 124, 0.14);
+  border-color: rgba(96, 113, 124, 0.3);
+}
+
+.appeals-status-badge.is-not-started {
+  color: #8a4b00;
+  background: rgba(223, 146, 42, 0.16);
+  border-color: rgba(223, 146, 42, 0.34);
+}
+
 .filterHeader {
   padding: 1rem;
   border-radius: 16px;
@@ -207,7 +290,407 @@
   padding: 0.7rem 0.85rem;
 }
 
+.appeals-contrast-section {
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+.first-chart{
+  max-height: 500px;
+}
+.appeals-first-col {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.appeals-second-col {
+  flex: 0 0 360px;
+  min-width: 300px;
+  display: flex;
+  margin-top: 0;
+  position: relative;
+}
+
+.AppealsByCourse {
+  width: 100%;
+  height: 100%;
+  background: #f8fafc;
+  border: 1px solid rgba(23, 53, 79, 0.12);
+  border-radius: 14px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.62rem;
+  background: var(--gradient-visual-soul);
+
+}
+
+.backgroundSVG {
+  position: absolute;
+  top: 50%;
+  right: 2.5rem;
+  transform: translateY(-50%);
+  opacity: 0.78;
+  z-index: 0;
+  pointer-events: none; 
+}
+
+.backgroundSVG svg {
+  width: 15.5rem;
+  height: 15.5rem;
+  color: rgba(255, 255, 255, 0.03);
+}
+.AppealsByCourse h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  color: #ffffff;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.AppealsByCourse label {
+  font-size: 0.74rem;
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.AppealsByCourse select,
+.AppealsByCourse input {
+  min-height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(23, 53, 79, 0.2);
+  background: #ffffff;
+  color: #17354f;
+  font-size: 0.88rem;
+  padding: 0.55rem 0.75rem;
+  outline: none;
+}
+
+.AppealsByCourse select:focus,
+.AppealsByCourse input:focus {
+  border-color: rgba(0, 67, 105, 0.45);
+  box-shadow: 0 0 0 3px rgba(0, 67, 105, 0.12);
+}
+
+.course-combo {
+  position: relative;
+  display: grid;
+  align-items: center;
+}
+
+.course-combo input {
+  padding-right: 3.35rem;
+}
+
+.course-combo-separator {
+  position: absolute;
+  right: 2.5rem;
+  top: 7px;
+  bottom: 7px;
+  width: 1px;
+  background: rgba(23, 53, 79, 0.2);
+  pointer-events: none;
+}
+
+.course-combo-trigger {
+  position: absolute;
+  right: 0.4rem;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 8px;
+  border: none;
+  background: rgba(23, 53, 79, 0.08);
+  color: #28435a;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.course-combo-native {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 2.5rem;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.course-search-btn {
+  margin-top: auto;
+  min-height: 38px;
+  background: var(--accent-color);
+  color: #ffffff;
+  border: none;
+  font-size: 0.83rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.course-search-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 1);
+  color: #17354f;
+}
+
+.course-search-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.appeals-contrast-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.95rem;
+}
+
+.appeals-insight-card {
+  background: #f8fafc;
+  border: 1px solid rgba(23, 53, 79, 0.12);
+  border-radius: 14px;
+  padding: 1rem;
+  display: grid;
+  gap: 0.95rem;
+  min-height: 200px;
+}
+
+.appeals-insight-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.appeals-insight-head h3 {
+  margin: 0;
+  font-size: 0.98rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: #27384a;
+}
+
+.appeals-insight-badge {
+  border-radius: 999px;
+  padding: 0.28rem 0.64rem;
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #2e4458;
+  background: rgba(23, 53, 79, 0.08);
+}
+
+.appeals-insight-values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.appeals-insight-values p {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #475e73;
+  letter-spacing: 0.05em;
+}
+
+.appeals-insight-values strong {
+  display: inline-block;
+  margin-top: 0.28rem;
+  font-size: clamp(1.65rem, 2.6vw, 2.1rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: #0f2f4a;
+}
+
+.appeals-insight-values .is-muted strong {
+  color: #7a8796;
+}
+
+.appeals-progress-wrap {
+  display: grid;
+  gap: 0.42rem;
+}
+
+.appeals-progress-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.appeals-progress-label span {
+  font-size: 0.73rem;
+  font-weight: 700;
+  color: #41566a;
+}
+
+.appeals-progress-label .is-up {
+  color: #0f5b34;
+}
+
+.appeals-progress-label .is-down {
+  color: #a4291f;
+}
+
+.appeals-progress-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(23, 53, 79, 0.14);
+  overflow: hidden;
+}
+
+.appeals-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+}
+
+.appeals-progress-fill.is-up {
+  background: #2cb36f;
+}
+
+.appeals-progress-fill.is-down {
+  background: #d9534f;
+}
+
+.appeals-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.45fr;
+  gap: 0.95rem;
+}
+
+.appeals-status-weight-card,
+.appeals-temporal-card {
+  background: #f8fafc;
+  border: 1px solid rgba(23, 53, 79, 0.12);
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.appeals-status-weight-card h3,
+.appeals-temporal-head h3 {
+  margin: 0 0 0.85rem;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: #27384a;
+}
+
+.appeals-status-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.42rem 0;
+}
+
+.appeals-status-percent {
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 14px;
+  border: 2px solid rgba(23, 53, 79, 0.18);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1f354b;
+}
+
+.appeals-status-row.approved .appeals-status-percent {
+  border-color: #203656;
+}
+
+.appeals-status-row.rejected .appeals-status-percent {
+  border-color: #ef6a5c;
+}
+
+.appeals-status-row.pending .appeals-status-percent {
+  border-color: #d2d7dd;
+}
+
+.appeals-status-copy h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: #24384d;
+}
+
+.appeals-status-copy p {
+  margin: 0.15rem 0 0;
+  font-size: 0.79rem;
+  color: #63798c;
+}
+
+.appeals-temporal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.appeals-temporal-head span {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #314a60;
+}
+
+.appeals-temporal-chart {
+  height: 190px;
+}
+
+.appeals-empty-note {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #63798c;
+}
+
+@media (min-width: 1081px) and (max-width: 1320px) {
+  .appeals-contrast-section {
+    gap: 0.85rem;
+  }
+
+  .appeals-second-col {
+    flex: 0 0 320px;
+    min-width: 280px;
+  }
+
+  .appeals-contrast-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .appeals-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .appeals-temporal-chart {
+    height: 180px;
+  }
+}
+
 @media (max-width: 720px) {
+  .appeals-top-header {
+    flex-direction: column;
+  }
+
+  .appeals-status-panel {
+    width: 100%;
+    min-width: 0;
+  }
+
   .appeals-filter-bar {
     flex-direction: column;
     align-items: stretch;
@@ -231,10 +714,106 @@
     padding: 0;
     background: transparent;
   }
+
+  .appeals-contrast-grid,
+  .appeals-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .appeals-contrast-section {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .appeals-first-col,
+  .appeals-second-col {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .AppealsByCourse {
+    padding: 0.88rem;
+  }
+
+  .AppealsByCourse h1 {
+    font-size: 0.92rem;
+  }
+
+  .AppealsByCourse label {
+    font-size: 0.69rem;
+  }
+
+  .AppealsByCourse select,
+  .AppealsByCourse input {
+    min-height: 38px;
+    font-size: 0.84rem;
+    padding: 0.5rem 0.65rem;
+  }
+
+  .course-combo input {
+    padding-right: 3rem;
+  }
+
+  .course-combo-separator {
+    right: 2.3rem;
+  }
+
+  .course-combo-trigger {
+    right: 0.28rem;
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .course-combo-native {
+    width: 2.3rem;
+  }
+
+  .course-search-btn {
+    min-height: 36px;
+    font-size: 0.78rem;
+  }
+
+  .appeals-status-weight-card,
+  .appeals-temporal-card,
+  .appeals-insight-card {
+    padding: 0.85rem;
+  }
+
+  .appeals-temporal-chart {
+    height: 170px;
+  }
 }
 
 @media (min-width: 721px) and (max-width: 1080px) {
   .appeals-kpi-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .appeals-contrast-section {
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .appeals-contrast-grid,
+  .appeals-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .appeals-second-col {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .AppealsByCourse {
+    padding: 0.95rem;
+  }
+
+  .AppealsByCourse select,
+  .AppealsByCourse input {
+    min-height: 39px;
+  }
+
+  .appeals-temporal-chart {
+    height: 180px;
   }
 }

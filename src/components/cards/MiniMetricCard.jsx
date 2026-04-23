@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 import "./MetricCards.css";
 
 const MiniMetricCard = ({
@@ -6,6 +7,7 @@ const MiniMetricCard = ({
   value,
   suffix = "",
   description,
+  trend,
   tone = "cool",
   animationDuration = 900,
 }) => {
@@ -50,14 +52,29 @@ const MiniMetricCard = ({
       })
     : value;
 
+  const hasTrend = trend === "up" || trend === "down" || trend === "same";
+
+  const TrendIcon = trend === "up" ? TrendingUp : trend === "down" ? TrendingDown : Minus;
+
   return (
-    <article className={`mini-metric-card ${tone}`}>
-      <p className="mini-metric-label">{label}</p>
-      <h3 className="mini-metric-value">
-        {displayValue}
-        {suffix}
-      </h3>
-      <p className="mini-metric-description">{description}</p>
+    <article className={`mini-metric-card ${tone} ${hasTrend ? "has-trend" : ""}`}>
+      <div className="kpi-card-main-col">
+        <p className="mini-metric-label">{label}</p>
+        <h3 className="mini-metric-value">
+          {displayValue}
+          {suffix}
+        </h3>
+        <p className="mini-metric-description">{description}</p>
+      </div>
+
+      {hasTrend && (
+        <aside className="kpi-card-trend-col" aria-label={`Trend ${trend}`}>
+          <span className="kpi-trend-separator" aria-hidden="true" />
+          <span className={`kpi-trend-icon ${trend}`} aria-hidden="true">
+            <TrendIcon />
+          </span>
+        </aside>
+      )}
     </article>
   );
 };
