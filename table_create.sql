@@ -168,3 +168,15 @@ CREATE TABLE password_history (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
+
+
+CREATE TABLE files (
+    file_id INT AUTO_INCREMENT PRIMARY KEY,
+    file_path VARCHAR(255) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    num_rows INT DEFAULT NULL,
+    num_cols INT DEFAULT NULL,
+    uploaded_by INT DEFAULT NULL,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (uploaded_by) REFERENCES users(user_id) ON DELETE SET NULL
+);
