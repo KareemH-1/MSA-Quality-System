@@ -15,10 +15,39 @@
   border-top: 1px solid var(--soft-color);
 }
 
+.pageInfoSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .pageInfo {
   color: var(--muted-color);
   font-size: 0.86rem;
   font-weight: 600;
+}
+
+.rowsPerPageControl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rowsPerPageControl label {
+  color: var(--muted-color);
+  font-weight: 600;
+  font-size: 0.86rem;
+}
+
+.rowsPerPageControl select {
+  border: 1px solid var(--soft-color);
+  border-radius: 6px;
+  padding: 6px 10px;
+  background: var(--neutral-color);
+  color: var(--foundation-color);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.86rem;
 }
 
 .pageControls {
@@ -78,6 +107,13 @@
   .pagification {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .pageInfoSection {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 
   .pageControls {

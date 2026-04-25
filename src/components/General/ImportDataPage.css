@@ -1,0 +1,391 @@
+.ImportDataPage {
+  width: 100%;
+  margin: 0 0 50px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+}
+
+.ImportDataPage.idp-drag-active {
+  background: rgba(var(--accent-rgb, 59, 130, 246), 0.05);
+  border: 2px dashed var(--accent-color);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.ImportDataPage .idp-drag-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.ImportDataPage .idp-drag-modal-content {
+  background: var(--neutral-color);
+  border-radius: 16px;
+  padding: 48px 32px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ImportDataPage .idp-drag-modal-content svg {
+  color: var(--accent-color);
+  margin-bottom: 16px;
+}
+
+.ImportDataPage .idp-drag-modal-content h2 {
+  margin: 16px 0 8px 0;
+  color: var(--foundation-color);
+  font-size: 1.5rem;
+}
+
+.ImportDataPage .idp-drag-modal-content p {
+  margin: 0;
+  color: var(--muted-color);
+  font-size: 1rem;
+}
+
+.ImportDataPage .idp-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ImportDataPage .idp-header h1 {
+  margin: 4px 0;
+  color: var(--foundation-color);
+  font-size: clamp(1.35rem, 2.2vw, 1.9rem);
+}
+
+.ImportDataPage .idp-header p {
+  margin: 0;
+  color: var(--muted-color);
+  line-height: 1.45;
+}
+
+.ImportDataPage .idp-kicker {
+  margin: 0;
+  color: var(--accent-color);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+}
+
+.ImportDataPage #idp-file-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ImportDataPage .idp-upload-btn {
+  border: 1px solid var(--soft-color);
+  border-radius: 8px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--neutral-color);
+  color: var(--foundation-color);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.ImportDataPage .idp-upload-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.ImportDataPage .idp-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ImportDataPage .idp-meta-card {
+  border: 1px solid #dfe3ea;
+  border-radius: 10px;
+  background: #f9fbff;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ImportDataPage .idp-meta-card span {
+  color: var(--muted-color);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+
+.ImportDataPage .idp-meta-card strong {
+  color: var(--foundation-color);
+  font-size: 1rem;
+  word-break: break-word;
+}
+
+.ImportDataPage .idp-alert {
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.ImportDataPage .idp-alert-error {
+  border: 1px solid #f2c4c4;
+  background: #fdecec;
+  color: #941c1c;
+}
+
+.ImportDataPage .idp-alert-neutral {
+  border: 1px solid #dce2ea;
+  background: #f5f7fb;
+  color: #2f3f55;
+}
+
+.ImportDataPage .idp-toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.ImportDataPage .idp-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.ImportDataPage .idp-table {
+  width: 100%;
+  min-width: 960px;
+  border-collapse: collapse;
+  background: var(--neutral-color);
+}
+
+.ImportDataPage .idp-table th,
+.ImportDataPage .idp-table td {
+  border-bottom: 1px solid #dce1e7;
+  padding: 8px;
+  vertical-align: top;
+}
+
+.ImportDataPage .idp-table thead th {
+  background: #f1f4f8;
+}
+
+.ImportDataPage .idp-col-editor {
+  display: grid;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.ImportDataPage .idp-col-editor input,
+.ImportDataPage .idp-col-editor select,
+.ImportDataPage .idp-table td input,
+.ImportDataPage .idp-table td select {
+  border: 1px solid #ccd4df;
+  border-radius: 6px;
+  min-height: 34px;
+  padding: 0 10px;
+  background: var(--neutral-color);
+  color: var(--foundation-color);
+}
+
+.ImportDataPage .idp-col-editor input:focus,
+.ImportDataPage .idp-col-editor select:focus,
+.ImportDataPage .idp-table td input:focus,
+.ImportDataPage .idp-table td select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.ImportDataPage .idp-col-help {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--muted-color);
+  line-height: 1.35;
+}
+
+.ImportDataPage .idp-remove-column,
+.ImportDataPage .idp-remove-row {
+  border: 1px solid #e9d4d4;
+  border-radius: 6px;
+  min-height: 30px;
+  min-width: 30px;
+  background: #fff4f4;
+  color: #a32f2f;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ImportDataPage .idp-remove-column:hover,
+.ImportDataPage .idp-remove-row:hover {
+  filter: brightness(0.97);
+}
+
+.ImportDataPage .idp-index-col,
+.ImportDataPage .idp-index-cell,
+.ImportDataPage .idp-actions-col,
+.ImportDataPage .idp-row-action {
+  text-align: center;
+}
+
+.ImportDataPage .idp-index-col,
+.ImportDataPage .idp-index-cell {
+  width: 54px;
+}
+
+.ImportDataPage .idp-actions-col,
+.ImportDataPage .idp-row-action {
+  width: 108px;
+}
+
+.ImportDataPage .idp-row-invalid {
+  background: #ffe0e0;
+}
+
+.ImportDataPage .idp-row-warning {
+  background: #fff6cc;
+}
+
+.ImportDataPage .idp-row-duplicate {
+  background: #ff4444;
+  color: white;
+  font-weight: 600;
+}
+
+.ImportDataPage .idp-row-duplicate td {
+  color: white;
+}
+
+.ImportDataPage .idp-row-duplicate input,
+.ImportDataPage .idp-row-duplicate select {
+  background: #ff6666;
+  color: white;
+  border-color: #cc0000;
+}
+
+.ImportDataPage .idp-row-duplicate input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.ImportDataPage .idp-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  color: var(--muted-color);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.ImportDataPage .idp-chip {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.ImportDataPage .idp-chip-red {
+  background: #ffb2b2;
+}
+
+.ImportDataPage .idp-chip-yellow {
+  background: #ffe68f;
+}
+
+.ImportDataPage .idp-chip-dark-red {
+  background: #ff4444;
+}
+
+.ImportDataPage .idp-confirm-bar {
+  border: 1px solid #cfe0ff;
+  border-radius: 10px;
+  background: #eef4ff;
+  color: #1b3f7a;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ImportDataPage .idp-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ImportDataPage .idp-btn {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  min-height: 38px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.ImportDataPage .idp-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ImportDataPage .idp-btn-primary {
+  background: var(--primary-color);
+  color: var(--neutral-color);
+}
+
+.ImportDataPage .idp-btn-secondary {
+  background: var(--neutral-color);
+  color: var(--foundation-color);
+  border-color: var(--soft-color);
+}
+
+@media (max-width: 980px) {
+  .ImportDataPage .idp-meta-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .ImportDataPage .idp-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ImportDataPage .idp-actions {
+    justify-content: flex-start;
+  }
+}

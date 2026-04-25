@@ -51,18 +51,43 @@ const Export = ({data , title}) => {
   }, [normalizedRows]);
 
   const rowsForExport = React.useMemo(() => {
+    const normalizeExportValue = (value) => {
+      if (value === null || value === undefined) {
+        return '';
+      }
+
+      if (Array.isArray(value)) {
+        return value
+          .map((item) => {
+            if (item === null || item === undefined) {
+              return '';
+            }
+
+            return typeof item === 'object' ? JSON.stringify(item) : String(item);
+          })
+          .filter((item) => item !== '')
+          .join(', ');
+      }
+
+      if (typeof value === 'object') {
+        return JSON.stringify(value, (_, innerValue) => {
+          if (Array.isArray(innerValue)) {
+            return innerValue.join(', ');
+          }
+
+          return innerValue;
+        });
+      }
+
+      return String(value);
+    };
+
     return normalizedRows.map((row) => {
       const normalizedRow = {};
 
       normalizedColumns.forEach((column) => {
         const value = row?.[column];
-
-        if (value === null || value === undefined) {
-          normalizedRow[column] = '';
-          return;
-        }
-
-        normalizedRow[column] = typeof value === 'object' ? JSON.stringify(value) : String(value);
+        normalizedRow[column] = normalizeExportValue(value);
       });
 
       return normalizedRow;

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from "lucide-react";
 import "./PagificationContainer.css";
 
@@ -32,18 +32,47 @@ const buildVisiblePages = (currentPage, totalPages, siblingCount) => {
 const PagificationContainer = ({
   children,
   data = [],
-  rowsPerPage = 10,
-  currentPage = 1,
+  rowsPerPage,
+  currentPage,
   setCurrentPage,
   itemName = "items",
   siblingCount = 1,
-  jumpStep = 5
+  jumpStep = 5,
+  rowsPerPageOptions = [10, 20, 50, 100],
+  onRowsPerPageChange = null,
+  initialRowsPerPage = 10,
+  enableRowsPerPageControl = true
 }) => {
+  const [internalCurrentPage, setInternalCurrentPage] = useState(1);
+  const [internalRowsPerPage, setInternalRowsPerPage] = useState(initialRowsPerPage);
+
+  const isPageControlled = typeof currentPage === "number" && typeof setCurrentPage === "function";
+  const isRowsPerPageControlled = typeof rowsPerPage === "number" && typeof onRowsPerPageChange === "function";
+
+  const resolvedRowsPerPage = isRowsPerPageControlled ? rowsPerPage : internalRowsPerPage;
+  const resolvedCurrentPage = isPageControlled ? currentPage : internalCurrentPage;
+
+  const setResolvedCurrentPage = isPageControlled ? setCurrentPage : setInternalCurrentPage;
+  const setResolvedRowsPerPage = isRowsPerPageControlled ? onRowsPerPageChange : setInternalRowsPerPage;
+
   const totalItems = Array.isArray(data) ? data.length : 0;
-  const safeRowsPerPage = Math.max(1, rowsPerPage);
+  const safeRowsPerPage = Math.max(1, resolvedRowsPerPage);
   const totalPages = Math.max(1, Math.ceil(totalItems / safeRowsPerPage));
-  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
-  const canChangePage = typeof setCurrentPage === "function";
+  const safeCurrentPage = Math.min(Math.max(1, resolvedCurrentPage), totalPages);
+  const canChangePage = typeof setResolvedCurrentPage === "function";
+  const hasRowsControl =
+    enableRowsPerPageControl && Array.isArray(rowsPerPageOptions) && rowsPerPageOptions.length > 0;
+
+  const paginatedData = useMemo(() => {
+    const start = (safeCurrentPage - 1) * safeRowsPerPage;
+    return (Array.isArray(data) ? data : []).slice(start, start + safeRowsPerPage);
+  }, [data, safeCurrentPage, safeRowsPerPage]);
+
+  useEffect(() => {
+    if (safeCurrentPage !== resolvedCurrentPage) {
+      setResolvedCurrentPage(safeCurrentPage);
+    }
+  }, [resolvedCurrentPage, safeCurrentPage, setResolvedCurrentPage]);
 
   const visiblePages = useMemo(() => {
     return buildVisiblePages(safeCurrentPage, totalPages, siblingCount);
@@ -56,19 +85,52 @@ const PagificationContainer = ({
 
     const nextPage = Math.min(Math.max(1, page), totalPages);
     if (nextPage !== safeCurrentPage) {
-      setCurrentPage(nextPage);
+      setResolvedCurrentPage(nextPage);
     }
   };
 
+  const handleRowsPerPageChange = (nextRowsPerPage) => {
+    setResolvedRowsPerPage(nextRowsPerPage);
+    setResolvedCurrentPage(1);
+  };
+
+  const content =
+    typeof children === "function"
+      ? children(paginatedData, {
+          currentPage: safeCurrentPage,
+          rowsPerPage: safeRowsPerPage,
+          totalPages,
+          totalItems
+        })
+      : children;
+
   return (
     <div className="pagificationContainer">
-      {children}
+      {content}
 
       <div className="pagification">
-        <div className="pageInfo">
-          <span>
-            Page {safeCurrentPage} of {totalPages} | {totalItems} {itemName}
-          </span>
+        <div className="pageInfoSection">
+          <div className="pageInfo">
+            <span>
+              Page {safeCurrentPage} of {totalPages} | {totalItems} {itemName}
+            </span>
+          </div>
+          {hasRowsControl && (
+            <div className="rowsPerPageControl">
+              <label htmlFor="rows-per-page-select">Rows per page:</label>
+              <select
+                id="rows-per-page-select"
+                value={safeRowsPerPage}
+                onChange={(event) => handleRowsPerPageChange(Number(event.target.value))}
+              >
+                {rowsPerPageOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         <div className="pageControls">
