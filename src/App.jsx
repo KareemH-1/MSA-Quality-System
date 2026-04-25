@@ -37,7 +37,7 @@ function App() {
   const { pathname } = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(getSideBarStateLocalStorage());
   const [navSelections, setNavSelections] = useState(buildInitialNavSelections);
-  const currentUserRole = ROLES.QA; // change later when backend is done
+  const currentUserRole = ROLES.ADMIN; // change later when backend is done
 
   const accessiblePages = APP_PAGES.filter(
     (page) => !page.roles || page.roles.includes(currentUserRole)

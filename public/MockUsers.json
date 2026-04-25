@@ -1,0 +1,46 @@
+{
+    "users": [
+        {
+        "id": 1,
+        "email": "admin@msa.edu.eg",
+        "username": "admin",
+        "role": "Admin"
+        },
+        {
+        "id": 2,
+        "email": "qa_user@msa.edu.eg",
+        "username": "qa_user",
+        "role": "QA"
+        },
+        {
+        "id": 3,
+        "email":"instructor1@msa.edu.eg", 
+        "username": "Instructor 1",
+        "role": "Instructor",
+        "courses": ["Course 1", "Course 2"],
+        "Faculty": "Computer Science"
+        },
+        {
+        "id": 4,
+        "email":"kareem.ahmed15@msa.edu.eg", 
+        "username": "Kareem Ahmed",
+        "role": "Student",
+        "courses": ["CS217", "CS232" , "CS244" , "CS244" , "CS293" , "MGT200x"],
+        "Faculty": "Computer Science"
+        }
+    ],
+
+     "faculties": [
+        "Dentistry",
+        "Physical Therapy",
+        "Pharmacy",
+        "Biotechnology",
+        "Nutrition & Food Technology",
+        "Engineering",
+        "Computer Science",
+        "Arts & Design",
+        "Management Sciences",
+        "Mass Communication",
+        "Languages"
+    ]
+}

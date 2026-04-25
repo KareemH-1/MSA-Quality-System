@@ -4,4 +4,5 @@ export const ROLES = {
   MODULE_LEADER: "ModuleLeader",
   INSTRUCTOR: "Instructor",
   STUDENT: "Student",
+  ADMIN: "Admin",
 };

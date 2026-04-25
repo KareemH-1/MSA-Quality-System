@@ -1,0 +1,87 @@
+.pagificationContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pagification {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--soft-color);
+}
+
+.pageInfo {
+  color: var(--muted-color);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.pageControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.pageBtn {
+  min-width: 34px;
+  height: 34px;
+  border: 1px solid var(--soft-color);
+  border-radius: 8px;
+  background: var(--neutral-color);
+  color: var(--foundation-color);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--anim-fast);
+  font-family: var(--font-main);
+  font-weight: 600;
+  padding: 0 10px;
+}
+
+.pageBtn:hover:not(:disabled) {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.pageBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.numberBtn.active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--neutral-color);
+}
+
+.jumpBtn {
+  min-width: 44px;
+  font-size: 0.8rem;
+}
+
+.ellipsis {
+  color: var(--muted-color);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0 2px;
+}
+
+@media (max-width: 760px) {
+  .pagification {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pageControls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

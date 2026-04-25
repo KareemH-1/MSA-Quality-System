@@ -1,10 +1,12 @@
 import QaDashboard from "../pages/QA_Admin/QaDashboard";
+import UserManagement from "../pages/Admin/UserManagement";
 import Login from "../pages/Login";
 import NotFound from "../pages/NotFound";
 import { getQaDashboardNavbarComponents } from "./QaDashboardNavbarComponents";
+import { getAdminManageUserNavbarComponents } from "./AdminNavbarComponents";
 
 import { ROLES } from "../constants/roles";
-import { Settings, LayoutDashboard} from "lucide-react";
+import { Settings, LayoutDashboard , UserRound} from "lucide-react";
 import Contact from "../pages/Contact";
 
 export const PAGE_CONFIG = {
@@ -32,6 +34,18 @@ export const PAGE_CONFIG = {
     showSidebar: false,
     showInSidebar: false,
     showNavbar: false,
+  },
+
+  UserManagement:{
+    path: "/user-management",
+    component: UserManagement,
+    showSidebar: true,
+    sidebarLabel: "Manage Users",
+    sidebarIcon: UserRound,
+    showNavbar: true,
+    defaultNavItem: "Dashboard",
+    getNavbarComponents: getAdminManageUserNavbarComponents,
+    roles: [ROLES.ADMIN]
   }
 };
 
