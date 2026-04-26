@@ -1,0 +1,267 @@
+.admin-header{
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+.admin-header p{
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: var(--font-family);
+    color: var(--accent-color);
+    margin-bottom: 10px;
+}
+.admin-header h1{
+    font-size: 32px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: var(--font-family);
+    margin: 0;
+}
+.heading{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.heading .description{
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-color);
+}
+
+.systemOnline{
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    background-color: var(--background-color);
+}
+
+.systemOnline .indicator{
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: green;
+    margin-right: 10px;
+}
+.systemOnline .indicator.offline{
+    background-color: red;
+}
+
+.systemOnline span{
+    font-size: 14px;
+    color: var(--text-color);
+    text-transform: uppercase;
+}
+
+.logs-section{
+    margin-top: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.logsContainer{
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.logsHeader{
+    display: flex;
+    align-items: center;
+    padding: 20px 20px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: #001532;
+    color: #fff;
+    gap: 10px;
+    border-radius: 18px 18px 0px 0px;
+}
+
+.logsHeader div{
+    padding: 2px 6px;
+    cursor: pointer;
+    border-radius: 50%;
+    filter: brightness(0.8);
+}
+.logsHeader div:hover{
+    opacity: 0.8;
+}
+.logsHeader .active{
+    filter: brightness(1.2);
+}
+.logsHeader .errors{
+    background-color: #ff4d4f;
+}
+.logsHeader .Security{
+    background-color: #faad14;
+}
+.logsHeader .App{
+    background-color: #27C83F;
+}
+
+.logsContent{
+    padding: 20px;
+    padding-bottom: 40px;
+    background-color: #020617;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: 500px;
+    overflow-y: auto;   
+}
+
+.logEntry{
+    border-radius: 8px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: var(--font-secondary);
+    font-size: 16px;
+    display: inline-block;
+
+    & > *{
+        display: inline-block;
+        margin-right: 8px;
+    }
+
+}
+.logEntry .time{
+    color: #5089D2;
+    margin-right: 4px;
+    font-family: "Space Mono", monospace;
+}
+.logEntry .logType{
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: var(--font-main);
+}
+.logEntry .logType.error{
+    color: #EB3D5C;
+}
+.logEntry .logType.security{
+    color: #FAAD14;
+}
+.logEntry .logType.info{
+    color: #27C83F;
+}
+
+.logsFooter{
+    display: flex;
+    align-items: center;
+    padding: 20px 20px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: #001532;
+    color: #fff;
+    gap: 10px;
+    border-radius: 0px 0px 18px 18px;
+}
+
+.SystemHealth{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 0;
+    background-color: #F3F4F5;
+    padding: 20px;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    width: min(360px, 100%);
+    flex: 0 0 min(360px, 100%);
+}
+.SystemHealth .healthHeader{
+    display: flex;
+    align-items: center;
+    position: relative;
+    gap: 10px;
+}
+
+.SystemHealth .healthHeader .title{
+    display: flex;
+    flex-direction: column;
+}
+.SystemHealth .healthHeader .title h2{
+    font-size: 18px;
+    margin: 0;
+    color: var(--muted-color);
+}
+.SystemHealth .healthHeader .title p{
+    font-size: 18px;
+    color: var(--foundation-color);
+    font-weight: bold;
+    margin: 0;
+}
+.SystemHealth .healthHeader .iconCont{
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    width: 20px;
+}
+
+.SystemHealth .healthHeader .iconCont svg{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.SystemHealth .healthHeader .iconCont .statusIcon{
+    fill: var(--accent-color);
+    color: #F3F4F5;
+}
+.SystemHealth .healthHeader .iconCont .checkIcon{
+    color:#F3F4F5;
+}
+
+.SystemHealth > div{
+    border-top: 1px solid #cccccc;
+    padding-top: 10px;
+}
+
+.SystemHealth > div:first-child{
+    margin-top: 0px;
+    border-top: none;
+}
+
+.SystemHealth > div p{
+    font-size: 14px;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.SystemHealth > div p span{
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+.statusIndicator{
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: var(--font-main);
+    color: #fff;
+}
+
+.statusIndicator.OK{
+    background-color: #27C83F;
+}
+.statusIndicator.error{
+    background-color: #EB3D5C;
+}
+
+@media (max-width: 1024px) {
+    .logs-section{
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .SystemHealth{
+        width: 100%;
+        flex: 1 1 auto;
+    }
+}

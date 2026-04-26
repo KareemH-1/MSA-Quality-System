@@ -1,12 +1,14 @@
 import QaDashboard from "../pages/QA_Admin/QaDashboard";
 import UserManagement from "../pages/Admin/UserManagement";
+import SystemLogs from "../pages/Admin/SystemLogs"
+;
 import Login from "../pages/Login";
 import NotFound from "../pages/NotFound";
 import { getQaDashboardNavbarComponents } from "./QaDashboardNavbarComponents";
 import { getAdminManageUserNavbarComponents } from "./AdminNavbarComponents";
 
 import { ROLES } from "../constants/roles";
-import { Settings, LayoutDashboard , UserRound} from "lucide-react";
+import { Settings, LayoutDashboard , UserRound, Activity} from "lucide-react";
 import Contact from "../pages/Contact";
 
 export const PAGE_CONFIG = {
@@ -43,8 +45,17 @@ export const PAGE_CONFIG = {
     sidebarLabel: "Manage Users",
     sidebarIcon: UserRound,
     showNavbar: true,
-    defaultNavItem: "Dashboard",
+    defaultNavItem: "User Management",
     getNavbarComponents: getAdminManageUserNavbarComponents,
+    roles: [ROLES.ADMIN]
+  },
+  Logs:{
+    path: "/logs",
+    component: SystemLogs,
+    showSidebar: true,
+    sidebarLabel: "System Health & Logs",
+    sidebarIcon: Activity,
+    showNavbar: true,
     roles: [ROLES.ADMIN]
   }
 };

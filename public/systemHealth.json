@@ -1,0 +1,70 @@
+{
+    "databaseConn": "OK",
+    "serverConn": "OK",
+    "fileSystem": "OK",
+    "errors_last_24h": {
+        "database": 0,
+        "server": 0,
+        "filesystem": 0
+    },
+    "ErrorLogs": [
+        {
+            "timestamp": "2024-06-01T12:00:00Z",
+            "source": "database",
+            "message": "Database connection timeout."
+        },
+        {
+            "timestamp": "2024-06-01T13:00:00Z",
+            "source": "server",
+            "message": "Server CPU usage exceeded threshold."
+        }
+    ],
+    "SecurityLogs":[
+        {
+            "timestamp": "2024-06-01T14:00:00Z",
+            "source": "auth",
+            "message": "Several failed login attempts from IP xxx.xxx.xxx.xxx."
+        },
+        {
+            "timestamp": "2024-06-01T15:00:00Z",
+            "source": "server",
+            "message": "request to access restricted resource from IP xxx.xxx.xxx.xxx."
+        },
+        {
+            "timestamp": "2024-06-01T16:00:00Z",
+            "source": "filesystem",
+            "message": "Unauthorized access attempt to sensitive file."
+        }
+
+    ],
+    "AppLogs": [
+        {
+            "timestamp": "2024-06-01T17:00:00Z",
+            "source": "application",
+            "message": "Application started successfully."
+        },
+        {
+            "timestamp": "2024-06-01T18:00:00Z",
+            "source": "application",
+            "message": "User X logged in successfully."
+        },
+        {
+            "timestamp": "2024-06-01T19:00:00Z",
+            "source": "application",
+            "message": "User Y logged out."
+        },
+        {
+            "timestamp": "2024-06-01T20:00:00Z",
+            "source": "application",
+            "message": "Admin X imported user data successfully."
+        }
+    ],
+
+    "FileImports": [
+        {
+            "timestamp": "2024-06-01T21:00:00Z",
+            "source": "users",
+            "message": "User X imported file 'data.csv' successfully."
+        }
+    ]
+}

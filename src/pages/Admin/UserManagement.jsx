@@ -1,5 +1,4 @@
 import React from 'react'
-import Dashboard from '../../components/Admin/UserManagement/Dashboard';
 import ManageUsers from '../../components/Admin/UserManagement/ManageUsers';
 import ImportDataPage from '../../components/General/ImportDataPage';
 
@@ -120,7 +119,6 @@ const UserManagement = ({ currentNavItem }) => {
                 textAlign: "left"
             }}
         >
-            {currentNavItem === "Dashboard" && <Dashboard />}
             {currentNavItem === "User Management" && (
                 isImportViewOpen ? (
                     <ImportDataPage

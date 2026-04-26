@@ -101,7 +101,7 @@ function App() {
                   element={
                     <div className={page.wrapperClassName}>
                       <NavBar components={navbarComponents} />
-                      <main className={page.contentClassName}>
+                      <main className={page.contentClassName} style={{marginBottom:"80px"}}>
                         <PageComponent currentNavItem={currentItem} />
                       </main>
                     </div>
