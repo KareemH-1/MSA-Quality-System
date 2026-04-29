@@ -265,3 +265,131 @@
         flex: 1 1 auto;
     }
 }
+
+/* ========== File Imports Section ========== */
+.fileImportsSection {
+    margin-top: 30px;
+    background-color: #F3F4F5;
+    border-radius: 12px;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.fileImportsHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 20px;
+    background-color: #001532;
+    color: #fff;
+}
+
+.fileImportsHeader h2 {
+    font-size: 16px;
+    margin: 0;
+    text-transform: uppercase;
+    font-family: var(--font-family);
+    flex: 1;
+}
+
+.fileImportsHeader .importsCount {
+    font-size: 12px;
+    background-color: var(--accent-color, #5089D2);
+    padding: 3px 10px;
+    border-radius: 12px;
+    color: #fff;
+}
+
+.fileImportsTable {
+    display: flex;
+    flex-direction: column;
+}
+
+.fileImportsTableHead,
+.fileImportRow {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 1.5fr 0.8fr;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+}
+
+.fileImportsTableHead {
+    background-color: #e8eaee;
+    font-weight: bold;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--muted-color, #555);
+    border-bottom: 1px solid #cccccc;
+}
+
+.fileImportsTableHead > div {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.fileImportRow {
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 14px;
+    color: var(--text-color);
+    transition: background-color 0.15s ease;
+}
+
+.fileImportRow:hover {
+    background-color: #eaf1fb;
+}
+
+.fileImportRow:last-child {
+    border-bottom: none;
+}
+
+.fileImportRow .fileLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #5089D2;
+    text-decoration: none;
+    font-weight: 600;
+    font-family: "Space Mono", monospace;
+    word-break: break-all;
+}
+
+.fileImportRow .fileLink:hover {
+    text-decoration: underline;
+    color: #001532;
+}
+
+.fileImportRow .col-date {
+    font-family: "Space Mono", monospace;
+    font-size: 13px;
+    color: #555;
+}
+
+.fileImportRow .col-size {
+    font-size: 12px;
+    color: #777;
+}
+
+.noImports {
+    padding: 20px;
+    text-align: center;
+    color: #888;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .fileImportsTableHead {
+        display: none;
+    }
+
+    .fileImportRow {
+        grid-template-columns: 1fr;
+        gap: 4px;
+        padding: 14px 20px;
+    }
+
+    .fileImportRow .col-user::before { content: "By: "; font-weight: bold; }
+    .fileImportRow .col-date::before { content: "On: "; font-weight: bold; }
+    .fileImportRow .col-size::before { content: "Size: "; font-weight: bold; }
+}

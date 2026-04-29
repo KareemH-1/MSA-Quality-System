@@ -19,7 +19,7 @@
             "message": "Server CPU usage exceeded threshold."
         }
     ],
-    "SecurityLogs":[
+    "SecurityLogs": [
         {
             "timestamp": "2024-06-01T14:00:00Z",
             "source": "auth",
@@ -35,7 +35,6 @@
             "source": "filesystem",
             "message": "Unauthorized access attempt to sensitive file."
         }
-
     ],
     "AppLogs": [
         {
@@ -59,12 +58,41 @@
             "message": "Admin X imported user data successfully."
         }
     ],
-
     "FileImports": [
         {
-            "timestamp": "2024-06-01T21:00:00Z",
-            "source": "users",
-            "message": "User X imported file 'data.csv' successfully."
+            "fileName": "users_data.csv",
+            "importedBy": "Admin John",
+            "timestamp": "2024-06-02T09:15:00Z",
+            "destination": "/files/users_data.csv",
+            "size": "2.4 MB"
+        },
+        {
+            "fileName": "surveys.xlsx",
+            "importedBy": "QA_Admin Sarah Youssef",
+            "timestamp": "2024-06-02T11:42:00Z",
+            "destination": "/files/surveys.xlsx",
+            "size": "1.1 MB"
+        },
+        {
+            "fileName": "appeals_data.json",
+            "importedBy": "QA Admin John",
+            "timestamp": "2024-06-03T08:05:00Z",
+            "destination": "/files/appeals_data.json",
+            "size": "780 KB"
+        },
+        {
+            "fileName": "user_data.xlsx",
+            "importedBy": "Admin Yasser",
+            "timestamp": "2024-06-03T14:30:00Z",
+            "destination": "/files/user_data.xlsx",
+            "size": "45.2 MB"
+        },
+        {
+            "fileName": "analytics_data.csv",
+            "importedBy": "QA Admin Mohammed",
+            "timestamp": "2024-06-04T10:20:00Z",
+            "destination": "/files/analytics_data.csv",
+            "size": "320 KB"
         }
     ]
 }

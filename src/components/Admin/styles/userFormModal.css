@@ -1,0 +1,393 @@
+/* ===== Overlay & Modal Shell ===== */
+.userModalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.18s ease-out;
+}
+
+.userModal {
+    background: var(--neutral-color);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 720px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    animation: slideUp 0.22s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Header ===== */
+.userModalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    background: var(--primary-color);
+    color: var(--neutral-color);
+    flex-shrink: 0;
+}
+
+.userModalHeader h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--neutral-color);
+}
+
+.userModalHeader .closeBtn {
+    background: transparent;
+    border: 0;
+    color: #fff;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease;
+}
+.userModalHeader .closeBtn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* ===== Body ===== */
+.userModalBody {
+    padding: 22px 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    flex: 1 1 auto;
+}
+
+/* ===== Layout ===== */
+.formGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 18px;
+}
+
+/* ===== Form Fields ===== */
+.formField {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.formField label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted-color);
+    font-family: var(--font-main);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.formField label small {
+    font-weight: 400;
+    color: var(--text-color);
+    font-size: 0.72rem;
+    font-style: italic;
+}
+
+.formField .req {
+    color: var(--accent-color);
+    font-weight: 700;
+}
+
+.formField input,
+.formField select {
+    padding: 10px 12px;
+    border: 1px solid #d6dbe3;
+    border-radius: 8px;
+    background: var(--surface-high);
+    font-size: 0.92rem;
+    font-family: var(--font-main);
+    color: var(--foundation-color);
+    transition: border-color var(--anim-fast), background var(--anim-fast),
+        box-shadow var(--anim-fast);
+    width: 100%;
+}
+
+.formField input::placeholder {
+    color: var(--soft-color);
+}
+
+.formField input:focus,
+.formField select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(0, 33, 71, 0.12);
+}
+
+.formField input:disabled,
+.formField select:disabled {
+    background: #ececec;
+    color: var(--soft-color);
+    cursor: not-allowed;
+}
+
+/* Error / Success messages */
+.formField .err,
+.formField .ok {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: var(--font-main);
+}
+
+.formField .err {
+    color: var(--accent-color);
+}
+.formField .ok {
+    color: #15803d;
+}
+
+/* ===== Role-specific section ===== */
+.roleSection {
+    border: 1px dashed #c8d0db;
+    border-radius: 12px;
+    padding: 18px;
+    background: var(--tint-color);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.roleSection h3 {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-family: var(--font-display);
+    font-weight: 700;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #d8dee6;
+}
+
+/* ===== Combobox row (input + button) ===== */
+.comboRow {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.comboRow input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid #d6dbe3;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 0.92rem;
+    font-family: var(--font-main);
+    transition: border-color var(--anim-fast), box-shadow var(--anim-fast);
+}
+
+.comboRow input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 33, 71, 0.12);
+}
+
+.comboRow input:disabled {
+    background: #ececec;
+    color: var(--soft-color);
+    cursor: not-allowed;
+}
+
+.addChipBtn {
+    background: var(--primary-color);
+    color: var(--neutral-color);
+    border: 0;
+    padding: 0 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-main);
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: filter var(--anim-fast), background var(--anim-fast);
+    flex-shrink: 0;
+}
+
+.addChipBtn:hover:not(:disabled) {
+    filter: brightness(1.15);
+}
+
+.addChipBtn:disabled {
+    background: var(--soft-color);
+    cursor: not-allowed;
+}
+
+/* ===== Chips ===== */
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 0;
+}
+
+.chips:empty {
+    display: none;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #e7eefc;
+    color: #204c92;
+    padding: 5px 6px 5px 12px;
+    border-radius: 16px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: var(--font-data);
+    border: 1px solid #d3def7;
+}
+
+.chip.chip-managed {
+    background: #fff5e6;
+    color: #92520c;
+    border-color: #f3d9b1;
+}
+
+.chip button {
+    background: transparent;
+    border: 0;
+    color: inherit;
+    opacity: 0.7;
+    cursor: pointer;
+    padding: 2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background var(--anim-fast), opacity var(--anim-fast);
+}
+
+.chip button:hover {
+    opacity: 1;
+    background: rgba(192, 57, 43, 0.15);
+    color: var(--accent-color);
+}
+
+/* ===== Footer ===== */
+.userModalFooter {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e8ed;
+    margin-top: 4px;
+    flex-shrink: 0;
+}
+
+.btnSecondary,
+.btnPrimary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: var(--font-main);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: 0;
+    transition: filter var(--anim-fast), background var(--anim-fast),
+        color var(--anim-fast);
+}
+
+.btnSecondary {
+    background: var(--tint-color);
+    color: var(--muted-color);
+    border: 1px solid #dfe3ea;
+}
+.btnSecondary:hover {
+    background: var(--soft-color);
+    color: var(--foundation-color);
+}
+
+.btnPrimary {
+    background: var(--primary-color);
+    color: var(--neutral-color);
+}
+.btnPrimary:hover {
+    filter: brightness(1.2);
+}
+.formField .hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+    color: var(--text-color);
+    font-style: italic;
+}
+
+.facultyNotice {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 6px;
+    background: var(--warning-color);
+    color: var(--quaternary-color);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    border: 1px solid #f5d6b1;
+}
+.contentMng .Users .userTable .noDean {
+    color: var(--accent-color);
+    font-style: italic;
+    font-size: 0.85rem;
+}
+/* ===== Responsive ===== */
+@media (max-width: 640px) {
+    .formGrid {
+        grid-template-columns: 1fr;
+    }
+    .userModal {
+        max-height: 95vh;
+    }
+    .userModalHeader,
+    .userModalBody {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+    .comboRow {
+        flex-direction: column;
+    }
+    .addChipBtn {
+        padding: 10px 16px;
+        justify-content: center;
+    }
+}

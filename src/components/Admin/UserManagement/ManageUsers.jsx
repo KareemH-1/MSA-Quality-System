@@ -2,24 +2,128 @@ import React from "react";
 import "../styles/manageUsers.css";
 import Export from "../../data-components/Export";
 import PagificationContainer from "../../General/PagificationContainer";
-import { CloudUpload, FileText, Search, UserPen, UserRoundPlus, UserX } from "lucide-react";
+import { ROLES } from "../../../constants/roles";
+import {
+  CloudUpload,
+  FileText,
+  Search,
+  UserPen,
+  UserRoundPlus,
+  UserX,
+} from "lucide-react";
+import UserFormModal from "./UserFormModal";
 
-const ManageUsers = ({ onOpenImportPage, userData = { users: [], faculties: [] } }) => {
+const ROLE_LABELS = {
+  Admin: "Admin",
+  QA: "Quality Assurance Admin",
+  Dean: "Dean",
+  ModuleLeader: "Module Leader",
+  Instructor: "Instructor",
+  Student: "Student",
+};
+
+const ManageUsers = ({
+  onOpenImportPage,
+  userData = { users: [], faculties: [] },
+}) => {
   const ROWS_PER_PAGE_OPTIONS = [5, 6, 10, 15, 20];
 
-  const users = React.useMemo(() => {
-    return Array.isArray(userData?.users) ? userData.users : [];
+  const [usersList, setUsersList] = React.useState(
+    Array.isArray(userData?.users) ? userData.users : []
+  );
+
+  React.useEffect(() => {
+    setUsersList(Array.isArray(userData?.users) ? userData.users : []);
   }, [userData]);
+
+  const faculties = React.useMemo(
+    () => (Array.isArray(userData?.faculties) ? userData.faculties : []),
+    [userData]
+  );
+
+  const facultyNames = React.useMemo(
+    () => faculties.map((f) => f.name),
+    [faculties]
+  );
+
+  // Filters
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [roleFilter, setRoleFilter] = React.useState("All");
+  const [facultyFilter, setFacultyFilter] = React.useState("All");
+
+  // Modal
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [modalMode, setModalMode] = React.useState("add");
+  const [editingUser, setEditingUser] = React.useState(null);
+
+  const filteredUsers = React.useMemo(() => {
+    return usersList.filter((u) => {
+      const matchesSearch =
+        !searchTerm ||
+        u.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u.email?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesRole = roleFilter === "All" || u.role === roleFilter;
+      const userFaculty = u.Faculty || u.faculty || "";
+      const matchesFaculty =
+        facultyFilter === "All" || userFaculty === facultyFilter;
+      return matchesSearch && matchesRole && matchesFaculty;
+    });
+  }, [usersList, searchTerm, roleFilter, facultyFilter]);
 
   const handleImportFileSelected = (event) => {
     const selectedFile = event.target.files?.[0] ?? null;
-    if (!selectedFile) {
-      return;
-    }
-
+    if (!selectedFile) return;
     onOpenImportPage?.(selectedFile);
     event.target.value = "";
   };
+
+  const openAddModal = () => {
+    setModalMode("add");
+    setEditingUser(null);
+    setModalOpen(true);
+  };
+
+  const openEditModal = (user) => {
+    setModalMode("edit");
+    setEditingUser(user);
+    setModalOpen(true);
+  };
+
+  const handleDelete = (user) => {
+    if (
+      !window.confirm(`Delete user "${user.username}"? This cannot be undone.`)
+    )
+      return;
+    setUsersList((prev) => prev.filter((u) => u.id !== user.id));
+  };
+
+  const handleSaveUser = (payload, mode) => {
+    if (mode === "add") {
+      const newId =
+        usersList.length > 0
+          ? Math.max(...usersList.map((u) => u.id || 0)) + 1
+          : 1;
+      setUsersList((prev) => [...prev, { ...payload, id: newId }]);
+    } else {
+            setUsersList((prev) =>
+        prev.map((u) => (u.id === payload.id ? { ...u, ...payload } : u))
+      );
+    }
+    setModalOpen(false);
+    setEditingUser(null);
+  };
+
+  // Build a map: facultyName -> dean username (for display)
+  const deanByFaculty = React.useMemo(() => {
+    const map = {};
+    faculties.forEach((f) => {
+      if (f.deanId != null) {
+        const dean = usersList.find((u) => u.id === f.deanId);
+        if (dean) map[f.name] = dean.username;
+      }
+    });
+    return map;
+  }, [faculties, usersList]);
 
   return (
     <div className="ManageUsers">
@@ -30,9 +134,9 @@ const ManageUsers = ({ onOpenImportPage, userData = { users: [], faculties: [] }
         </div>
 
         <div className="end">
-          <Export data={userData} title="UserData" />
+          <Export data={{ ...userData, users: usersList }} title="UserData" />
 
-          <button className="addUser">
+          <button className="addUser" onClick={openAddModal}>
             <UserRoundPlus />
             Add New User
           </button>
@@ -42,28 +146,44 @@ const ManageUsers = ({ onOpenImportPage, userData = { users: [], faculties: [] }
       <div className="contentMng">
         <div className="Users">
           <div className="userTable">
-            <div className="filters" style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
+            <div
+              className="filters"
+              style={{ display: "flex", gap: "20px", marginBottom: "20px" }}
+            >
               <div className="searchUsers">
                 <Search />
-                <input type="text" placeholder="Search Users" />
+                <input
+                  type="text"
+                  placeholder="Search Users"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
 
               <div className="filterRole filter">
                 <h3>Filter by Role:</h3>
-                <select>
-                  <option value="Admin">Admin</option>
-                  <option value="QA">QA</option>
-                  <option value="Dean">Dean</option>
-                  <option value="ModuleLeader">Module Leader</option>
-                  <option value="Instructor">Instructor</option>
-                  <option value="Student">Student</option>
+                <select
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                >
+                  <option value="All">All</option>
+                  <option value={ROLES.ADMIN}>Admin</option>
+                  <option value={ROLES.QA}>QA</option>
+                  <option value={ROLES.DEAN}>Dean</option>
+                  <option value={ROLES.MODULE_LEADER}>Module Leader</option>
+                  <option value={ROLES.INSTRUCTOR}>Instructor</option>
+                  <option value={ROLES.STUDENT}>Student</option>
                 </select>
               </div>
 
               <div className="filterFaculty filter">
                 <h3>Filter by Faculty:</h3>
-                <select>
-                  {userData.faculties?.map((faculty) => (
+                <select
+                  value={facultyFilter}
+                  onChange={(e) => setFacultyFilter(e.target.value)}
+                >
+                  <option value="All">All</option>
+                  {facultyNames.map((faculty) => (
                     <option key={faculty} value={faculty}>
                       {faculty}
                     </option>
@@ -73,7 +193,7 @@ const ManageUsers = ({ onOpenImportPage, userData = { users: [], faculties: [] }
             </div>
 
             <PagificationContainer
-              data={users}
+              data={filteredUsers}
               itemName="users"
               initialRowsPerPage={6}
               rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
@@ -86,31 +206,48 @@ const ManageUsers = ({ onOpenImportPage, userData = { users: [], faculties: [] }
                       <th>Email</th>
                       <th>Role</th>
                       <th>Faculty</th>
+                      <th>Dean</th>
                       <th>Edit User</th>
                       <th>Delete User</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {paginatedUsers.map((user) => (
-                      <tr key={user.id}>
-                        <td>{user.username}</td>
-                        <td>{user.email}</td>
-                        <td>{user.role}</td>
-                        <td>{user.faculty || user.Faculty || "-"}</td>
-                        <td>
-                          <button className="editBtn">
-                            <UserPen />
-                            Edit
-                          </button>
-                        </td>
-                        <td>
-                          <button className="deleteBtn">
-                            <UserX />
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {paginatedUsers.map((user) => {
+                      const userFaculty = user.Faculty || user.faculty || "";
+                      return (
+                        <tr key={user.id}>
+                          <td>{user.username}</td>
+                          <td>{user.email}</td>
+                          <td>{ROLE_LABELS[user.role] || user.role}</td>
+                          <td>{userFaculty || "-"}</td>
+                          <td>
+                            {userFaculty
+                              ? deanByFaculty[userFaculty] || (
+                                  <span className="noDean">No Dean</span>
+                                )
+                              : "-"}
+                          </td>
+                          <td>
+                            <button
+                              className="editBtn"
+                              onClick={() => openEditModal(user)}
+                            >
+                              <UserPen />
+                              Edit
+                            </button>
+                          </td>
+                          <td>
+                            <button
+                              className="deleteBtn"
+                              onClick={() => handleDelete(user)}
+                            >
+                              <UserX />
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               )}
@@ -122,7 +259,11 @@ const ManageUsers = ({ onOpenImportPage, userData = { users: [], faculties: [] }
               <FileText />
             </div>
             <h2>Bulk Import Users</h2>
-            <p>Import multiple users at once using a CSV file, or an Excel file. The CSV should have the following columns: username, email, password , level , role, and faculty.</p>
+            <p>
+              Import multiple users at once using a CSV file, or an Excel file.
+              The CSV should have the following columns: username, email,
+              password, level, role, and faculty.
+            </p>
             <div className="dragDropImport">
               <div className="dragArea">
                 <CloudUpload />
@@ -132,13 +273,28 @@ const ManageUsers = ({ onOpenImportPage, userData = { users: [], faculties: [] }
                   accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                   onChange={handleImportFileSelected}
                 />
-                <p className="fileFormatNote">Supported formats: .csv, .xlsx, .xls</p>
+                <p className="fileFormatNote">
+                  Supported formats: .csv, .xlsx, .xls
+                </p>
               </div>
-              <p className="importNote">Note: Ensure your file is properly formatted to avoid import errors.</p>
+              <p className="importNote">
+                Note: Ensure your file is properly formatted to avoid import
+                errors.
+              </p>
             </div>
           </div>
         </div>
       </div>
+
+      <UserFormModal
+        open={modalOpen}
+        mode={modalMode}
+        initialUser={editingUser}
+        faculties={faculties}
+        existingUsers={usersList}
+        onClose={() => setModalOpen(false)}
+        onSubmit={handleSaveUser}
+      />
     </div>
   );
 };
