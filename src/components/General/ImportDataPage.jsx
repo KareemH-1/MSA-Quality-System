@@ -1,806 +1,1130 @@
 import React from "react";
 import * as XLSX from "xlsx";
-import { AlertTriangle, CheckCircle2, Plus, Trash2, Upload, XCircle } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ChevronDown,
+  Info,
+  Plus,
+  Trash2,
+  Upload,
+  X,
+  XCircle,
+} from "lucide-react";
 import PagificationContainer from "./PagificationContainer";
 import "./ImportDataPage.css";
 
-const TYPE_OPTIONS = [
-  { value: "string", label: "Text" },
-  { value: "number", label: "Number" },
-  { value: "email", label: "Email" },
-  { value: "date", label: "Date" },
-  { value: "boolean", label: "Boolean" },
-  { value: "dropdown", label: "Dropdown" },
-  { value: "list", label: "List (Text Items)" }
+/* ============================================================
+   SCHEMA
+   ============================================================ */
+
+// Canonical role keys used internally + what we accept in CSVs
+const ROLE_LABELS = {
+  Admin: "Admin",
+  QA: "Quality Assurance Admin",
+  Dean: "Dean",
+  ModuleLeader: "Module Leader",
+  Instructor: "Instructor",
+  Student: "Student",
+};
+const ROLE_KEYS = Object.keys(ROLE_LABELS);
+
+const ROLE_INPUT_OPTIONS = [
+  "Admin",
+  "QA",
+  "Dean",
+  "Module Leader",
+  "Instructor",
+  "Student",
 ];
 
-const DEFAULT_ROLE_OPTIONS = ["Admin", "QA", "Dean", "Module Leader", "Instructor", "Student"];
+const normalizeRole = (raw) => {
+  const v = String(raw ?? "")
+    .trim()
+    .toLowerCase();
+  if (!v) return "";
+  if (v === "admin") return "Admin";
+  if (["qa", "quality assurance", "quality assurance admin"].includes(v))
+    return "QA";
+  if (v === "dean") return "Dean";
+  if (["module leader", "moduleleader", "ml"].includes(v))
+    return "ModuleLeader";
+  if (v === "instructor") return "Instructor";
+  if (v === "student") return "Student";
+  return null; // unknown
+};
+
+// Fields that the importer cares about
+const FIELDS = {
+  username: { label: "Name", required: true, type: "string" },
+  email: { label: "Email", required: true, type: "email" },
+  password: {
+    label: "Password",
+    required: true,
+    type: "password",
+    minLength: 6,
+  },
+  role: {
+    label: "Role",
+    required: true,
+    type: "enum",
+    options: ROLE_INPUT_OPTIONS,
+  },
+  faculty: {
+    label: "Faculty",
+    required: false,
+    type: "string",
+    requiredForRoles: ["Dean", "Instructor", "ModuleLeader", "Student"],
+  },
+  courses: {
+    label: "Courses",
+    required: false,
+    type: "list",
+    requiredForRoles: ["Instructor", "ModuleLeader", "Student"],
+  },
+  managedCourses: {
+    label: "Managed Courses",
+    required: false,
+    type: "list",
+    requiredForRoles: ["ModuleLeader"],
+  },
+  level: {
+    label: "Level",
+    required: false,
+    type: "number",
+    requiredForRoles: ["Student"],
+  },
+};
+const FIELD_KEYS = Object.keys(FIELDS);
+
+// Header aliases for auto-mapping (lowercased)
+const FIELD_ALIASES = {
+  username: ["username", "name", "full name", "fullname"],
+  email: ["email", "e-mail", "mail"],
+  password: ["password", "pass", "pwd"],
+  role: ["role", "type", "user role", "usertype"],
+  faculty: ["faculty", "department", "school"],
+  courses: [
+    "courses",
+    "course",
+    "enrolled courses",
+    "enrolledcourses",
+    "taught courses",
+  ],
+  managedCourses: [
+    "managedcourses",
+    "managed courses",
+    "leading courses",
+    "managed",
+  ],
+  level: ["level", "year", "grade"],
+};
 
 const ROWS_PER_PAGE_OPTIONS = [10, 20, 50, 100];
 
-const normalizeValue = (value) => {
-  if (value === null || value === undefined) {
-    return "";
-  }
 
-  return String(value).trim();
-};
+const norm = (v) => (v === null || v === undefined ? "" : String(v).trim());
 
-const parseOptionsText = (value) => {
-  return String(value || "")
+const parseList = (v) =>
+  norm(v)
     .split(",")
-    .map((item) => item.trim())
+    .map((s) => s.trim())
     .filter(Boolean);
+
+const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
+let __idSeq = 0;
+const uid = (prefix) =>
+  `${prefix}-${Date.now()}-${(__idSeq++).toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+
+const autoMapField = (rawHeader) => {
+  const h = norm(rawHeader).toLowerCase();
+  if (!h) return null;
+  for (const field of FIELD_KEYS) {
+    if (FIELD_ALIASES[field].includes(h)) return field;
+  }
+  return null;
 };
 
-const buildColumnMetaByName = (name) => {
-  const normalizedName = normalizeValue(name).toLowerCase();
 
-  if (normalizedName === "role") {
-    return {
-      type: "dropdown",
-      options: DEFAULT_ROLE_OPTIONS
-    };
-  }
-
-  if (normalizedName === "courses" || normalizedName === "course") {
-    return {
-      type: "list",
-      options: []
-    };
-  }
-
-  return {
-    type: "string",
-    options: []
-  };
-};
-
-const isValueValidForType = (value, type, column = null) => {
-  const normalized = normalizeValue(value);
-
-  if (!normalized) {
-    return true;
-  }
-
-  if (type === "number") {
-    return Number.isFinite(Number(normalized));
-  }
-
-  if (type === "email") {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
-  }
-
-  if (type === "date") {
-    return !Number.isNaN(Date.parse(normalized));
-  }
-
-  if (type === "boolean") {
-    const lower = normalized.toLowerCase();
-    return ["true", "false", "1", "0", "yes", "no"].includes(lower);
-  }
-
-  if (type === "dropdown") {
-    const options = Array.isArray(column?.options) ? column.options : [];
-    return options.includes(normalized);
-  }
-
-  if (type === "list") {
-    const items = normalized.split(",").map((item) => item.trim());
-    if (items.length === 0) {
-      return false;
-    }
-
-    return items.every((item) => item.length > 0);
-  }
-
-  return true;
-};
-
-const hasDuplicateEmail = (rows, columns, existingUsers = []) => {
-  const emailColumnId = columns.find(
-    (col) => normalizeValue(col.name).toLowerCase() === "email"
-  )?.id;
-
-  if (!emailColumnId) return false;
-
-  const existingEmails = new Set(existingUsers.map((user) => normalizeValue(user.email || "").toLowerCase()));
-  const importedEmails = new Set();
-
-  for (const row of rows) {
-    const email = normalizeValue(row.values[emailColumnId] || "").toLowerCase();
-    if (email && (existingEmails.has(email) || importedEmails.has(email))) {
-      return true;
-    }
-    if (email) {
-      importedEmails.add(email);
-    }
-  }
-
-  return false;
-};
-
-const hasDuplicateId = (rows, columns, existingUsers = []) => {
-  const idColumnId = columns.find(
-    (col) => normalizeValue(col.name).toLowerCase() === "id"
-  )?.id;
-
-  if (!idColumnId) return false;
-
-  const existingIds = new Set(existingUsers.map((user) => user.id));
-  const importedIds = new Set();
-
-  for (const row of rows) {
-    const id = normalizeValue(row.values[idColumnId] || "");
-    if (id && (existingIds.has(Number(id)) || importedIds.has(Number(id)))) {
-      return true;
-    }
-    if (id) {
-      importedIds.add(Number(id));
-    }
-  }
-
-  return false;
-};
-
-const getDuplicateRowIds = (rows, columns, existingUsers = []) => {
-  const duplicateRowIds = new Set();
-  const emailColumnId = columns.find(
-    (col) => normalizeValue(col.name).toLowerCase() === "email"
-  )?.id;
-  const idColumnId = columns.find(
-    (col) => normalizeValue(col.name).toLowerCase() === "id"
-  )?.id;
-
-  if (emailColumnId) {
-    const existingEmails = new Set(existingUsers.map((user) => normalizeValue(user.email || "").toLowerCase()));
-    const importedEmails = new Map();
-
-    rows.forEach((row) => {
-      const email = normalizeValue(row.values[emailColumnId] || "").toLowerCase();
-      if (email) {
-        if (existingEmails.has(email) || importedEmails.has(email)) {
-          duplicateRowIds.add(row.id);
-          if (importedEmails.has(email)) {
-            duplicateRowIds.add(importedEmails.get(email));
-          }
-        }
-        importedEmails.set(email, row.id);
-      }
-    });
-  }
-
-  if (idColumnId) {
-    const existingIds = new Set(existingUsers.map((user) => user.id));
-    const importedIds = new Map();
-
-    rows.forEach((row) => {
-      const id = normalizeValue(row.values[idColumnId] || "");
-      if (id) {
-        const numId = Number(id);
-        if (existingIds.has(numId) || importedIds.has(numId)) {
-          duplicateRowIds.add(row.id);
-          if (importedIds.has(numId)) {
-            duplicateRowIds.add(importedIds.get(numId));
-          }
-        }
-        importedIds.set(numId, row.id);
-      }
-    });
-  }
-
-  return duplicateRowIds;
-};
-
-const createColumnId = () => `col-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-const createRowId = () => `row-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-
-const buildDatasetFromArray = (arrayData = []) => {
-  const safeRows = Array.isArray(arrayData) ? arrayData : [];
-
-  if (safeRows.length === 0) {
-    return { columns: [], rows: [] };
-  }
-
-  const longestRowLength = safeRows.reduce((max, row) => {
-    return Math.max(max, Array.isArray(row) ? row.length : 0);
-  }, 0);
-
-  const headerSource = Array.isArray(safeRows[0]) ? safeRows[0] : [];
-  const headers = Array.from({ length: Math.max(longestRowLength, headerSource.length) }, (_, index) => {
-    const value = normalizeValue(headerSource[index]);
-    return value || `Column ${index + 1}`;
-  });
-
-  const columns = headers.map((name) => {
-    const meta = buildColumnMetaByName(name);
-
-    return {
-      id: createColumnId(),
-      name,
-      type: meta.type,
-      options: meta.options
-    };
-  });
-
-  const rows = safeRows
-    .slice(1)
-    .map((rawRow) => {
-      const safeRow = Array.isArray(rawRow) ? rawRow : [];
-      const values = {};
-
-      columns.forEach((column, index) => {
-        values[column.id] = normalizeValue(safeRow[index]);
-      });
-
-      return {
-        id: createRowId(),
-        values
-      };
-    })
-    .filter((row) => Object.values(row.values).some((value) => normalizeValue(value) !== ""));
-
-  return { columns, rows };
-};
-
-const parseSpreadsheetFile = async (selectedFile) => {
-  if (!selectedFile) {
-    return { columns: [], rows: [] };
-  }
-
-  const arrayBuffer = await selectedFile.arrayBuffer();
-  const workbook = XLSX.read(arrayBuffer, { type: "array" });
-  const firstSheetName = workbook.SheetNames?.[0];
-
-  if (!firstSheetName) {
-    return { columns: [], rows: [] };
-  }
-
-  const firstSheet = workbook.Sheets[firstSheetName];
-  const arrayData = XLSX.utils.sheet_to_json(firstSheet, {
+const parseSpreadsheet = async (file) => {
+  if (!file) return { headers: [], rows: [] };
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf, { type: "array" });
+  const sheetName = wb.SheetNames?.[0];
+  if (!sheetName) return { headers: [], rows: [] };
+  const sheet = wb.Sheets[sheetName];
+  const arr = XLSX.utils.sheet_to_json(sheet, {
     header: 1,
     defval: "",
     raw: false,
-    blankrows: false
+    blankrows: false,
   });
+  if (arr.length === 0) return { headers: [], rows: [] };
 
-  return buildDatasetFromArray(arrayData);
+  const longest = arr.reduce(
+    (m, r) => Math.max(m, Array.isArray(r) ? r.length : 0),
+    0,
+  );
+  const headerRow = Array.isArray(arr[0]) ? arr[0] : [];
+  const headers = Array.from(
+    { length: Math.max(longest, headerRow.length) },
+    (_, i) => ({
+      id: uid("h"),
+      rawName: norm(headerRow[i]) || `Column ${i + 1}`,
+      field: autoMapField(headerRow[i]), // schema field key (e.g. "email") or null
+    }),
+  );
+
+  const rows = arr
+    .slice(1)
+    .map((raw) => {
+      const safe = Array.isArray(raw) ? raw : [];
+      const cells = {};
+      headers.forEach((h, i) => {
+        cells[h.id] = norm(safe[i]);
+      });
+      return { id: uid("r"), cells };
+    })
+    .filter((r) => Object.values(r.cells).some((v) => v !== ""));
+
+  return { headers, rows };
 };
 
-const ImportDataPage = ({ file, onCancel, onConfirmImport, existingUsers = [] }) => {
+
+const computeSchemaReport = (headers) => {
+  const fieldToHeaderId = {};
+  const duplicateMappings = [];
+  headers.forEach((h) => {
+    if (!h.field) return;
+    if (fieldToHeaderId[h.field]) {
+      duplicateMappings.push(h.field);
+    } else {
+      fieldToHeaderId[h.field] = h.id;
+    }
+  });
+
+  const missingRequired = FIELD_KEYS.filter(
+    (f) => FIELDS[f].required && !fieldToHeaderId[f],
+  );
+  const extraHeaders = headers.filter((h) => !h.field);
+  const mapped = headers.filter((h) => h.field);
+
+  return {
+    fieldToHeaderId, // { fieldKey: headerId }
+    missingRequired, // [fieldKey]
+    duplicateMappings: [...new Set(duplicateMappings)],
+    extraHeaders, // [headerObj]
+    mapped, // [headerObj]
+  };
+};
+
+
+const getCell = (row, fieldKey, fieldToHeaderId) => {
+  const hid = fieldToHeaderId[fieldKey];
+  return hid ? norm(row.cells[hid]) : "";
+};
+
+const validateRows = ({ rows, fieldToHeaderId, existingUsers, faculties }) => {
+  const issues = new Map(); // rowId -> string[]
+  const status = new Map(); // rowId -> 'valid'|'warning'|'invalid'|'duplicate'
+  const add = (rowId, msg) => {
+    if (!issues.has(rowId)) issues.set(rowId, []);
+    issues.get(rowId).push(msg);
+  };
+
+  /* --- Pre-existing constraints from current DB --- */
+  const dbDeanByFaculty = {};
+  faculties.forEach((f) => {
+    if (f.deanId != null) {
+      const dean = existingUsers.find((u) => u.id === f.deanId);
+      if (dean) dbDeanByFaculty[f.name] = dean.username || dean.email;
+    }
+  });
+
+  const dbLeaderByCourse = {};
+  existingUsers.forEach((u) => {
+    if (u.role === "ModuleLeader" && Array.isArray(u.managedCourses)) {
+      u.managedCourses.forEach((code) => {
+        dbLeaderByCourse[code] = u.username || u.email;
+      });
+    }
+  });
+
+  const dbEmails = new Set(
+    existingUsers.map((u) => norm(u.email).toLowerCase()),
+  );
+
+  /* --- Within-batch trackers --- */
+  const batchEmails = new Map(); // email -> [rowIds]
+  const batchDeanByFaculty = new Map(); // faculty -> [rowIds]
+  const batchLeaderByCourse = new Map(); // course -> [rowIds]
+
+  /* --- Per-row checks --- */
+  rows.forEach((row) => {
+    const username = getCell(row, "username", fieldToHeaderId);
+    const email = getCell(row, "email", fieldToHeaderId);
+    const password = getCell(row, "password", fieldToHeaderId);
+    const rawRole = getCell(row, "role", fieldToHeaderId);
+    const faculty = getCell(row, "faculty", fieldToHeaderId);
+    const courses = parseList(getCell(row, "courses", fieldToHeaderId));
+    const managed = parseList(getCell(row, "managedCourses", fieldToHeaderId));
+    const level = getCell(row, "level", fieldToHeaderId);
+
+    // Skip wholly empty rows (don't even count them)
+    if (
+      !username &&
+      !email &&
+      !password &&
+      !rawRole &&
+      !faculty &&
+      !courses.length &&
+      !managed.length &&
+      !level
+    ) {
+      status.set(row.id, "valid"); // treated as valid-empty so it doesn't block
+      return;
+    }
+
+    /* --- Required everywhere --- */
+    if (!username) add(row.id, "Name is required.");
+    if (!email) add(row.id, "Email is required.");
+    else if (!isEmail(email)) add(row.id, `Invalid email format: "${email}".`);
+    if (!password) add(row.id, "Password is required.");
+    else if (password.length < FIELDS.password.minLength)
+      add(
+        row.id,
+        `Password must be at least ${FIELDS.password.minLength} characters.`,
+      );
+
+    if (!rawRole) {
+      add(row.id, "Role is required.");
+    }
+
+    const role = rawRole ? normalizeRole(rawRole) : "";
+    if (rawRole && !role) {
+      add(row.id, `Unknown role "${rawRole}".`);
+    }
+
+    /* --- Faculty existence --- */
+    const facultyObj = faculty
+      ? faculties.find((f) => f.name.toLowerCase() === faculty.toLowerCase())
+      : null;
+    const validCodes = facultyObj
+      ? new Set(facultyObj.courses.map((c) => c.code))
+      : null;
+    if (faculty && !facultyObj)
+      add(row.id, `Faculty "${faculty}" does not exist.`);
+
+    /* --- Role-specific rules --- */
+    if (role === "Dean") {
+      if (!faculty) add(row.id, "Dean requires a Faculty.");
+      else if (facultyObj) {
+        if (dbDeanByFaculty[facultyObj.name])
+          add(
+            row.id,
+            `Faculty "${facultyObj.name}" already has a Dean (${dbDeanByFaculty[facultyObj.name]}).`,
+          );
+        if (!batchDeanByFaculty.has(facultyObj.name))
+          batchDeanByFaculty.set(facultyObj.name, []);
+        batchDeanByFaculty.get(facultyObj.name).push(row.id);
+      }
+    }
+
+    if (role === "Instructor" || role === "ModuleLeader") {
+      const lbl = ROLE_LABELS[role];
+      if (!faculty) add(row.id, `${lbl} requires a Faculty.`);
+      if (!courses.length) add(row.id, `${lbl} requires at least one course.`);
+      else if (validCodes) {
+        const bad = courses.filter((c) => !validCodes.has(c));
+        if (bad.length)
+          add(
+            row.id,
+            `Course(s) not in "${facultyObj.name}": ${bad.join(", ")}.`,
+          );
+      }
+    }
+
+    if (role === "ModuleLeader") {
+      if (!managed.length)
+        add(row.id, "Module Leader requires at least one managed course.");
+      else {
+        if (validCodes) {
+          const bad = managed.filter((c) => !validCodes.has(c));
+          if (bad.length)
+            add(
+              row.id,
+              `Managed course(s) not in "${facultyObj.name}": ${bad.join(", ")}.`,
+            );
+        }
+        managed.forEach((code) => {
+          if (dbLeaderByCourse[code])
+            add(
+              row.id,
+              `Course "${code}" already managed by ${dbLeaderByCourse[code]}.`,
+            );
+          if (!batchLeaderByCourse.has(code)) batchLeaderByCourse.set(code, []);
+          batchLeaderByCourse.get(code).push(row.id);
+        });
+      }
+    }
+
+    if (role === "Student") {
+      if (!faculty) add(row.id, "Student requires a Faculty.");
+      if (!level) add(row.id, "Student requires a Level.");
+      else if (!Number.isFinite(Number(level)))
+        add(row.id, `Level "${level}" must be a number.`);
+      if (courses.length && validCodes) {
+        const bad = courses.filter((c) => !validCodes.has(c));
+        if (bad.length)
+          add(
+            row.id,
+            `Enrolled course(s) not in "${facultyObj.name}": ${bad.join(", ")}.`,
+          );
+      }
+    }
+
+    /* --- Email tracking for duplicates --- */
+    if (email) {
+      const k = email.toLowerCase();
+      if (!batchEmails.has(k)) batchEmails.set(k, []);
+      batchEmails.get(k).push(row.id);
+    }
+  });
+
+  /* --- Email duplicates (DB + within batch) --- */
+  const dupRowIds = new Set();
+  batchEmails.forEach((ids, k) => {
+    const inDb = dbEmails.has(k);
+    if (inDb || ids.length > 1) {
+      ids.forEach((rid) => {
+        dupRowIds.add(rid);
+        add(
+          rid,
+          inDb
+            ? `Email "${k}" is already used by an existing user.`
+            : `Email "${k}" is duplicated within this import.`,
+        );
+      });
+    }
+  });
+
+  /* --- Cross-batch dean / leader conflicts --- */
+  batchDeanByFaculty.forEach((ids, fac) => {
+    if (ids.length > 1)
+      ids.forEach((rid) =>
+        add(rid, `Multiple Deans in this import for faculty "${fac}".`),
+      );
+  });
+  batchLeaderByCourse.forEach((ids, code) => {
+    if (ids.length > 1)
+      ids.forEach((rid) =>
+        add(
+          rid,
+          `Multiple Module Leaders in this import for course "${code}".`,
+        ),
+      );
+  });
+
+  /* --- Compute final status per row --- */
+  rows.forEach((row) => {
+    if (status.has(row.id)) return; // already set (e.g. empty)
+    if (dupRowIds.has(row.id)) status.set(row.id, "duplicate");
+    else if (issues.has(row.id)) status.set(row.id, "invalid");
+    else status.set(row.id, "valid");
+  });
+
+  return { issues, status };
+};
+
+/* ============================================================
+   PAYLOAD BUILDER
+   ============================================================ */
+
+const buildUserPayloads = ({ rows, fieldToHeaderId, existingUsers }) => {
+  const maxId = existingUsers.reduce((m, u) => Math.max(m, u.id || 0), 0);
+  let nextId = maxId + 1;
+
+  return rows
+    .filter((row) => Object.values(row.cells).some((v) => norm(v) !== ""))
+    .map((row) => {
+      const username = getCell(row, "username", fieldToHeaderId);
+      const email = getCell(row, "email", fieldToHeaderId);
+      const password = getCell(row, "password", fieldToHeaderId);
+      const role = normalizeRole(getCell(row, "role", fieldToHeaderId));
+      const faculty = getCell(row, "faculty", fieldToHeaderId);
+      const courses = parseList(getCell(row, "courses", fieldToHeaderId));
+      const managed = parseList(
+        getCell(row, "managedCourses", fieldToHeaderId),
+      );
+      const level = getCell(row, "level", fieldToHeaderId);
+
+      const user = { id: nextId++, username, email, password, role };
+      if (["Dean", "Instructor", "ModuleLeader", "Student"].includes(role))
+        user.Faculty = faculty;
+      if (["Instructor", "ModuleLeader", "Student"].includes(role))
+        user.courses = courses;
+      if (role === "ModuleLeader") user.managedCourses = managed;
+      if (role === "Student" && level) user.level = Number(level);
+      return user;
+    });
+};
+
+/* ============================================================
+   COMPONENT
+   ============================================================ */
+
+const ImportDataPage = ({
+  file,
+  onCancel,
+  onConfirmImport,
+  existingUsers = [],
+  faculties = [],
+}) => {
   const [selectedFile, setSelectedFile] = React.useState(file ?? null);
-  const [columns, setColumns] = React.useState([]);
+  const [headers, setHeaders] = React.useState([]);
   const [rows, setRows] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
-  const [confirmIntent, setConfirmIntent] = React.useState(null);
+  const [confirmIntent, setConfirmIntent] = React.useState(null); // 'import' | 'cancel'
   const [dragActive, setDragActive] = React.useState(false);
+  const [showAllIssues, setShowAllIssues] = React.useState(false);
 
+  const dragCounter = React.useRef(0);
+
+  /* ----- Sync external file prop ----- */
   React.useEffect(() => {
-    setSelectedFile(file ?? null);
+    setSelectedFile((prev) =>
+      prev === (file ?? null) ? prev : (file ?? null),
+    );
   }, [file]);
 
+  /* ----- Parse file (only when file actually changes) ----- */
   React.useEffect(() => {
-    let isMounted = true;
-
-    const loadFile = async () => {
+    let alive = true;
+    const load = async () => {
       if (!selectedFile) {
-        setColumns([]);
+        setHeaders([]);
         setRows([]);
         setErrorMessage("");
         return;
       }
-
       setIsLoading(true);
       setErrorMessage("");
-
       try {
-        const dataset = await parseSpreadsheetFile(selectedFile);
-        if (isMounted) {
-          setColumns(dataset.columns);
-          setRows(dataset.rows);
-        }
+        const ds = await parseSpreadsheet(selectedFile);
+        if (!alive) return;
+        setHeaders(ds.headers);
+        setRows(ds.rows);
       } catch {
-        if (isMounted) {
-          setColumns([]);
-          setRows([]);
-          setErrorMessage("Unable to read this file. Please upload a valid CSV or Excel file.");
-        }
+        if (!alive) return;
+        setHeaders([]);
+        setRows([]);
+        setErrorMessage(
+          "Unable to read this file. Please upload a valid CSV or Excel file.",
+        );
       } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        if (alive) setIsLoading(false);
       }
     };
-
-    loadFile();
-
+    load();
     return () => {
-      isMounted = false;
+      alive = false;
     };
   }, [selectedFile]);
 
-  const duplicateRowIds = React.useMemo(() => {
-    return getDuplicateRowIds(rows, columns, existingUsers);
-  }, [rows, columns, existingUsers]);
+  /* ----- Esc key closes confirm modal ----- */
+  React.useEffect(() => {
+    if (!confirmIntent) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") setConfirmIntent(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [confirmIntent]);
 
-  const rowSummaries = React.useMemo(() => {
-    return rows.map((row) => {
-      if (duplicateRowIds.has(row.id)) {
-        return { rowId: row.id, status: "duplicate" };
-      }
+  /* ----- Schema report (memoised) ----- */
+  const schema = React.useMemo(() => computeSchemaReport(headers), [headers]);
 
-      let hasInvalid = false;
-      let hasEmpty = false;
+  /* ----- Row validation ----- */
+  const { issues, status } = React.useMemo(
+    () =>
+      validateRows({
+        rows,
+        fieldToHeaderId: schema.fieldToHeaderId,
+        existingUsers,
+        faculties,
+      }),
+    [rows, schema.fieldToHeaderId, existingUsers, faculties],
+  );
 
-      columns.forEach((column) => {
-        const value = row.values[column.id] ?? "";
-        const normalized = normalizeValue(value);
-
-        if (!normalized) {
-          hasEmpty = true;
-          return;
-        }
-
-        if (!isValueValidForType(value, column.type, column)) {
-          hasInvalid = true;
-        }
-      });
-
-      if (hasInvalid) {
-        return { rowId: row.id, status: "invalid" };
-      }
-
-      if (hasEmpty) {
-        return { rowId: row.id, status: "warning" };
-      }
-
-      return { rowId: row.id, status: "valid" };
+  /* ----- Counts ----- */
+  const counts = React.useMemo(() => {
+    let valid = 0,
+      invalid = 0,
+      duplicate = 0;
+    status.forEach((s) => {
+      if (s === "valid") valid++;
+      else if (s === "duplicate") duplicate++;
+      else if (s === "invalid") invalid++;
     });
-  }, [columns, rows, duplicateRowIds]);
+    return { valid, invalid, duplicate };
+  }, [status]);
 
-  const rowStatusMap = React.useMemo(() => {
-    return rowSummaries.reduce((acc, item) => {
-      acc[item.rowId] = item.status;
-      return acc;
-    }, {});
-  }, [rowSummaries]);
+  const canImport =
+    rows.length > 0 &&
+    schema.missingRequired.length === 0 &&
+    schema.duplicateMappings.length === 0 &&
+    counts.invalid === 0 &&
+    counts.duplicate === 0;
 
-  const hasDupEmail = hasDuplicateEmail(rows, columns, existingUsers);
-  const hasDupId = hasDuplicateId(rows, columns, existingUsers);
-  const invalidRowCount = rowSummaries.filter((item) => item.status === "invalid").length;
-  const warningRowCount = rowSummaries.filter((item) => item.status === "warning").length;
-  const canImport = rows.length > 0 && columns.length > 0 && invalidRowCount === 0 && !hasDupEmail && !hasDupId;
+  /* ----- Handlers ----- */
 
-  const onFileInputChange = (event) => {
-    const nextFile = event.target.files?.[0] ?? null;
-    setSelectedFile(nextFile);
+  const onFileInputChange = (e) => {
+    setSelectedFile(e.target.files?.[0] ?? null);
+    e.target.value = "";
   };
 
-  const handleDrag = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (event.type === "dragenter" || event.type === "dragover") {
-      setDragActive(true);
-    } else if (event.type === "dragleave") {
-      setDragActive(false);
-    }
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!Array.from(e.dataTransfer?.types || []).includes("Files")) return;
+    dragCounter.current += 1;
+    if (dragCounter.current === 1) setDragActive(true);
   };
-
-  const handleDrop = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (dragCounter.current === 0) return;
+    dragCounter.current -= 1;
+    if (dragCounter.current === 0) setDragActive(false);
+  };
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current = 0;
     setDragActive(false);
-    const nextFile = event.dataTransfer?.files?.[0] ?? null;
-    if (nextFile && (nextFile.name.endsWith(".csv") || nextFile.name.endsWith(".xlsx") || nextFile.name.endsWith(".xls"))) {
-      setSelectedFile(nextFile);
-    }
+    const f = e.dataTransfer?.files?.[0];
+    if (f && /\.(csv|xlsx|xls)$/i.test(f.name)) setSelectedFile(f);
   };
 
-  const updateCell = (rowId, columnId, value) => {
-    setRows((prevRows) => {
-      return prevRows.map((row) => {
-        if (row.id !== rowId) {
-          return row;
-        }
-
-        return {
-          ...row,
-          values: {
-            ...row.values,
-            [columnId]: value
-          }
-        };
-      });
-    });
+  const updateCell = (rowId, headerId, value) => {
+    setRows((prev) =>
+      prev.map((r) =>
+        r.id !== rowId ? r : { ...r, cells: { ...r.cells, [headerId]: value } },
+      ),
+    );
   };
 
-  const updateColumnMeta = (columnId, patch) => {
-    setColumns((prevColumns) => {
-      return prevColumns.map((column) => {
-        if (column.id !== columnId) {
-          return column;
-        }
-
-        const nextType = patch.type ?? column.type;
-        return {
-          ...column,
-          ...patch,
-          type: nextType,
-          options: nextType === "dropdown" ? (patch.options ?? column.options ?? []) : []
-        };
-      });
-    });
-  };
-
-  const updateColumnName = (columnId, nextName) => {
-    setColumns((prevColumns) => {
-      return prevColumns.map((column) => {
-        if (column.id !== columnId) {
-          return column;
-        }
-
-        const autoMeta = buildColumnMetaByName(nextName);
-        const shouldAutoApply = autoMeta.type === "dropdown" || autoMeta.type === "list";
-
-        if (!shouldAutoApply) {
-          return {
-            ...column,
-            name: nextName
-          };
-        }
-
-        return {
-          ...column,
-          name: nextName,
-          type: autoMeta.type,
-          options: autoMeta.options
-        };
-      });
-    });
-  };
-
-  const removeColumn = (columnId) => {
-    setColumns((prevColumns) => prevColumns.filter((column) => column.id !== columnId));
-    setRows((prevRows) => {
-      return prevRows.map((row) => {
-        const nextValues = { ...row.values };
-        delete nextValues[columnId];
-        return { ...row, values: nextValues };
-      });
-    });
-  };
-
-  const addColumn = () => {
-    const nextColumnId = createColumnId();
-
-    setColumns((prevColumns) => [
-      ...prevColumns,
-      {
-        id: nextColumnId,
-        name: `Column ${prevColumns.length + 1}`,
-        type: "string",
-        options: []
-      }
-    ]);
-
-    setRows((prevRows) => {
-      return prevRows.map((row) => ({
-        ...row,
-        values: {
-          ...row.values,
-          [nextColumnId]: ""
-        }
-      }));
-    });
+  const setHeaderField = (headerId, fieldKey) => {
+    setHeaders((prev) =>
+      prev.map((h) =>
+        h.id !== headerId ? h : { ...h, field: fieldKey || null },
+      ),
+    );
   };
 
   const addRow = () => {
-    const values = {};
-    columns.forEach((column) => {
-      values[column.id] = "";
+    const cells = {};
+    headers.forEach((h) => {
+      cells[h.id] = "";
     });
-
-    setRows((prevRows) => [
-      ...prevRows,
-      {
-        id: createRowId(),
-        values
-      }
-    ]);
+    setRows((p) => [...p, { id: uid("r"), cells }]);
   };
-
-  const removeRow = (rowId) => {
-    setRows((prevRows) => prevRows.filter((row) => row.id !== rowId));
-  };
+  const removeRow = (rowId) => setRows((p) => p.filter((r) => r.id !== rowId));
 
   const handleImportClick = () => {
-    if (!canImport) {
-      return;
-    }
-
-    setConfirmIntent("import");
+    if (canImport) setConfirmIntent("import");
   };
-
-  const handleCancelClick = () => {
-    setConfirmIntent("cancel");
-  };
+  const handleCancelClick = () => setConfirmIntent("cancel");
+  const closeConfirm = () => setConfirmIntent(null);
 
   const confirmAction = () => {
     if (confirmIntent === "import") {
+      const payloads = buildUserPayloads({
+        rows,
+        fieldToHeaderId: schema.fieldToHeaderId,
+        existingUsers,
+      });
       onConfirmImport?.({
         fileName: selectedFile?.name ?? "",
-        columns,
-        rows
+        users: payloads,
       });
-    }
-
-    if (confirmIntent === "cancel") {
+    } else if (confirmIntent === "cancel") {
       onCancel?.();
     }
-
     setConfirmIntent(null);
   };
 
+  /* ----- Issues list for the panel ----- */
+  const issuesList = React.useMemo(() => {
+    const arr = [];
+    rows.forEach((r, i) => {
+      const list = issues.get(r.id) || [];
+      if (list.length)
+        arr.push({ rowId: r.id, rowNumber: i + 1, messages: list });
+    });
+    return arr;
+  }, [rows, issues]);
+
+  /* ============================================================
+     RENDER
+     ============================================================ */
   return (
     <section
-      className={`ImportDataPage ${dragActive ? "idp-drag-active" : ""}`}
-      onDragEnter={handleDrag}
-      onDragLeave={handleDrag}
-      onDragOver={handleDrag}
+      className="idp"
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <header className="idp-header">
-        <div>
-          <p className="idp-kicker">BULK IMPORT WORKSPACE</p>
-          <h1>Review Data Before Import</h1>
+      {/* HEADER */}
+      <header className="idp__header">
+        <div className="idp__heading">
+          <span className="idp__kicker">Bulk Import Users</span>
+          <h1>Review &amp; Validate</h1>
           <p>
-            Edit rows, change structure, remove columns, and fix validation issues before confirming import.
+            Map columns, fix any issues, then confirm the import. The system
+            will enforce all role rules.
           </p>
         </div>
-
-        <label className="idp-upload-btn" htmlFor="idp-file-input">
-          <Upload size={16} />
-          {selectedFile ? "Replace File" : "Upload File"}
-        </label>
-        <input
-          id="idp-file-input"
-          type="file"
-          accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-          onChange={onFileInputChange}
-        />
+        <div className="idp__header-actions">
+          <label className="idp__upload" htmlFor="idp-file-input">
+            <Upload size={16} />
+            {selectedFile ? "Replace File" : "Upload File"}
+          </label>
+          <input
+            id="idp-file-input"
+            type="file"
+            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+            onChange={onFileInputChange}
+          />
+        </div>
       </header>
 
-      <div className="idp-meta-grid">
-        <div className="idp-meta-card">
-          <span>File Name</span>
-          <strong>{selectedFile?.name || "No file selected"}</strong>
+      {/* SCHEMA CHECK */}
+      {headers.length > 0 && (
+        <div className="idp__schema">
+          <div className="idp__schema-row">
+            <h3>Schema Check</h3>
+            <div className="idp__schema-stats">
+              <span className="idp__pill idp__pill--ok">
+                <CheckCircle2 size={12} /> {schema.mapped.length} mapped
+              </span>
+              {schema.missingRequired.length > 0 && (
+                <span className="idp__pill idp__pill--bad">
+                  <XCircle size={12} /> {schema.missingRequired.length} missing
+                  required
+                </span>
+              )}
+              {schema.duplicateMappings.length > 0 && (
+                <span className="idp__pill idp__pill--bad">
+                  <AlertTriangle size={12} /> {schema.duplicateMappings.length}{" "}
+                  duplicate mappings
+                </span>
+              )}
+              {schema.extraHeaders.length > 0 && (
+                <span className="idp__pill idp__pill--warn">
+                  <Info size={12} /> {schema.extraHeaders.length} unknown
+                  columns
+                </span>
+              )}
+            </div>
+          </div>
+
+          {schema.missingRequired.length > 0 && (
+            <div className="idp__schema-msg idp__schema-msg--bad">
+              <strong>
+                Missing required column
+                {schema.missingRequired.length === 1 ? "" : "s"}:
+              </strong>{" "}
+              {schema.missingRequired.map((f) => FIELDS[f].label).join(", ")}.{" "}
+              Add them to your file or map an existing column below.
+            </div>
+          )}
+          {schema.duplicateMappings.length > 0 && (
+            <div className="idp__schema-msg idp__schema-msg--bad">
+              <strong>Duplicate mappings:</strong>{" "}
+              {schema.duplicateMappings.map((f) => FIELDS[f].label).join(", ")}.{" "}
+              Each schema field can only be mapped to one column.
+            </div>
+          )}
+          {schema.extraHeaders.length > 0 && (
+            <div className="idp__schema-msg idp__schema-msg--warn">
+              <strong>Unknown columns will be ignored:</strong>{" "}
+              {schema.extraHeaders.map((h) => h.rawName).join(", ")}. Map them
+              to a schema field below if you want to include them.
+            </div>
+          )}
         </div>
-        <div className="idp-meta-card">
-          <span>Total Rows</span>
-          <strong>{rows.length}</strong>
-        </div>
-        <div className="idp-meta-card">
-          <span>Total Columns</span>
-          <strong>{columns.length}</strong>
-        </div>
-        <div className="idp-meta-card">
-          <span>Validation</span>
-          <strong>
-            {invalidRowCount} invalid / {warningRowCount} warning
+      )}
+
+      {/* META */}
+      <div className="idp__meta">
+        <div className="idp__meta-card">
+          <span className="idp__meta-label">File</span>
+          <strong className="idp__meta-value">
+            {selectedFile?.name || "No file selected"}
           </strong>
         </div>
+        <div className="idp__meta-card">
+          <span className="idp__meta-label">Rows</span>
+          <strong className="idp__meta-value">{rows.length}</strong>
+        </div>
+        <div className="idp__meta-card">
+          <span className="idp__meta-label">Columns</span>
+          <strong className="idp__meta-value">{headers.length}</strong>
+        </div>
+        <div className="idp__meta-card">
+          <span className="idp__meta-label">Validation</span>
+          <div className="idp__stats">
+            <span className="idp__stat idp__stat--ok">
+              <CheckCircle2 size={12} /> {counts.valid}
+            </span>
+            <span className="idp__stat idp__stat--bad">
+              <XCircle size={12} /> {counts.invalid}
+            </span>
+            <span className="idp__stat idp__stat--dup">
+              <Info size={12} /> {counts.duplicate}
+            </span>
+          </div>
+        </div>
       </div>
 
-      {(errorMessage || hasDupEmail || hasDupId) && (
-        <div className="idp-alert idp-alert-error">
-          <AlertTriangle size={16} />
-          <span>
-            {errorMessage || (hasDupEmail ? "Duplicate email found in import or existing users." : "Duplicate ID found in import or existing users.")}
-          </span>
+      {/* ALERTS */}
+      {errorMessage && (
+        <div className="idp__alert idp__alert--error">
+          <AlertTriangle size={16} /> <span>{errorMessage}</span>
         </div>
       )}
-
-      {!errorMessage && !isLoading && rows.length === 0 && columns.length === 0 && (
-        <div className="idp-alert idp-alert-neutral">
-          <AlertTriangle size={16} />
-          <span>Upload a file to start editing and validating your import data.</span>
-        </div>
-      )}
-
-      <div className="idp-toolbar">
-        <button type="button" onClick={addRow} className="idp-btn idp-btn-secondary" disabled={columns.length === 0}>
-          <Plus size={16} />
-          Add Row
-        </button>
-        <button type="button" onClick={addColumn} className="idp-btn idp-btn-secondary">
-          <Plus size={16} />
-          Add Column
-        </button>
-      </div>
-
-      <PagificationContainer
-        data={rows}
-        itemName="rows"
-        initialRowsPerPage={20}
-        rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
-      >
-        {(paginatedRows, pagination) => (
-        <div className="idp-table-wrap">
-          <table className="idp-table">
-            <thead>
-              <tr>
-                <th className="idp-index-col">#</th>
-                {columns.map((column) => (
-                  <th key={column.id}>
-                    <div className="idp-col-editor">
-                      <input
-                        type="text"
-                        value={column.name}
-                        onChange={(event) => updateColumnName(column.id, event.target.value)}
-                        placeholder="Column name"
-                      />
-                      <select
-                        value={column.type}
-                        onChange={(event) => updateColumnMeta(column.id, { type: event.target.value })}
-                      >
-                        {TYPE_OPTIONS.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                      {column.type === "dropdown" && (
-                        <input
-                          type="text"
-                          value={(column.options || []).join(", ")}
-                          onChange={(event) => {
-                            updateColumnMeta(column.id, {
-                              options: parseOptionsText(event.target.value)
-                            });
-                          }}
-                          placeholder="Dropdown values (comma separated)"
-                        />
-                      )}
-                      {column.type === "list" && (
-                        <p className="idp-col-help">Use comma-separated text like: Math, Physics, Algorithms</p>
-                      )}
-                      <button
-                        type="button"
-                        className="idp-remove-column"
-                        onClick={() => removeColumn(column.id)}
-                        title="Remove this column"
-                        aria-label="Remove this column"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </th>
-                ))}
-                <th className="idp-actions-col">Remove Row</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedRows.map((row, index) => {
-                const rowStatus = rowStatusMap[row.id];
-
-                return (
-                  <tr
-                    key={row.id}
-                    className={
-                      rowStatus === "duplicate"
-                        ? "idp-row-duplicate"
-                        : rowStatus === "invalid"
-                          ? "idp-row-invalid"
-                          : rowStatus === "warning"
-                            ? "idp-row-warning"
-                            : ""
-                    }
-                  >
-                    <td className="idp-index-cell">
-                      {(pagination.currentPage - 1) * pagination.rowsPerPage + index + 1}
-                    </td>
-                    {columns.map((column) => (
-                      <td key={`${row.id}-${column.id}`}>
-                        {column.type === "dropdown" ? (
-                          <select
-                            value={row.values[column.id] ?? ""}
-                            onChange={(event) => updateCell(row.id, column.id, event.target.value)}
-                          >
-                            <option value="">Select...</option>
-                            {(column.options || []).map((optionValue) => (
-                              <option key={optionValue} value={optionValue}>
-                                {optionValue}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          <input
-                            type="text"
-                            value={row.values[column.id] ?? ""}
-                            onChange={(event) => updateCell(row.id, column.id, event.target.value)}
-                            placeholder={column.type === "list" ? "item1, item2" : ""}
-                          />
-                        )}
-                      </td>
-                    ))}
-                    <td className="idp-row-action">
-                      <button
-                        type="button"
-                        onClick={() => removeRow(row.id)}
-                        className="idp-remove-row"
-                        aria-label="Remove row"
-                        title="Remove row"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+      {!errorMessage &&
+        !isLoading &&
+        rows.length === 0 &&
+        headers.length === 0 && (
+          <div className="idp__alert idp__alert--neutral">
+            <Upload size={16} />{" "}
+            <span>Upload a CSV or Excel file to begin.</span>
+          </div>
         )}
-      </PagificationContainer>
 
-      <div className="idp-legend">
-        <div>
-          <span className="idp-chip idp-chip-dark-red" /> Duplicate row (email or ID exists)
-        </div>
-        <div>
-          <span className="idp-chip idp-chip-red" /> Invalid row (wrong type)
-        </div>
-        <div>
-          <span className="idp-chip idp-chip-yellow" /> Warning row (has empty values)
-        </div>
-      </div>
-
-      {!canImport && (
-        <div className="idp-alert idp-alert-neutral">
-          <AlertTriangle size={16} />
-          <span>
-            Import is disabled. You need at least 1 row and 1 column, and all invalid rows must be fixed.
-          </span>
+      {/* ISSUES */}
+      {issuesList.length > 0 && (
+        <div className="idp__issues">
+          <button
+            type="button"
+            className="idp__issues-head"
+            onClick={() => setShowAllIssues((v) => !v)}
+            aria-expanded={showAllIssues}
+          >
+            <AlertTriangle size={16} />
+            <span>
+              <strong>{issuesList.length}</strong> row
+              {issuesList.length === 1 ? "" : "s"} need fixing
+            </span>
+            <ChevronDown
+              size={14}
+              className={`idp__chev ${showAllIssues ? "is-open" : ""}`}
+            />
+          </button>
+          {showAllIssues && (
+            <ul className="idp__issues-list">
+              {issuesList.map(({ rowId, rowNumber, messages }) => (
+                <li key={rowId}>
+                  <span className="idp__rowtag">Row {rowNumber}</span>
+                  <ul>
+                    {messages.map((m, i) => (
+                      <li key={i}>{m}</li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
-      {confirmIntent && (
-        <div className="idp-confirm-bar">
-          {confirmIntent === "import" ? <CheckCircle2 size={18} /> : <XCircle size={18} />}
-          <span>
-            {confirmIntent === "import"
-              ? "Confirm import? This will import the currently edited dataset."
-              : "Confirm cancel? Your current import edits will be discarded."}
-          </span>
-          <button type="button" className="idp-btn idp-btn-primary" onClick={confirmAction}>
-            Confirm
+      {/* TOOLBAR */}
+      {headers.length > 0 && (
+        <div className="idp__toolbar">
+          <button
+            type="button"
+            onClick={addRow}
+            className="idp__btn idp__btn--ghost"
+          >
+            <Plus size={16} /> Add Row
+          </button>
+        </div>
+      )}
+
+      {/* TABLE */}
+      {headers.length > 0 && (
+        <PagificationContainer
+          data={rows}
+          itemName="rows"
+          initialRowsPerPage={20}
+          rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
+        >
+          {(paginatedRows, pagination) => (
+            <div className="idp__table-wrap">
+              <table className="idp__table">
+                <thead>
+                  <tr>
+                    <th className="idp__th-index">#</th>
+                    {headers.map((h) => {
+                      const isDup =
+                        h.field && schema.duplicateMappings.includes(h.field);
+                      return (
+                        <th
+                          key={h.id}
+                          className={`idp__th-col ${!h.field ? "is-extra" : ""} ${isDup ? "is-dup" : ""}`}
+                        >
+                          <div className="idp__col-editor">
+                            <span className="idp__col-raw" title={h.rawName}>
+                              {h.rawName}
+                            </span>
+                            <select
+                              className="idp__col-mapping"
+                              value={h.field || ""}
+                              onChange={(e) =>
+                                setHeaderField(h.id, e.target.value)
+                              }
+                            >
+                              <option value="">— Ignore —</option>
+                              {FIELD_KEYS.map((fk) => (
+                                <option key={fk} value={fk}>
+                                  {FIELDS[fk].label}
+                                  {FIELDS[fk].required ? " *" : ""}
+                                </option>
+                              ))}
+                            </select>
+                            {isDup && (
+                              <span className="idp__col-warn">
+                                duplicate mapping
+                              </span>
+                            )}
+                          </div>
+                        </th>
+                      );
+                    })}
+                    <th className="idp__th-issues">Status</th>
+                    <th className="idp__th-actions">Remove</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedRows.map((row, index) => {
+                    const s = status.get(row.id) || "valid";
+                    const rowIssues = issues.get(row.id) || [];
+                    const cls =
+                      s === "duplicate"
+                        ? "idp__row idp__row--dup"
+                        : s === "invalid"
+                          ? "idp__row idp__row--invalid"
+                          : "idp__row idp__row--ok";
+
+                    return (
+                      <tr key={row.id} className={cls}>
+                        <td className="idp__td-index">
+                          {(pagination.currentPage - 1) *
+                            pagination.rowsPerPage +
+                            index +
+                            1}
+                        </td>
+                        {headers.map((h) => {
+                          const value = row.cells[h.id] ?? "";
+                          // Render role as enum, level as number, others as text
+                          if (h.field === "role") {
+                            return (
+                              <td key={`${row.id}-${h.id}`} className="idp__td">
+                                <select
+                                  className="idp__cell"
+                                  value={value}
+                                  onChange={(e) =>
+                                    updateCell(row.id, h.id, e.target.value)
+                                  }
+                                >
+                                  <option value="">Select…</option>
+                                  {ROLE_INPUT_OPTIONS.map((r) => (
+                                    <option key={r} value={r}>
+                                      {r}
+                                    </option>
+                                  ))}
+                                </select>
+                              </td>
+                            );
+                          }
+                          return (
+                            <td key={`${row.id}-${h.id}`} className="idp__td">
+                              <input
+                                className="idp__cell"
+                                type={h.field === "password" ? "text" : "text"}
+                                value={value}
+                                onChange={(e) =>
+                                  updateCell(row.id, h.id, e.target.value)
+                                }
+                                placeholder={
+                                  h.field === "courses" ||
+                                  h.field === "managedCourses"
+                                    ? "CS213, CS232"
+                                    : ""
+                                }
+                              />
+                            </td>
+                          );
+                        })}
+                        <td className="idp__td-issues">
+                          {rowIssues.length > 0 ? (
+                            <span
+                              className={`idp__badge ${s === "duplicate" ? "idp__badge--dup" : "idp__badge--bad"}`}
+                              title={rowIssues.join("\n")}
+                            >
+                              <Info size={12} /> {rowIssues.length}
+                            </span>
+                          ) : (
+                            <span className="idp__badge idp__badge--ok">
+                              <CheckCircle2 size={12} /> ok
+                            </span>
+                          )}
+                        </td>
+                        <td className="idp__td-actions">
+                          <button
+                            type="button"
+                            className="idp__icon-btn idp__icon-btn--danger"
+                            onClick={() => removeRow(row.id)}
+                            aria-label="Remove row"
+                            title="Remove row"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </PagificationContainer>
+      )}
+
+      <div className="idp__footer">
+        {!canImport && rows.length > 0 && (
+          <p className="idp__footer-hint">
+            <AlertTriangle size={14} />
+            {schema.missingRequired.length > 0
+              ? "Map all required columns before importing."
+              : "Fix all invalid and duplicate rows before importing."}
+          </p>
+        )}
+        <div className="idp__footer-actions">
+          <button
+            type="button"
+            className="idp__btn idp__btn--ghost"
+            onClick={handleCancelClick}
+          >
+            Cancel Import
           </button>
           <button
             type="button"
-            className="idp-btn idp-btn-secondary"
-            onClick={() => setConfirmIntent(null)}
+            className="idp__btn idp__btn--primary"
+            onClick={handleImportClick}
+            disabled={!canImport}
           >
-            Keep Editing
+            <CheckCircle2 size={16} /> Confirm Import
           </button>
+        </div>
+      </div>
+
+      {confirmIntent && (
+        <div
+          className="idp-modal__backdrop"
+          onClick={closeConfirm}
+          role="presentation"
+        >
+          <div
+            className="idp-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="idp-modal-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <header className="idp-modal__head">
+              <div
+                className={`idp-modal__icon ${confirmIntent === "import" ? "is-success" : "is-danger"}`}
+              >
+                {confirmIntent === "import" ? (
+                  <CheckCircle2 size={22} />
+                ) : (
+                  <XCircle size={22} />
+                )}
+              </div>
+              <h2 id="idp-modal-title">
+                {confirmIntent === "import"
+                  ? "Confirm Import"
+                  : "Cancel Import"}
+              </h2>
+              <button
+                type="button"
+                className="idp-modal__close"
+                onClick={closeConfirm}
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </header>
+            <div className="idp-modal__body">
+              {confirmIntent === "import" ? (
+                <>
+                  <p>
+                    Import <strong>{counts.valid}</strong> user
+                    {counts.valid === 1 ? "" : "s"} from{" "}
+                    <strong>
+                      {selectedFile?.name || "the current dataset"}
+                    </strong>
+                    ?
+                  </p>
+                  <p className="idp-modal__muted">
+                    This will create new accounts. Cannot be undone.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p>Cancel and discard your changes?</p>
+                  <p className="idp-modal__muted">
+                    You'll go back to the previous page.
+                  </p>
+                </>
+              )}
+            </div>
+            <footer className="idp-modal__foot">
+              <button
+                type="button"
+                className="idp__btn idp__btn--ghost"
+                onClick={closeConfirm}
+              >
+                Keep Editing
+              </button>
+              <button
+                type="button"
+                className={`idp__btn ${confirmIntent === "import" ? "idp__btn--primary" : "idp__btn--danger"}`}
+                onClick={confirmAction}
+              >
+                {confirmIntent === "import" ? "Yes, Import" : "Yes, Cancel"}
+              </button>
+            </footer>
+          </div>
         </div>
       )}
 
-      <div className="idp-actions">
-        <button type="button" className="idp-btn idp-btn-secondary" onClick={handleCancelClick}>
-          Cancel Import
-        </button>
-        <button type="button" className="idp-btn idp-btn-primary" onClick={handleImportClick} disabled={!canImport}>
-          Confirm Import
-        </button>
-      </div>
-
       {dragActive && (
-        <div className="idp-drag-modal">
-          <div className="idp-drag-modal-content">
+        <div className="idp-drop">
+          <div className="idp-drop__card">
             <Upload size={48} />
             <h2>Drop your file here</h2>
-            <p>Release to import CSV or Excel file</p>
+            <p>Release to load your CSV or Excel file</p>
           </div>
         </div>
       )}
