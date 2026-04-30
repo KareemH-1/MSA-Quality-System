@@ -3,6 +3,7 @@ import "../styles/manageUsers.css";
 import Export from "../../data-components/Export";
 import PagificationContainer from "../../General/PagificationContainer";
 import { ROLES } from "../../../constants/roles";
+import { getRoleLabel, normalizeRole } from "../../../services/roleUtils";
 import {
   CloudUpload,
   FileText,
@@ -22,6 +23,11 @@ const ROLE_LABELS = {
   Student: "Student",
 };
 
+const normalizeUserRecord = (user) => ({
+  ...user,
+  role: normalizeRole(user?.role),
+});
+
 const ManageUsers = ({
   onOpenImportPage,
   userData = { users: [], faculties: [] },
@@ -29,11 +35,11 @@ const ManageUsers = ({
   const ROWS_PER_PAGE_OPTIONS = [5, 6, 10, 15, 20];
 
   const [usersList, setUsersList] = React.useState(
-    Array.isArray(userData?.users) ? userData.users : []
+    Array.isArray(userData?.users) ? userData.users.map(normalizeUserRecord) : []
   );
 
   React.useEffect(() => {
-    setUsersList(Array.isArray(userData?.users) ? userData.users : []);
+    setUsersList(Array.isArray(userData?.users) ? userData.users.map(normalizeUserRecord) : []);
   }, [userData]);
 
   const faculties = React.useMemo(
@@ -62,7 +68,7 @@ const ManageUsers = ({
         !searchTerm ||
         u.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         u.email?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesRole = roleFilter === "All" || u.role === roleFilter;
+      const matchesRole = roleFilter === "All" || normalizeRole(u.role) === roleFilter;
       const userFaculty = u.Faculty || u.faculty || "";
       const matchesFaculty =
         facultyFilter === "All" || userFaculty === facultyFilter;
@@ -103,10 +109,10 @@ const ManageUsers = ({
         usersList.length > 0
           ? Math.max(...usersList.map((u) => u.id || 0)) + 1
           : 1;
-      setUsersList((prev) => [...prev, { ...payload, id: newId }]);
+      setUsersList((prev) => [...prev, normalizeUserRecord({ ...payload, id: newId })]);
     } else {
-            setUsersList((prev) =>
-        prev.map((u) => (u.id === payload.id ? { ...u, ...payload } : u))
+      setUsersList((prev) =>
+        prev.map((u) => (u.id === payload.id ? normalizeUserRecord({ ...u, ...payload }) : u))
       );
     }
     setModalOpen(false);
@@ -218,7 +224,7 @@ const ManageUsers = ({
                         <tr key={user.id}>
                           <td>{user.username}</td>
                           <td>{user.email}</td>
-                          <td>{ROLE_LABELS[user.role] || user.role}</td>
+                          <td>{ROLE_LABELS[normalizeRole(user.role)] || getRoleLabel(user.role)}</td>
                           <td>{userFaculty || "-"}</td>
                           <td>
                             {userFaculty

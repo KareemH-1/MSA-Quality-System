@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Lock, MoveRight, Eye, EyeOff } from "lucide-react";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../services/AuthContext";
+import { getDefaultPageForRole } from "../../services/pagesConfig";
+import { normalizeRole } from "../../services/roleUtils";
+
+import api from "../../api/axios";
 
 const containerVariants = {
   hidden: { opacity: 0, y: 18 },
@@ -24,19 +31,57 @@ const itemVariants = {
 const MotionDiv = motion.div;
 const MotionButton = motion.button;
 const MotionForm = motion.form;
+
 const LoginForm = ({ onForgotPassword }) => {
-  const [currentRole, setCurrentRole] = useState("student");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { setUser, setRole, setName } = useAuth();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
-  let passwordType = "password";
-  let toggleLabel = "Show password";
-  let ToggleIcon = Eye;
+  const passwordType = showPassword ? "text" : "password";
+  const toggleLabel = showPassword ? "Hide password" : "Show password";
+  const ToggleIcon = showPassword ? EyeOff : Eye;
 
-  if (showPassword) {
-    passwordType = "text";
-    toggleLabel = "Hide password";
-    ToggleIcon = EyeOff;
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      const response = await api.post("/Controller/AuthController.php", {
+        email,
+        password,
+        rememberMe,
+      });
+
+      if (response.data?.status === "success") {
+        const name = response.data.user.name || "";
+        const role = normalizeRole(response.data.user.role || "");
+        toast.success(`Welcome back${name ? ', ' + name : ''}!`);
+        if (rememberMe) {
+          setUser({ name, role, _remember: true });
+        } else {
+          setRole(role);
+          setName(name);
+        }
+        // Redirect to user's default page based on role
+        const defaultPage = getDefaultPageForRole(role);
+        navigate(defaultPage, { replace: true });
+      } else {
+        // Server responded 200 but with a failure status
+        toast.error(response.data?.message || "Invalid credentials");
+        console.log("Login failed:", response.data); // Log full response for debugging
+      }
+    } catch (err) {
+      const msg = err?.response?.data?.message || err?.message || "Login failed";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <MotionDiv
@@ -45,64 +90,63 @@ const LoginForm = ({ onForgotPassword }) => {
       initial="hidden"
       animate="visible"
     >
-      <MotionDiv className="Header" variants={itemVariants}>
+      <MotionDiv className="login-header" variants={itemVariants}>
         <h1>Portal Access</h1>
         <p>Login to your account</p>
       </MotionDiv>
-      <MotionDiv className="Portal-Options" variants={itemVariants}>
-        <MotionButton
-          type="button"
-          className={`student-btn btn ${currentRole === "student" ? "is-active" : ""}`}
-          onClick={() => setCurrentRole("student")}
-          whileTap={{ scale: 0.98 }}
-        >
-          Student Login
-        </MotionButton>
 
-        <MotionButton
-          type="button"
-          className={`staff-btn btn ${currentRole === "staff" ? "is-active" : ""}`}
-          onClick={() => setCurrentRole("staff")}
-          whileTap={{ scale: 0.98 }}
-        >
-          Staff Login
-        </MotionButton>
-      </MotionDiv>
-      <MotionForm variants={itemVariants}>
-        <label htmlFor="username">University Email</label>
-
-        <MotionDiv className="input-group" whileFocus={{ scale: 1.01 }}>
-          <div className="input-icon">@</div>
+      <MotionForm variants={itemVariants} onSubmit={handleSubmit} noValidate>
+        <label htmlFor="email">University Email</label>
+        <div className="input-group">
+          <div className="input-icon" aria-hidden="true">@</div>
           <input
             type="email"
-            id="username"
+            id="email"
+            name="email"
+            autoComplete="username"
             placeholder="University Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
-        </MotionDiv>
-        <label htmlFor="password">Password</label>
+        </div>
 
-        <MotionDiv className="input-group" whileFocus={{ scale: 1.01 }}>
-          <div className="input-icon">
+        <label htmlFor="password">Password</label>
+        <div className="input-group">
+          <div className="input-icon" aria-hidden="true">
             <Lock />
           </div>
           <input
             type={passwordType}
             id="password"
+            name="password"
+            autoComplete="current-password"
             placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
           <button
             type="button"
             className="password-toggle"
-            onClick={() => setShowPassword(!showPassword)}
+            onClick={() => setShowPassword((s) => !s)}
             aria-label={toggleLabel}
+            aria-pressed={showPassword}
           >
-            <ToggleIcon />
+            <ToggleIcon aria-hidden="true" />
           </button>
-        </MotionDiv>
+        </div>
 
-        <div className="form-links">
+        <div className="form-row">
+          <label className="remember-me">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+            />
+            <span>Remember me</span>
+          </label>
+
           <button
             type="button"
             className="forgot-password"
@@ -111,16 +155,17 @@ const LoginForm = ({ onForgotPassword }) => {
             Forgot password?
           </button>
         </div>
-        <MotionDiv
-          className="submit-div"
-          whileHover={{ y: -1 }}
-          whileTap={{ y: 0 }}
+
+        <MotionButton
+          type="submit"
+          className="submit-btn"
+          disabled={loading}
+          whileHover={!loading ? { y: -1 } : undefined}
+          whileTap={!loading ? { y: 0, scale: 0.99 } : undefined}
         >
-          <MotionButton type="submit" whileTap={{ scale: 0.99 }}>
-            Sign In
-          </MotionButton>
-          <MoveRight />
-        </MotionDiv>
+          <span>{loading ? "Authenticating..." : "Sign In"}</span>
+          {!loading && <MoveRight aria-hidden="true" />}
+        </MotionButton>
       </MotionForm>
     </MotionDiv>
   );

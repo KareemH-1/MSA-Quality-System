@@ -10,6 +10,7 @@ import { getAdminManageUserNavbarComponents } from "./AdminNavbarComponents";
 import { ROLES } from "../constants/roles";
 import { Settings, LayoutDashboard , UserRound, Activity} from "lucide-react";
 import Contact from "../pages/Contact";
+import { normalizeRole } from "./roleUtils";
 
 export const PAGE_CONFIG = {
   login: {
@@ -63,4 +64,14 @@ export const PAGE_CONFIG = {
 export const NOT_FOUND_PAGE = {
   path: "*",
   component: NotFound,
+};
+
+export const ROLE_DEFAULT_PAGES = {
+  [ROLES.QA]: "/dashboard",
+  [ROLES.ADMIN]: "/user-management",
+};
+
+export const getDefaultPageForRole = (role) => {
+  const normalizedRole = normalizeRole(role);
+  return ROLE_DEFAULT_PAGES[normalizedRole] || "/contact";
 };

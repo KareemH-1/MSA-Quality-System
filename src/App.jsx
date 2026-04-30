@@ -1,11 +1,16 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight} from "lucide-react";
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import SideBar from "./components/layout/sideBar";
 import NavBar from "./components/layout/navBar";
 import { NOT_FOUND_PAGE, PAGE_CONFIG } from "./services/pagesConfig";
-import { ROLES } from "./constants/roles";
 import Footer from "./components/Footer";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useAuth } from './services/AuthContext';
+import Loader from "./components/Loader";
+import { normalizeRole } from "./services/roleUtils";
+import { getDefaultPageForRole } from "./services/pagesConfig";
 
 const APP_PAGES = Object.values(PAGE_CONFIG);
 
@@ -37,7 +42,23 @@ function App() {
   const { pathname } = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(getSideBarStateLocalStorage());
   const [navSelections, setNavSelections] = useState(buildInitialNavSelections);
-  const currentUserRole = ROLES.ADMIN; // change later when backend is done
+  const { user, authReady } = useAuth();
+  const currentUserRole = normalizeRole(user?.role);
+  const requestedPage = APP_PAGES.find((page) => page.path === pathname);
+
+  if (!authReady) {
+    return <Loader />;
+  }
+
+  if (requestedPage?.roles) {
+    if (!currentUserRole) {
+      return <Navigate to="/" replace />;
+    }
+
+    if (!requestedPage.roles.includes(currentUserRole)) {
+      return <Navigate to={getDefaultPageForRole(currentUserRole)} replace />;
+    }
+  }
 
   const accessiblePages = APP_PAGES.filter(
     (page) => !page.roles || page.roles.includes(currentUserRole)
@@ -125,6 +146,7 @@ function App() {
         </Routes>
         <Footer />
       </div>
+      <ToastContainer position="top-right" />
     </main>
   );
 }

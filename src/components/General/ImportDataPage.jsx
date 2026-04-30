@@ -44,10 +44,10 @@ const normalizeRole = (raw) => {
     .toLowerCase();
   if (!v) return "";
   if (v === "admin") return "Admin";
-  if (["qa", "quality assurance", "quality assurance admin"].includes(v))
+  if (["qa", "qa_admin", "quality assurance", "quality assurance admin"].includes(v))
     return "QA";
   if (v === "dean") return "Dean";
-  if (["module leader", "moduleleader", "ml"].includes(v))
+  if (["module leader", "moduleleader", "module_leader", "ml"].includes(v))
     return "ModuleLeader";
   if (v === "instructor") return "Instructor";
   if (v === "student") return "Student";
@@ -244,7 +244,7 @@ const validateRows = ({ rows, fieldToHeaderId, existingUsers, faculties }) => {
 
   const dbLeaderByCourse = {};
   existingUsers.forEach((u) => {
-    if (u.role === "ModuleLeader" && Array.isArray(u.managedCourses)) {
+    if (normalizeRole(u.role) === "ModuleLeader" && Array.isArray(u.managedCourses)) {
       u.managedCourses.forEach((code) => {
         dbLeaderByCourse[code] = u.username || u.email;
       });

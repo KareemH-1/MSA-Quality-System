@@ -2,6 +2,7 @@ import React from "react";
 import "../styles/userFormModal.css";
 import { X, Plus, AlertCircle, CheckCircle2, Info } from "lucide-react";
 import { ROLES } from "../../../constants/roles";
+import { normalizeRole } from "../../../services/roleUtils";
 
 const ROLE_OPTIONS = [
   { value: ROLES.ADMIN, label: "Admin" },
@@ -44,16 +45,26 @@ const UserFormModal = ({
   });
   const [facultyNotice, setFacultyNotice] = React.useState("");
 
+  const normalizedExistingUsers = React.useMemo(
+    () => existingUsers.map((user) => ({ ...user, role: normalizeRole(user.role) })),
+    [existingUsers]
+  );
+
+  const normalizedInitialUser = React.useMemo(
+    () => (initialUser ? { ...initialUser, role: normalizeRole(initialUser.role) } : null),
+    [initialUser]
+  );
+
   React.useEffect(() => {
     if (!open) return;
-    if (mode === "edit" && initialUser) {
+    if (mode === "edit" && normalizedInitialUser) {
       setForm({
         ...emptyForm,
-        ...initialUser,
-        Faculty: initialUser.Faculty || initialUser.faculty || "",
-        courses: initialUser.courses || [],
-        managedCourses: initialUser.managedCourses || [],
-        level: initialUser.level ?? "",
+        ...normalizedInitialUser,
+        Faculty: normalizedInitialUser.Faculty || normalizedInitialUser.faculty || "",
+        courses: normalizedInitialUser.courses || [],
+        managedCourses: normalizedInitialUser.managedCourses || [],
+        level: normalizedInitialUser.level ?? "",
         password: "",
       });
     } else {
@@ -64,7 +75,7 @@ const UserFormModal = ({
     setManagedInput("");
     setComboError({ courses: "", managedCourses: "" });
     setFacultyNotice("");
-  }, [open, mode, initialUser]);
+  }, [open, mode, normalizedInitialUser]);
 
   const facultyObj = React.useMemo(
     () => faculties.find((f) => f.name === form.Faculty) || null,
@@ -75,16 +86,16 @@ const UserFormModal = ({
   // Excludes the user being edited so they keep their own managed courses.
   const managedByMap = React.useMemo(() => {
     const map = {};
-    existingUsers.forEach((u) => {
+    normalizedExistingUsers.forEach((u) => {
       if (u.role === ROLES.MODULE_LEADER && Array.isArray(u.managedCourses)) {
-        if (u.id === initialUser?.id) return;
+        if (u.id === normalizedInitialUser?.id) return;
         u.managedCourses.forEach((code) => {
           map[code] = u;
         });
       }
     });
     return map;
-  }, [existingUsers, initialUser]);
+  }, [normalizedExistingUsers, normalizedInitialUser]);
 
   if (!open) return null;
 
@@ -198,22 +209,25 @@ const UserFormModal = ({
 
   const validate = () => {
     const e = {};
+
     if (!form.username.trim()) e.username = "Name is required.";
     if (!form.email.trim()) e.email = "Email is required.";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       e.email = "Invalid email format.";
+    }
 
-    if (mode === "add" && !form.password.trim())
+    if (mode === "add" && !form.password.trim()) {
       e.password = "Password is required.";
-    else if (form.password && form.password.length < 6)
+    } else if (form.password && form.password.length < 6) {
       e.password = "Password must be at least 6 characters.";
+    }
 
     if (!form.role) e.role = "Role is required.";
 
-    const emailTaken = existingUsers.some(
+    const emailTaken = normalizedExistingUsers.some(
       (u) =>
         u.email.toLowerCase() === form.email.toLowerCase() &&
-        u.id !== initialUser?.id
+        u.id !== normalizedInitialUser?.id
     );
     if (emailTaken) e.email = "This email is already registered.";
 
@@ -221,11 +235,11 @@ const UserFormModal = ({
     if (form.role === ROLES.DEAN) {
       if (!form.Faculty) e.Faculty = "Faculty is required for Dean.";
       else {
-        const existingDean = existingUsers.find(
+        const existingDean = normalizedExistingUsers.find(
           (u) =>
             u.role === ROLES.DEAN &&
             (u.Faculty || u.faculty) === form.Faculty &&
-            u.id !== initialUser?.id
+            u.id !== normalizedInitialUser?.id
         );
         if (existingDean) {
           e.Faculty = `Faculty "${form.Faculty}" already has a Dean (${existingDean.username}).`;
@@ -239,18 +253,21 @@ const UserFormModal = ({
       if (!form.Faculty) e.Faculty = "Faculty is required.";
       if (!form.courses?.length) e.courses = "At least one course is required.";
       const invalid = form.courses.filter((c) => !validCodes.includes(c));
-      if (invalid.length)
+      if (invalid.length) {
         e.courses = `Courses not in ${form.Faculty}: ${invalid.join(", ")}`;
+      }
 
       if (form.role === ROLES.MODULE_LEADER) {
-        if (!form.managedCourses?.length)
+        if (!form.managedCourses?.length) {
           e.managedCourses = "Module Leader must manage at least one course.";
+        }
+
         const notAssigned = form.managedCourses.filter(
           (c) => !form.courses.includes(c)
         );
-        if (notAssigned.length)
-          e.managedCourses =
-            "Managed courses must be part of assigned courses.";
+        if (notAssigned.length) {
+          e.managedCourses = "Managed courses must be part of assigned courses.";
+        }
 
         const conflicts = form.managedCourses
           .filter((c) => managedByMap[c])
@@ -266,13 +283,16 @@ const UserFormModal = ({
     if (form.role === ROLES.STUDENT) {
       if (!form.Faculty) e.Faculty = "Faculty is required.";
       if (!form.level) e.level = "Level is required.";
-      if (!form.courses?.length)
+      if (!form.courses?.length) {
         e.courses = "At least one enrolled course is required.";
+      }
+
       const invalid = form.courses.filter((c) => !validCodes.includes(c));
-      if (invalid.length)
+      if (invalid.length) {
         e.courses = `Courses not offered by ${form.Faculty}: ${invalid.join(
           ", "
         )}`;
+      }
     }
 
     setErrors(e);
@@ -334,7 +354,7 @@ const UserFormModal = ({
   const showLevel = role === ROLES.STUDENT;
 
   const facultyDean = facultyObj?.deanId
-    ? existingUsers.find((u) => u.id === facultyObj.deanId)
+    ? normalizedExistingUsers.find((u) => u.id === facultyObj.deanId)
     : null;
 
   const courseSourceCodes = facultyCourses.map((c) => c.code);
