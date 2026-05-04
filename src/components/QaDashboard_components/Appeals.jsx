@@ -19,6 +19,8 @@ import AppealKpiCard from "../cards/AppealKpiCard";
 import MiniMetricCard from "../cards/MiniMetricCard";
 import "./styles/Appeals.css";
 import { Search, SearchCheck, SearchX } from "lucide-react";
+import SearchCourseAppeal from "./SearchCourseAppeal";
+import SearchFacultyAppeal from "./SearchFacultyAppeal";
 
 ChartJS.register(
   CategoryScale,
@@ -734,6 +736,7 @@ const Appeals = () => {
   const [selectedFaculty, setSelectedFaculty] = useState("");
   const [courseSearchText, setCourseSearchText] = useState("");
   const [selectedCourseId, setSelectedCourseId] = useState("");
+  const [searchView, setSearchView] = useState(null); // { type: 'course'|'faculty', params: {} }
 
   useEffect(() => {
     const fetchAppealsData = async () => {
@@ -870,11 +873,18 @@ const Appeals = () => {
 
   const handleCourseSearch = () => {
     if (isCourseSearchDisabled) return;
-    if (!shouldSearchByCourse) return;
-    const next = closestCourse || courseDropdownOptions[0] || null;
-    if (!next) return;
-    setSelectedCourseId(next.id);
-    setCourseSearchText(`${next.code} ${next.name}`);
+    // If user provided free-text course input, prefer course search behavior
+    if (shouldSearchByCourse) {
+      const next = closestCourse || courseDropdownOptions[0] || null;
+      if (!next) return;
+      setSelectedCourseId(next.id);
+      setCourseSearchText(`${next.code} ${next.name}`);
+      setSearchView({ type: "course", params: { course: next } });
+      return;
+    }
+
+    // Otherwise perform a faculty search (selectedFaculty may be empty => all faculties)
+    setSearchView({ type: "faculty", params: { faculty: selectedFaculty } });
   };
 
   const activeSemester = useMemo(
@@ -1078,6 +1088,28 @@ const Appeals = () => {
     () => buildCumulativeVelocityData(sourceData, appealsData),
     [sourceData, appealsData],
   );
+  if (searchView) {
+    const { type, params } = searchView;
+    return (
+      <div className="appeals-page page-cont">
+        {type === "course" ? (
+          <SearchCourseAppeal
+            course={params.course}
+            onBack={() => setSearchView(null)}
+            courseCatalog={courseCatalog}
+            appealsData={appealsData}
+          />
+        ) : (
+          <SearchFacultyAppeal
+            faculty={params.faculty}
+            onBack={() => setSearchView(null)}
+            courseCatalog={courseCatalog}
+            appealsData={appealsData}
+          />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="appeals-page page-cont">
@@ -1298,7 +1330,7 @@ const Appeals = () => {
         <div className="appeals-second-col">
           <div className="AppealsByCourse">
             <div className="backgroundSVG">
-              {courseDropdownOptions.length === 0 || isCourseSearchDisabled ? <SearchX /> : <SearchCheck />}
+              {isCourseSearchDisabled ? <SearchX /> : <SearchCheck />}
             </div>
             <h1>Find appeal trends by course/Faculty</h1>
             <label htmlFor="faculty-select">Choose Faculty:</label>
@@ -1355,7 +1387,7 @@ const Appeals = () => {
               type="button"
               className="course-search-btn"
               onClick={handleCourseSearch}
-              disabled={courseDropdownOptions.length === 0 || isCourseSearchDisabled}
+              disabled={isCourseSearchDisabled}
             >
               {shouldSearchByCourse ? "Search by course" : "Search by faculty"}
             </button>
