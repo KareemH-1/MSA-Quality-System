@@ -1,6 +1,4 @@
-/* ============================================================
-   SearchCourseAppeal — page layout
-   ============================================================ */
+
 .search-appeal-page {
   display: flex;
   flex-direction: column;
@@ -11,7 +9,6 @@
   color: #17354f;
 }
 
-/* ---------- header ---------- */
 .search-appeal-header {
   display: flex;
   align-items: flex-start;
@@ -66,9 +63,6 @@
   color: #7d8796;
 }
 
-/* ============================================================
-   KPI section styles
-   ============================================================ */
 .search-appeal-kpi-section {
   display: flex;
   flex-direction: column;
@@ -88,10 +82,6 @@
   background: #fff;
   border-radius: 14px;
   box-shadow: 0 1px 4px rgba(23, 53, 79, 0.06);
-  border-left: 4px solid #1f77b4;
-}
-.search-appeal-session-section:nth-child(n+4) {
-  border-left-color: #b22b1d;
 }
 
 .session-section-header {
@@ -115,9 +105,6 @@
   color: #7d8796;
 }
 
-/* ============================================================
-   KPI grid layout
-   ============================================================ */
 .appeals-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -128,10 +115,6 @@
 .appeals-kpi-grid .mini-metric-card {
   height: 100%;
 }
-
-/* ============================================================
-   Charts section styles
-   ============================================================ */
 .search-appeal-charts-section {
   display: flex;
   flex-direction: column;
@@ -167,9 +150,6 @@
 }
 
 
-/* ============================================================
-   Responsive layout
-   ============================================================ */
 @media (max-width: 1600px) {
   .charts-grid-row {
     grid-template-columns: repeat(2, 1fr);
