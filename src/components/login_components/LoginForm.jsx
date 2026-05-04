@@ -51,7 +51,7 @@ const LoginForm = ({ onForgotPassword }) => {
     setLoading(true);
 
     try {
-      const response = await api.post("/Controller/AuthController.php", {
+      const response = await api.post("/View/AuthView.php", {
         email,
         password,
         rememberMe,

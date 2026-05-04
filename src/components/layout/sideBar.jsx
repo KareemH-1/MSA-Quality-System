@@ -24,7 +24,7 @@ const SideBar = ({ isOpen, pages = [] }) => {
 
   const handleLogout = async () => {
     try {
-      const response = await api.post("/Controller/LogoutController.php", {});
+      const response = await api.post("/View/LogoutView.php", {});
 
       if (response?.data?.status === "success") {
         setUser(null);
