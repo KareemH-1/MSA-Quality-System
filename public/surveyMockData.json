@@ -302,10 +302,10 @@
       "semester": "2026-SPRING",
       "submittedAt": "2026-04-07",
       "status": "completed",
-      "overallScore": 93,
-      "courseMaterialScore": 91,
-      "instructorSatisfaction": 95,
-      "responseRate": 96,
+      "overallScore": 90,
+      "courseMaterialScore": 79,
+      "instructorSatisfaction": 94,
+      "responseRate": 88,
       "draftSummary": "Strong practical project work and excellent support.",
       "comments": [
         {
@@ -334,6 +334,246 @@
         }
       ],
       "fullDraft": "Students strongly praised the live coding sessions, the project feedback, and the instructor's responsiveness."
+    },
+    {
+      "id": "SV-008",
+      "faculty": "Computer Science",
+      "course": "Web Development",
+      "courseCode": "CS101",
+      "instructor": "Dr. Youssef Adel",
+      "semester": "2025-FALL",
+      "submittedAt": "2025-11-18",
+      "status": "completed",
+      "overallScore": 86,
+      "courseMaterialScore": 84,
+      "instructorSatisfaction": 88,
+      "responseRate": 90,
+      "draftSummary": "Students liked the projects, requested more frontend testing coverage.",
+      "comments": [
+        {
+          "commenter": "Student A",
+          "comment": "Great balance between theory and practice, but I wanted more testing examples.",
+          "submittedAt": "2025-11-19T10:05:00Z",
+          "studentOverallScore": 88
+        },
+        {
+          "commenter": "Student B",
+          "comment": "The projects were useful and relevant to real work. More feedback earlier would help.",
+          "submittedAt": "2025-11-20T15:45:00Z",
+          "studentOverallScore": 84
+        }
+      ],
+      "fullDraft": "Learners appreciated hands-on projects and asked for earlier feedback cycles plus more testing/QA examples."
+    },
+    {
+      "id": "SV-009",
+      "faculty": "Computer Science",
+      "course": "Web Development",
+      "courseCode": "CS101",
+      "instructor": "Dr. Youssef Adel",
+      "semester": "2025-SPRING",
+      "submittedAt": "2025-04-22",
+      "status": "completed",
+      "overallScore": 81,
+      "courseMaterialScore": 70,
+      "instructorSatisfaction": 86,
+      "responseRate": 78,
+      "draftSummary": "Solid fundamentals; students requested more API integration labs.",
+      "comments": [
+        {
+          "commenter": "Student A",
+          "comment": "Loved the UI part. I struggled a bit with API calls; more guided labs would help.",
+          "submittedAt": "2025-04-23T11:10:00Z",
+          "studentOverallScore": 80
+        },
+        {
+          "commenter": "Student B",
+          "comment": "The instructor was supportive. More examples of authentication and security would be great.",
+          "submittedAt": "2025-04-24T16:35:00Z",
+          "studentOverallScore": 82
+        }
+      ],
+      "fullDraft": "Feedback highlights strong support and requests more guided API integration and authentication/security examples."
+    },
+    {
+      "id": "SV-010",
+      "faculty": "Computer Science",
+      "course": "Web Development",
+      "courseCode": "CS101",
+      "instructor": "Dr. Youssef Adel",
+      "semester": "2024-FALL",
+      "submittedAt": "2024-11-14",
+      "status": "completed",
+      "overallScore": 74,
+      "courseMaterialScore": 74,
+      "instructorSatisfaction": 77,
+      "responseRate": 71,
+      "draftSummary": "Students asked for slower pacing and clearer project milestones.",
+      "comments": [
+        {
+          "commenter": "Student A",
+          "comment": "Sometimes the pace was fast. Weekly milestones for the project would help a lot.",
+          "submittedAt": "2024-11-15T09:20:00Z",
+          "studentOverallScore": 72
+        },
+        {
+          "commenter": "Student B",
+          "comment": "I enjoyed the course, but I needed more time on JavaScript basics.",
+          "submittedAt": "2024-11-16T14:55:00Z",
+          "studentOverallScore": 75
+        }
+      ],
+      "fullDraft": "Learners enjoyed projects but requested slower pacing, more JavaScript fundamentals, and clearer milestone checkpoints."
+    },
+    {
+      "id": "SV-011",
+      "faculty": "Computer Science",
+      "course": "Web Development",
+      "courseCode": "CS101",
+      "instructor": "Dr. Youssef Adel",
+      "semester": "2024-SPRING",
+      "submittedAt": "2024-04-18",
+      "status": "pending",
+      "overallScore": 69,
+      "courseMaterialScore": 64,
+      "instructorSatisfaction": 75,
+      "responseRate": 65,
+      "draftSummary": "Needs more scaffolding for beginners and more practice exercises.",
+      "comments": [
+        {
+          "commenter": "Student A",
+          "comment": "I was new to coding. More step-by-step exercises would help me keep up.",
+          "submittedAt": "2024-04-19T12:10:00Z",
+          "studentOverallScore": 65
+        },
+        {
+          "commenter": "Student B",
+          "comment": "Good course but I needed more examples before starting the project.",
+          "submittedAt": "2024-04-20T17:40:00Z",
+          "studentOverallScore": 70
+        }
+      ],
+      "fullDraft": "Students requested more beginner scaffolding, additional practice exercises, and more examples before project work."
+    },
+    {
+      "id": "SV-012",
+      "faculty": "Computer Science",
+      "course": "Web Development",
+      "courseCode": "CS101",
+      "instructor": "Dr. Youssef Adel",
+      "semester": "2023-FALL",
+      "submittedAt": "2023-11-16",
+      "status": "completed",
+      "overallScore": 72,
+      "courseMaterialScore": 72,
+      "instructorSatisfaction": 73,
+      "responseRate": 74,
+      "draftSummary": "Better project guidance needed; students wanted clearer rubrics.",
+      "comments": [
+        {
+          "commenter": "Student A",
+          "comment": "The project was interesting but the rubric could be clearer.",
+          "submittedAt": "2023-11-17T10:00:00Z",
+          "studentOverallScore": 70
+        },
+        {
+          "commenter": "Student B",
+          "comment": "More examples of responsive layouts would help.",
+          "submittedAt": "2023-11-18T15:20:00Z",
+          "studentOverallScore": 74
+        }
+      ],
+      "fullDraft": "Students requested clearer project rubrics and more responsive design examples."
+    },
+    {
+      "id": "SV-013",
+      "faculty": "Computer Science",
+      "course": "Web Development",
+      "courseCode": "CS101",
+      "instructor": "Dr. Youssef Adel",
+      "semester": "2023-SPRING",
+      "submittedAt": "2023-04-20",
+      "status": "completed",
+      "overallScore": 66,
+      "courseMaterialScore": 60,
+      "instructorSatisfaction": 70,
+      "responseRate": 60,
+      "draftSummary": "Students needed more step-by-step labs and debugging practice.",
+      "comments": [
+        {
+          "commenter": "Student A",
+          "comment": "Debugging was hard at first. More guided labs would help.",
+          "submittedAt": "2023-04-21T11:05:00Z",
+          "studentOverallScore": 64
+        },
+        {
+          "commenter": "Student B",
+          "comment": "More practice exercises between lectures would be good.",
+          "submittedAt": "2023-04-22T16:40:00Z",
+          "studentOverallScore": 68
+        }
+      ],
+      "fullDraft": "Learners asked for more guided labs, debugging practice, and incremental exercises."
+    },
+    {
+      "id": "SV-014",
+      "faculty": "Computer Science",
+      "course": "Web Development",
+      "courseCode": "CS101",
+      "instructor": "Dr. Youssef Adel",
+      "semester": "2022-FALL",
+      "submittedAt": "2022-11-10",
+      "status": "completed",
+      "overallScore": 70,
+      "courseMaterialScore": 66,
+      "instructorSatisfaction": 76,
+      "responseRate": 68,
+      "draftSummary": "Students wanted more JavaScript fundamentals before React.",
+      "comments": [
+        {
+          "commenter": "Student A",
+          "comment": "React was fun but I needed more JS basics first.",
+          "submittedAt": "2022-11-11T09:30:00Z",
+          "studentOverallScore": 68
+        },
+        {
+          "commenter": "Student B",
+          "comment": "More small coding drills would help build confidence.",
+          "submittedAt": "2022-11-12T14:10:00Z",
+          "studentOverallScore": 72
+        }
+      ],
+      "fullDraft": "Feedback suggests strengthening JavaScript fundamentals and adding more drills before React components."
+    },
+    {
+      "id": "SV-015",
+      "faculty": "Computer Science",
+      "course": "Web Development",
+      "courseCode": "CS101",
+      "instructor": "Dr. Youssef Adel",
+      "semester": "2022-SPRING",
+      "submittedAt": "2022-04-14",
+      "status": "completed",
+      "overallScore": 63,
+      "courseMaterialScore": 58,
+      "instructorSatisfaction": 68,
+      "responseRate": 58,
+      "draftSummary": "Course needed clearer weekly structure and more starter templates.",
+      "comments": [
+        {
+          "commenter": "Student A",
+          "comment": "I got lost sometimes. A weekly plan would help.",
+          "submittedAt": "2022-04-15T12:00:00Z",
+          "studentOverallScore": 60
+        },
+        {
+          "commenter": "Student B",
+          "comment": "Starter templates for labs would save time.",
+          "submittedAt": "2022-04-16T17:25:00Z",
+          "studentOverallScore": 65
+        }
+      ],
+      "fullDraft": "Students requested clearer weekly structure, starter templates, and more guided practice."
     },
     {
       "id": "SV-007",

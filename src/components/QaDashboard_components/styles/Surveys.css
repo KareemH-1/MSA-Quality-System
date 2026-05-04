@@ -434,7 +434,7 @@
   gap: 0.35rem;
 }
 
-.course-detail-comments{
+.course-detail-comments {
   display: grid;
   gap: 0.75rem;
   border-top: 1px solid rgba(54, 82, 110, 0.477);
@@ -481,7 +481,7 @@
   text-align: right;
 }
 
-.comment-meta{
+.comment-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -769,6 +769,218 @@
   border-radius: 14px;
 }
 
+.satisfaction-trend-section {
+  display: grid;
+  gap: 0.85rem;
+  border-radius: 16px;
+  padding: 0.95rem;
+  border: 1px solid var(--soft-color);
+  background: var(--surface-high);
+  box-shadow: var(--shadow-soft);
+}
+
+.satisfaction-trend-section > h2 {
+  margin: 0;
+  color: var(--primary-color);
+  font-size: 1.02rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.satisfaction-trend-section > p {
+  margin: -0.35rem 0 0;
+  font-size: 0.88rem;
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+.satisfaction-trend-section .filters-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border-radius: 14px;
+  border: 1px solid var(--soft-color);
+  background: var(--neutral-color);
+}
+
+.satisfaction-trend-section .filter-item {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 180px;
+  flex: 1 1 180px;
+}
+
+.satisfaction-trend-section .filter-item label {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-color);
+  font-weight: 700;
+}
+
+.satisfaction-trend-section .filter-item select {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--soft-color);
+  background: var(--surface-high);
+  color: var(--foundation-color);
+  font-size: 0.9rem;
+  box-shadow: none;
+}
+
+.satisfaction-trend-section .filter-item select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.satisfaction-trend-section .clear-filters-btn {
+  margin-left: auto;
+  padding: 0.62rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid var(--soft-color);
+  background: var(--tint-color);
+  color: var(--muted-color);
+  cursor: pointer;
+  transition: 0.3s ease;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.satisfaction-trend-section .clear-filters-btn:hover {
+  background: var(--soft-color);
+}
+
+.satisfaction-trend-section .chart-section {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border-radius: 14px;
+  border: 1px solid var(--soft-color);
+  background: var(--neutral-color);
+  box-shadow: none;
+}
+
+.satisfaction-trend-section .chart-section h3 {
+  margin: 0;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted-color);
+}
+
+.satisfaction-trend-section .chart-section > p {
+  margin: -0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-color);
+}
+
+.satisfaction-trend-section .chart-wrapper {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  min-height: 320px;
+}
+
+.satisfaction-trend-section .chart-wrapper canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.satisfaction-trend-section .table-section {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.35rem;
+}
+
+.satisfaction-trend-section .table-section a.export-link {
+  justify-self: end;
+  font-size: 0.85rem;
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.satisfaction-trend-section .table-section a.export-link:hover {
+  text-decoration: underline;
+}
+
+.semester-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--soft-color);
+}
+
+.semester-table thead th {
+  text-align: left;
+  padding: 0.75rem 0.8rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-color);
+  background: var(--tint-color);
+  border-bottom: 1px solid var(--soft-color);
+}
+
+.semester-table tbody td {
+  padding: 0.75rem 0.8rem;
+  font-size: 0.9rem;
+  color: var(--foundation-color);
+  border-bottom: 1px solid var(--tint-color);
+}
+
+.semester-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.semester-table tbody tr:hover td {
+  background: var(--tint-color);
+}
+
+.semester-table td.gap-positive {
+  color: var(--bridge-teal);
+  font-weight: 700;
+}
+
+.semester-table td.gap-negative {
+  color: var(--accent-color);
+  font-weight: 700;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--soft-color);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.status-badge.status-met {
+  background: var(--info-color);
+  color: var(--primary-color);
+}
+
+.status-badge.status-improving {
+  background: var(--warning-color);
+  color: var(--secondary-color);
+}
+
+.status-badge.status-not-met {
+  background: var(--error-color);
+  color: var(--accent-color);
+}
+
 @media (max-width: 760px) {
   .surveys-page {
     gap: 0.85rem;
@@ -776,5 +988,27 @@
 
   .faculty-satisfaction {
     padding: 0.8rem;
+  }
+
+  .satisfaction-trend-section {
+    padding: 0.8rem;
+  }
+
+  .satisfaction-trend-section .filters-section {
+    padding: 0.75rem;
+  }
+
+  .satisfaction-trend-section .filter-item {
+    min-width: 100%;
+  }
+
+  .satisfaction-trend-section .clear-filters-btn {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .satisfaction-trend-section .chart-wrapper {
+    height: 280px;
+    min-height: 280px;
   }
 }

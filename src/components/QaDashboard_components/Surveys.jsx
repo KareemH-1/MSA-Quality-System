@@ -3,12 +3,14 @@ import MiniMetricCard from "../cards/MiniMetricCard.jsx";
 import "./styles/Surveys.css";
 import RingProgressCard from "../cards/RingProgressCard.jsx";
 import { VisualCard } from "../cards/VisualCard.jsx";
-import { Bar } from "react-chartjs-2";
+import { Bar, Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   BarElement,
+  LineElement,
+  PointElement,
   Tooltip,
   Legend,
   Title,
@@ -20,6 +22,8 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
+  LineElement,
+  PointElement,
   Tooltip,
   Legend,
   Title,
@@ -65,6 +69,106 @@ const submissionChartOptions = {
   },
 };
 
+const surveyData = {
+  satisfactionTrends: {
+    "2024-FALL": 78.5,
+    "2025-SPRING": 88.2,
+    "2025-FALL": 85.0,
+    "2026-SPRING": 91.5,
+    "2026-FALL (PROJ)": 92.4, // Projected data
+  },
+  institutionalTarget: 85.0,
+  semesterBreakdown: [
+    { semester: "2026-FALL (PROJ)", score: 92.4, status: "Improving" },
+    { semester: "2026-SPRING", score: 88.2, status: "Met" },
+    { semester: "2025-FALL", score: 76.5, status: "Not Met" },
+    { semester: "2025-SPRING", score: 82.1, status: "Improving" },
+  ],
+};
+
+const TREND_METRICS = [
+  {
+    key: "overallScore",
+    label: "Overall Satisfaction Score",
+    value: (record) => Number(record?.overallScore) || 0,
+    axisLabel: "Score (%)",
+  },
+  {
+    key: "instructorSatisfaction",
+    label: "Instructor Satisfaction",
+    value: (record) => Number(record?.instructorSatisfaction) || 0,
+    axisLabel: "Score (%)",
+  },
+  {
+    key: "courseMaterialScore",
+    label: "Course Material Score",
+    value: (record) => Number(record?.courseMaterialScore) || 0,
+    axisLabel: "Score (%)",
+  },
+  {
+    key: "responseRate",
+    label: "Response Rate",
+    value: (record) => Number(record?.responseRate) || 0,
+    axisLabel: "Rate (%)",
+  },
+];
+
+const getSemesterSortKey = (semester) => {
+  const raw = String(semester ?? "");
+  const match = raw.match(/(\d{4})\s*-\s*(SPRING|FALL)/i);
+  if (!match) return { year: 0, term: 0, raw };
+
+  const year = Number(match[1]) || 0;
+  const termToken = String(match[2]).toUpperCase();
+  const term = termToken === "SPRING" ? 1 : 2;
+  return { year, term, raw };
+};
+
+const initializeStarRating = (score) => {
+  if (score >= 90) return 5;
+  if (score >= 80) return 4.5;
+  if (score >= 70) return 4;
+  if (score >= 60) return 3.5;
+  if (score >= 50) return 3;
+  if (score >= 40) return 2.5;
+  if (score >= 30) return 2;
+  if (score >= 20) return 1.5;
+  if (score >= 10) return 1;
+  return 0.5;
+};
+
+const getLatestComments = (record, count = 4) => {
+  if (!record?.comments?.length) {
+    return [];
+  }
+
+  const sorted = [...record.comments].sort((a, b) => {
+    const dateA = new Date(a.submittedAt);
+    const dateB = new Date(b.submittedAt);
+    return dateB - dateA;
+  });
+
+  return sorted.slice(0, count);
+};
+
+const getOverallRatingPerStudent = (record) => {
+  if (!record?.comments?.length) {
+    return [];
+  }
+
+  return [...record.comments]
+    .sort((a, b) => {
+      const dateA = new Date(a.submittedAt);
+      const dateB = new Date(b.submittedAt);
+      return dateB - dateA;
+    })
+    .map((comment) => {
+      const rawScore =
+        comment?.studentOverallScore ?? comment?.sutdentOverallScore;
+      return initializeStarRating(Number(rawScore) || 0);
+    });
+};
+
 const Surveys = () => {
   const [surveyMockData, setSurveyMockData] = useState(null);
   const [error, setError] = useState("");
@@ -79,6 +183,10 @@ const Surveys = () => {
   const [isCourseMenuOpen, setIsCourseMenuOpen] = useState(false);
   const [sortedComments, setSortedComments] = useState([]);
   const [overallRatings, setOverallRatings] = useState([]);
+
+  const [trendFaculty, setTrendFaculty] = useState("");
+  const [trendCourse, setTrendCourse] = useState("");
+  const [trendMetricKey, setTrendMetricKey] = useState("overallScore");
 
   const totalSubmissions = surveyMockData?.overview?.kpis?.totalSubmitted ?? 0;
   const totalCompleted = surveyMockData?.overview?.kpis?.completed ?? 0;
@@ -203,64 +311,17 @@ const Surveys = () => {
     const lowerQuery = trimmedQuery.toLowerCase();
 
     const results = allRecords.filter((record) => {
-      const courseNameMatch = record?.course
-        ?.toLowerCase()
-        .includes(lowerQuery);
-      const courseCodeMatch = record?.courseCode
-        ?.toLowerCase()
-        .includes(lowerQuery);
-      const instructorMatch = record?.instructor
-        ?.toLowerCase()
-        .includes(lowerQuery);
+      const course = String(record?.course ?? "").toLowerCase();
+      const courseCode = String(record?.courseCode ?? "").toLowerCase();
+      const instructor = String(record?.instructor ?? "").toLowerCase();
+
+      const courseNameMatch = course.includes(lowerQuery);
+      const courseCodeMatch = courseCode.includes(lowerQuery);
+      const instructorMatch = instructor.includes(lowerQuery);
 
       return courseNameMatch || courseCodeMatch || instructorMatch;
     });
     setSearchResults(results);
-  };
-
-  const getLatestComments = (record, count = 4) => {
-    if (!record?.comments?.length) {
-      return [];
-    }
-
-    const sortedComments = [...record.comments].sort((a, b) => {
-      const dateA = new Date(a.submittedAt);
-      const dateB = new Date(b.submittedAt);
-      return dateB - dateA;
-    });
-
-    return sortedComments.slice(0, count);
-  };
-
-  const initializeStarRating = (score) => {
-    if (score >= 90) return 5;
-    if (score >= 80) return 4.5;
-    if (score >= 70) return 4;
-    if (score >= 60) return 3.5;
-    if (score >= 50) return 3;
-    if (score >= 40) return 2.5;
-    if (score >= 30) return 2;
-    if (score >= 20) return 1.5;
-    if (score >= 10) return 1;
-    return 0.5;
-  };
-
-  const getOverallRatingPerStudent = (record) => {
-    if (!record?.comments?.length) {
-      return [];
-    }
-
-    return [...record.comments]
-      .sort((a, b) => {
-        const dateA = new Date(a.submittedAt);
-        const dateB = new Date(b.submittedAt);
-        return dateB - dateA;
-      })
-      .map((comment) => {
-        const rawScore =
-          comment?.studentOverallScore ?? comment?.sutdentOverallScore;
-        return initializeStarRating(Number(rawScore) || 0);
-      });
   };
 
   const handleSearchResultClick = (record) => {
@@ -353,6 +414,200 @@ const Surveys = () => {
     setSelectedFaculty("");
     setSelectedCourse("");
     setSortedComments([]);
+    setOverallRatings([]);
+  };
+
+  const trendMetric = useMemo(() => {
+    return (
+      TREND_METRICS.find((metric) => metric.key === trendMetricKey) ??
+      TREND_METRICS[0]
+    );
+  }, [trendMetricKey]);
+
+  const trendCourseOptions = useMemo(() => {
+    const sourceRecords = trendFaculty
+      ? allRecords.filter((record) => record?.faculty === trendFaculty)
+      : allRecords;
+
+    return Array.from(
+      new Set(sourceRecords.map((record) => record?.course).filter(Boolean)),
+    ).sort((left, right) => String(left).localeCompare(String(right)));
+  }, [allRecords, trendFaculty]);
+
+  const trendRecords = useMemo(() => {
+    return allRecords.filter((record) => {
+      const facultyMatches = trendFaculty
+        ? record?.faculty === trendFaculty
+        : true;
+      const courseMatches = trendCourse ? record?.course === trendCourse : true;
+      return facultyMatches && courseMatches;
+    });
+  }, [allRecords, trendFaculty, trendCourse]);
+
+  const trendBySemester = useMemo(() => {
+    if (!trendRecords.length) {
+      return [];
+    }
+
+    const map = new Map();
+    trendRecords.forEach((record) => {
+      const semester = record?.semester ?? "Unknown";
+      const value = trendMetric.value(record);
+      if (!Number.isFinite(value)) {
+        return;
+      }
+      if (!map.has(semester)) {
+        map.set(semester, []);
+      }
+      map.get(semester).push(value);
+    });
+
+    const items = Array.from(map.entries()).map(([semester, values]) => {
+      const safeValues = Array.isArray(values) ? values : [];
+      const sum = safeValues.reduce((acc, next) => acc + next, 0);
+      const avg = safeValues.length ? sum / safeValues.length : 0;
+      return { semester, score: avg };
+    });
+
+    items.sort((a, b) => {
+      const left = getSemesterSortKey(a.semester);
+      const right = getSemesterSortKey(b.semester);
+      if (left.year !== right.year) return left.year - right.year;
+      if (left.term !== right.term) return left.term - right.term;
+      return String(left.raw).localeCompare(String(right.raw));
+    });
+
+    return items;
+  }, [trendRecords, trendMetric]);
+
+  const trendTarget = useMemo(() => {
+    const candidate = Number(targetSatisfaction);
+    if (Number.isFinite(candidate) && candidate > 0) {
+      return candidate;
+    }
+    return Number(surveyData.institutionalTarget) || 85;
+  }, [targetSatisfaction]);
+
+  const trendSemesterBreakdown = useMemo(() => {
+    if (!trendBySemester.length) {
+      return surveyData.semesterBreakdown;
+    }
+
+    return [...trendBySemester]
+      .slice()
+      .reverse()
+      .map((item, index, reversed) => {
+        const prev = reversed[index + 1];
+        const prevScore = prev ? Number(prev.score) || 0 : null;
+        const currentScore = Number(item.score) || 0;
+
+        let status = currentScore >= trendTarget ? "Met" : "Not Met";
+        if (
+          status === "Not Met" &&
+          prevScore !== null &&
+          currentScore - prevScore >= 0.75
+        ) {
+          status = "Improving";
+        }
+
+        return { semester: item.semester, score: currentScore, status };
+      });
+  }, [trendBySemester, trendTarget]);
+
+  useEffect(() => {
+    if (trendCourse && !trendCourseOptions.includes(trendCourse)) {
+      setTrendCourse("");
+    }
+  }, [trendCourse, trendCourseOptions]);
+
+  const lineChartData = useMemo(() => {
+    if (!trendBySemester.length) {
+      const labels = Object.keys(surveyData.satisfactionTrends);
+      const values = Object.values(surveyData.satisfactionTrends);
+
+      return {
+        labels,
+        datasets: [
+          {
+            label: "Actual Performance",
+            data: values.map((value, index, arr) =>
+              index < arr.length - 1 ? value : null,
+            ),
+            borderColor: "#1a2e44",
+            backgroundColor: "rgba(26, 46, 68, 0.15)",
+            pointBackgroundColor: "#1a2e44",
+            pointBorderColor: "#ffffff",
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            tension: 0.4,
+          },
+          {
+            label: "QY Projection",
+            data: values.map((value, index, arr) =>
+              index >= arr.length - 2 ? value : null,
+            ),
+            borderColor: "#c0392b",
+            borderDash: [5, 5],
+            backgroundColor: "rgba(192, 57, 43, 0.08)",
+            pointBackgroundColor: "#c0392b",
+            pointBorderColor: "#ffffff",
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            tension: 0.4,
+          },
+        ],
+      };
+    }
+
+    const labels = trendBySemester.map((item) => item.semester);
+    const values = trendBySemester.map((item) => Number(item.score) || 0);
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: trendMetric.label,
+          data: values,
+          borderColor: "#1a2e44",
+          backgroundColor: "rgba(26, 46, 68, 0.12)",
+          pointBackgroundColor: "#1a2e44",
+          pointBorderColor: "#ffffff",
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          tension: 0.35,
+        },
+        {
+          label: "Target",
+          data: labels.map(() => trendTarget),
+          borderColor: "#c0392b",
+          borderDash: [6, 6],
+          pointRadius: 0,
+          tension: 0,
+        },
+      ],
+    };
+  }, [trendBySemester, trendMetric, trendTarget]);
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "top",
+        align: "end",
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: false,
+        suggestedMin: 70,
+        suggestedMax: 100,
+        title: {
+          display: true,
+          text: trendMetric.axisLabel,
+        },
+      },
+    },
   };
 
   return (
@@ -439,6 +694,122 @@ const Surveys = () => {
               emptyMessage="No weekly survey data found."
             />
           </div>
+
+          <section className="satisfaction-trend-section">
+            <div className="filters-section">
+              <div className="filter-item">
+                <label>FACULTY</label>
+                <select
+                  value={trendFaculty}
+                  onChange={(event) => {
+                    setTrendFaculty(event.target.value);
+                    setTrendCourse("");
+                  }}
+                >
+                  <option value="">All Faculties</option>
+                  {facultyOptions.map((faculty) => (
+                    <option key={faculty} value={faculty}>
+                      {faculty}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="filter-item">
+                <label>COURSE</label>
+                <select
+                  value={trendCourse}
+                  onChange={(event) => setTrendCourse(event.target.value)}
+                  disabled={!trendCourseOptions.length}
+                >
+                  <option value="">All Courses</option>
+                  {trendCourseOptions.map((course) => (
+                    <option key={course} value={course}>
+                      {course}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="filter-item">
+                <label>METRIC</label>
+                <select
+                  value={trendMetricKey}
+                  onChange={(event) => setTrendMetricKey(event.target.value)}
+                >
+                  {TREND_METRICS.map((metric) => (
+                    <option key={metric.key} value={metric.key}>
+                      {metric.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button
+                type="button"
+                className="clear-filters-btn"
+                onClick={() => {
+                  setTrendFaculty("");
+                  setTrendCourse("");
+                  setTrendMetricKey("overallScore");
+                }}
+              >
+                Clear All Filters
+              </button>
+            </div>
+            <h2>Satisfaction Trend</h2>
+            <p>
+              Longitudinal analysis of student satisfaction metrics across key
+              performance indicators.
+            </p>
+
+            <div className="chart-section">
+              <h3>Longitudinal Satisfaction Score</h3>
+              <p>Benchmark target: {trendTarget}%</p>
+              <div className="chart-wrapper">
+                <Line data={lineChartData} options={chartOptions} />
+              </div>
+
+              <div className="table-section">
+                <h3>Semester Breakdown</h3>
+                <a href="#" className="export-link">
+                  Export Dataset
+                </a>
+                <table className="semester-table">
+                  <thead>
+                    <tr>
+                      <th>SEMESTER</th>
+                      <th>SATISFACTION SCORE</th>
+                      <th>INSTITUTIONAL TARGET</th>
+                      <th>GAP ANALYSIS</th>
+                      <th>AUDIT STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {trendSemesterBreakdown.map((item, index) => {
+                      const gap = item.score - trendTarget;
+                      const gapStatus = gap >= 0 ? "positive" : "negative";
+                      return (
+                        <tr key={index}>
+                          <td>{item.semester}</td>
+                          <td>{item.score.toFixed(1)}%</td>
+                          <td>{trendTarget.toFixed(1)}%</td>
+                          <td className={`gap-${gapStatus}`}>
+                            {gap > 0 ? "+" : ""}
+                            {gap.toFixed(1)}%
+                          </td>
+                          <td>
+                            <span
+                              className={`status-badge status-${item.status.toLowerCase().replace(" ", "-")}`}
+                            >
+                              {item.status}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
         </>
       ) : (
         <>
