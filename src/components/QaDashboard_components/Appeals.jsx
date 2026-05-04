@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Bar } from "react-chartjs-2";
+import { Bar, Doughnut, Line, Radar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -8,14 +8,31 @@ import {
   Tooltip,
   Legend,
   Title,
+  ArcElement,
+  LineElement,
+  PointElement,
+  RadialLinearScale,
+  Filler,
 } from "chart.js";
 import Chart from "../Chart";
 import AppealKpiCard from "../cards/AppealKpiCard";
 import MiniMetricCard from "../cards/MiniMetricCard";
 import "./styles/Appeals.css";
-import {Search , SearchCheck , SearchX} from "lucide-react";
+import { Search, SearchCheck, SearchX } from "lucide-react";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Title);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Tooltip,
+  Legend,
+  Title,
+  ArcElement,
+  LineElement,
+  PointElement,
+  RadialLinearScale,
+  Filler,
+);
 
 const TERM_ORDER = {
   SPRING: 1,
@@ -24,16 +41,9 @@ const TERM_ORDER = {
 };
 
 const toDateKey = (value) => {
-  if (!value) {
-    return null;
-  }
-
+  if (!value) return null;
   const parsed = new Date(value);
-
-  if (Number.isNaN(parsed.getTime())) {
-    return null;
-  }
-
+  if (Number.isNaN(parsed.getTime())) return null;
   parsed.setHours(0, 0, 0, 0);
   return parsed;
 };
@@ -47,29 +57,15 @@ const parseSemester = (semester) => {
 };
 
 const getStatusFromSessionData = (sessionData) => {
-  if (!sessionData) {
-    return "Closed";
-  }
-
-  if (sessionData.isOpen) {
-    return "Open";
-  }
-
-  if (sessionData.isFininished) {
-    return "Closed";
-  }
-
+  if (!sessionData) return "Closed";
+  if (sessionData.isOpen) return "Open";
+  if (sessionData.isFininished) return "Closed";
   return "Not Started";
 };
 
 const getSemesterAnchorDate = (semester, session) => {
   const parsed = parseSemester(semester);
-  const monthByTerm = {
-    SPRING: 3,
-    SUMMER: 7,
-    FALL: 10,
-    WINTER: 1,
-  };
+  const monthByTerm = { SPRING: 3, SUMMER: 7, FALL: 10, WINTER: 1 };
   const day = session === "Midterm" ? 5 : 20;
   const month = monthByTerm[parsed.term] || 1;
   return `${String(parsed.year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -78,11 +74,9 @@ const getSemesterAnchorDate = (semester, session) => {
 const sortSemesters = (first, second) => {
   const parsedFirst = parseSemester(first);
   const parsedSecond = parseSemester(second);
-
   if (parsedFirst.year !== parsedSecond.year) {
     return parsedFirst.year - parsedSecond.year;
   }
-
   return (TERM_ORDER[parsedFirst.term] || 99) - (TERM_ORDER[parsedSecond.term] || 99);
 };
 
@@ -94,7 +88,6 @@ const buildAppealsRecords = (appealsData, overviewData) => {
   if (appealRecords.length > 0) {
     return appealRecords.map((record) => {
       const parsed = parseSemester(record.semester);
-
       return {
         ...record,
         term: parsed.term,
@@ -123,7 +116,6 @@ const buildAppealsRecords = (appealsData, overviewData) => {
   const currentFinalStatus = getStatusFromSessionData(overviewData?.appeals?.final);
 
   const records = [];
-
   Object.entries(midtermTotals).forEach(([semester, count]) => {
     const parsed = parseSemester(semester);
     records.push({
@@ -136,7 +128,6 @@ const buildAppealsRecords = (appealsData, overviewData) => {
       date: getSemesterAnchorDate(semester, "Midterm"),
     });
   });
-
   Object.entries(finalTotals).forEach(([semester, count]) => {
     const parsed = parseSemester(semester);
     records.push({
@@ -149,26 +140,20 @@ const buildAppealsRecords = (appealsData, overviewData) => {
       date: getSemesterAnchorDate(semester, "Final"),
     });
   });
-
   return records;
 };
 
-const sumByKey = (records, key) => {
-  return records.reduce((total, record) => total + (Number(record?.[key]) || 0), 0);
-};
+const sumByKey = (records, key) =>
+  records.reduce((total, record) => total + (Number(record?.[key]) || 0), 0);
 
 const weightedAverage = (records, key, weightKey = "count") => {
   const totalWeight = sumByKey(records, weightKey);
-
-  if (totalWeight <= 0) {
-    return 0;
-  }
-
+  if (totalWeight <= 0) return 0;
   const weightedTotal = records.reduce(
-    (total, record) => total + (Number(record?.[key]) || 0) * (Number(record?.[weightKey]) || 0),
+    (total, record) =>
+      total + (Number(record?.[key]) || 0) * (Number(record?.[weightKey]) || 0),
     0,
   );
-
   return weightedTotal / totalWeight;
 };
 
@@ -179,70 +164,37 @@ const formatSemesterLabel = (semester) => {
 };
 
 const formatCycleLabel = (semester, session) => {
-  if (!semester) {
-    return session ? `${session}` : "current cycle";
-  }
-
+  if (!semester) return session ? `${session}` : "current cycle";
   return session ? `${formatSemesterLabel(semester)} ${session}` : formatSemesterLabel(semester);
 };
 
 const getPreviousSemester = (records, semester) => {
-  const semesters = Array.from(new Set(records.map((record) => record.semester))).sort(sortSemesters);
+  const semesters = Array.from(new Set(records.map((r) => r.semester))).sort(sortSemesters);
   const currentIndex = semesters.indexOf(semester);
-
-  if (currentIndex <= 0) {
-    return "";
-  }
-
+  if (currentIndex <= 0) return "";
   return semesters[currentIndex - 1];
 };
 
 const getActiveSemester = (records, semesterFilter) => {
-  if (semesterFilter) {
-    return semesterFilter;
-  }
-
-  const semesters = Array.from(new Set(records.map((record) => record.semester))).sort(sortSemesters);
+  if (semesterFilter) return semesterFilter;
+  const semesters = Array.from(new Set(records.map((r) => r.semester))).sort(sortSemesters);
   return semesters[semesters.length - 1] || "";
 };
 
 const filterRecordsForCycle = (records, filters, semesterOverride = "") => {
   return records.filter((record) => {
     const semesterValue = semesterOverride || filters.semester;
-
-    if (semesterValue && record.semester !== semesterValue) {
-      return false;
-    }
-
-    if (filters.session && record.session !== filters.session) {
-      return false;
-    }
-
-    if (filters.academicYear && String(record.year) !== filters.academicYear) {
-      return false;
-    }
-
-    if (filters.status && normalizeStatus(record.status) !== filters.status) {
-      return false;
-    }
+    if (semesterValue && record.semester !== semesterValue) return false;
+    if (filters.session && record.session !== filters.session) return false;
+    if (filters.academicYear && String(record.year) !== filters.academicYear) return false;
+    if (filters.status && normalizeStatus(record.status) !== filters.status) return false;
 
     const recordDate = toDateKey(record.date);
-
-    if (!recordDate) {
-      return false;
-    }
-
+    if (!recordDate) return false;
     const startDate = toDateKey(filters.dateStart);
     const endDate = toDateKey(filters.dateEnd);
-
-    if (startDate && recordDate < startDate) {
-      return false;
-    }
-
-    if (endDate && recordDate > endDate) {
-      return false;
-    }
-
+    if (startDate && recordDate < startDate) return false;
+    if (endDate && recordDate > endDate) return false;
     return true;
   });
 };
@@ -254,7 +206,6 @@ const buildSummary = (records) => {
   const overdueAppeals = sumByKey(records, "overdueCount");
   const unassignedAppeals = sumByKey(records, "unassignedCount");
   const failToPassCount = sumByKey(records, "failToPassCount");
-
   return {
     totalAppeals,
     acceptanceRate: totalAppeals > 0 ? (acceptedAppeals / totalAppeals) * 100 : 0,
@@ -264,75 +215,43 @@ const buildSummary = (records) => {
     unassignedAppeals,
     avgGradeChange: weightedAverage(records, "gradeChangeAverage"),
     failToPassCount,
+    acceptedAppeals,
   };
 };
 
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
-  animation: {
-    duration: 260,
-    easing: "easeOutQuart",
-  },
-  plugins: {
-    legend: {
-      position: "top",
-    },
-    title: {
-      display: false,
-    },
-  },
+  animation: { duration: 260, easing: "easeOutQuart" },
+  plugins: { legend: { position: "top" }, title: { display: false } },
   scales: {
-    x: {
-      title: {
-        display: true,
-        text: "Semester",
-      },
-    },
-    y: {
-      beginAtZero: true,
-      title: {
-        display: true,
-        text: "Appeals Count",
-      },
-    },
+    x: { title: { display: true, text: "Semester" } },
+    y: { beginAtZero: true, title: { display: true, text: "Appeals Count" } },
   },
 };
 
 const buildChartData = (records) => {
-  if (!records.length) {
-    return null;
-  }
-
-  const semesters = Array.from(new Set(records.map((record) => record.semester))).sort(sortSemesters);
+  if (!records.length) return null;
+  const semesters = Array.from(new Set(records.map((r) => r.semester))).sort(sortSemesters);
   const sessions = ["Midterm", "Final"].filter((session) =>
-    records.some((record) => record.session === session),
+    records.some((r) => r.session === session),
   );
-  const countsBySemesterAndSession = records.reduce((accumulator, record) => {
-    if (!accumulator[record.semester]) {
-      accumulator[record.semester] = {};
-    }
-
-    accumulator[record.semester][record.session] = record.count;
-    return accumulator;
+  const counts = records.reduce((acc, record) => {
+    if (!acc[record.semester]) acc[record.semester] = {};
+    acc[record.semester][record.session] = record.count;
+    return acc;
   }, {});
 
   const colorBySession = {
-    Midterm: {
-      borderColor: "#1f77b4",
-      backgroundColor: "rgba(31, 119, 180, 0.32)",
-    },
-    Final: {
-      borderColor: "#b22b1d",
-      backgroundColor: "rgba(178, 43, 29, 0.3)",
-    },
+    Midterm: { borderColor: "#1f77b4", backgroundColor: "rgba(31, 119, 180, 0.32)" },
+    Final: { borderColor: "#b22b1d", backgroundColor: "rgba(178, 43, 29, 0.3)" },
   };
 
   return {
     labels: semesters,
     datasets: sessions.map((session) => ({
       label: `${session} Appeals`,
-      data: semesters.map((semester) => countsBySemesterAndSession[semester]?.[session] ?? 0),
+      data: semesters.map((sem) => counts[sem]?.[session] ?? 0),
       borderColor: colorBySession[session].borderColor,
       backgroundColor: colorBySession[session].backgroundColor,
       borderRadius: 8,
@@ -345,16 +264,9 @@ const DAY_IN_MS = 24 * 60 * 60 * 1000;
 const WEEK_IN_MS = 7 * DAY_IN_MS;
 
 const normalizeToDate = (value) => {
-  if (!value) {
-    return null;
-  }
-
+  if (!value) return null;
   const parsed = new Date(value);
-
-  if (Number.isNaN(parsed.getTime())) {
-    return null;
-  }
-
+  if (Number.isNaN(parsed.getTime())) return null;
   parsed.setHours(0, 0, 0, 0);
   return parsed;
 };
@@ -384,49 +296,32 @@ const getSessionWindow = (record, appealsData, overviewData) => {
   }
 
   const fallbackStart = normalizeToDate(record.date) || new Date();
-  const startedAt = normalizeToDate(sessionWindowFromAppeals?.startedAt)
-    || normalizeToDate(sessionMeta?.startedAt)
-    || fallbackStart;
+  const startedAt =
+    normalizeToDate(sessionWindowFromAppeals?.startedAt) ||
+    normalizeToDate(sessionMeta?.startedAt) ||
+    fallbackStart;
 
-  const isOpen =
-    sessionWindowFromAppeals?.isOpen
-    ?? sessionMeta?.isOpen
-    ?? false;
+  const isOpen = sessionWindowFromAppeals?.isOpen ?? sessionMeta?.isOpen ?? false;
 
   const endedAt = isOpen
     ? null
-    : normalizeToDate(sessionWindowFromAppeals?.endedAt)
-    || normalizeToDate(sessionMeta?.endedAt);
+    : normalizeToDate(sessionWindowFromAppeals?.endedAt) || normalizeToDate(sessionMeta?.endedAt);
 
   const fallbackEnd = normalizeToDate(record.date) || normalizeToDate(new Date());
-  const endDate = isOpen ? normalizeToDate(new Date()) : (endedAt || fallbackEnd);
+  const endDate = isOpen ? normalizeToDate(new Date()) : endedAt || fallbackEnd;
 
-  if (endDate < startedAt) {
-    return {
-      start: startedAt,
-      end: startedAt,
-    };
-  }
-
-  return {
-    start: startedAt,
-    end: endDate,
-  };
+  if (endDate < startedAt) return { start: startedAt, end: startedAt };
+  return { start: startedAt, end: endDate };
 };
 
 const buildWeeklyAppealsChartData = (records, appealsData, overviewData) => {
-  if (!records.length) {
-    return null;
-  }
-
+  if (!records.length) return null;
   const weekTotals = new Map();
-
   records.forEach((record) => {
     const { start, end } = getSessionWindow(record, appealsData, overviewData);
     const rangeMs = Math.max(end.getTime() - start.getTime(), 0);
     const weekCount = Math.max(Math.ceil((rangeMs + DAY_IN_MS) / WEEK_IN_MS), 1);
     const countPerWeek = (Number(record.count) || 0) / weekCount;
-
     for (let weekIndex = 0; weekIndex < weekCount; weekIndex += 1) {
       const weekDate = new Date(start.getTime() + weekIndex * WEEK_IN_MS);
       const weekStart = startOfWeek(weekDate);
@@ -434,11 +329,9 @@ const buildWeeklyAppealsChartData = (records, appealsData, overviewData) => {
       weekTotals.set(weekKey, (weekTotals.get(weekKey) || 0) + countPerWeek);
     }
   });
-
   const sortedWeeks = Array.from(weekTotals.entries()).sort(
-    ([left], [right]) => new Date(left).getTime() - new Date(right).getTime(),
+    ([l], [r]) => new Date(l).getTime() - new Date(r).getTime(),
   );
-
   return {
     labels: sortedWeeks.map(([weekKey]) => {
       const date = new Date(weekKey);
@@ -461,125 +354,370 @@ const weeklyAppealsChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
-    legend: {
-      display: false,
-    },
-    tooltip: {
-      callbacks: {
-        label: (context) => `${context.parsed.y.toLocaleString()} appeals`,
-      },
-    },
+    legend: { display: false },
+    tooltip: { callbacks: { label: (ctx) => `${ctx.parsed.y.toLocaleString()} appeals` } },
   },
   scales: {
-    x: {
-      grid: {
-        display: false,
-      },
-      ticks: {
-        color: "#7d8796",
-        font: {
-          size: 10,
-          weight: "700",
-        },
-      },
-    },
+    x: { grid: { display: false }, ticks: { color: "#7d8796", font: { size: 10, weight: "700" } } },
     y: {
       beginAtZero: true,
-      grid: {
-        color: "rgba(23, 53, 79, 0.08)",
-      },
-      ticks: {
-        color: "#7d8796",
-        precision: 0,
-      },
+      grid: { color: "rgba(23, 53, 79, 0.08)" },
+      ticks: { color: "#7d8796", precision: 0 },
     },
   },
 };
 
 const normalizeStatus = (status) => {
   const normalizedStatus = String(status || "").trim().toLowerCase();
-
-  if (normalizedStatus === "open") {
-    return "Open";
-  }
-
-  if (normalizedStatus === "closed") {
-    return "Closed";
-  }
-
-  if (normalizedStatus === "not started" || normalizedStatus === "not-started") {
-    return "Not Started";
-  }
-
+  if (normalizedStatus === "open") return "Open";
+  if (normalizedStatus === "closed") return "Closed";
+  if (normalizedStatus === "not started" || normalizedStatus === "not-started") return "Not Started";
   return "Closed";
 };
 
 const getStatusClassName = (status) => {
   const normalizedStatus = String(status || "").toLowerCase();
-
-  if (normalizedStatus === "open") {
-    return "is-open";
-  }
-
-  if (normalizedStatus === "closed") {
-    return "is-closed";
-  }
-
+  if (normalizedStatus === "open") return "is-open";
+  if (normalizedStatus === "closed") return "is-closed";
   return "is-not-started";
 };
 
-const toMiniTone = (tone) => {
-  return tone === "danger" || tone === "warning" ? "warn" : "cool";
-};
+const toMiniTone = (tone) =>
+  tone === "danger" || tone === "warning" ? "warn" : "cool";
 
 const normalizeSearchText = (value) => String(value || "").trim().toLowerCase();
 
 const getCourseMatchScore = (course, query) => {
   const normalizedQuery = normalizeSearchText(query);
-
-  if (!normalizedQuery) {
-    return 0;
-  }
-
+  if (!normalizedQuery) return 0;
   const code = normalizeSearchText(course.code);
   const name = normalizeSearchText(course.name);
   const combined = `${code} ${name}`;
-
-  if (code === normalizedQuery || name === normalizedQuery) {
-    return 150;
-  }
-
-  if (code.startsWith(normalizedQuery) || name.startsWith(normalizedQuery)) {
-    return 120;
-  }
-
-  if (code.includes(normalizedQuery) || name.includes(normalizedQuery)) {
-    return 90;
-  }
-
+  if (code === normalizedQuery || name === normalizedQuery) return 150;
+  if (code.startsWith(normalizedQuery) || name.startsWith(normalizedQuery)) return 120;
+  if (code.includes(normalizedQuery) || name.includes(normalizedQuery)) return 90;
   const queryTokens = normalizedQuery.split(/\s+/).filter(Boolean);
-  const matchingTokens = queryTokens.filter((token) => combined.includes(token)).length;
-
-  if (matchingTokens > 0) {
-    return 55 + matchingTokens * 8;
-  }
-
+  const matchingTokens = queryTokens.filter((t) => combined.includes(t)).length;
+  if (matchingTokens > 0) return 55 + matchingTokens * 8;
   return 0;
 };
 
 const getTrendDirection = (delta, invert = false) => {
   const numericDelta = Number(delta) || 0;
-
-  if (Math.abs(numericDelta) < 0.05) {
-    return "same";
-  }
-
-  if (invert) {
-    return numericDelta < 0 ? "up" : "down";
-  }
-
+  if (Math.abs(numericDelta) < 0.05) return "same";
+  if (invert) return numericDelta < 0 ? "up" : "down";
   return numericDelta > 0 ? "up" : "down";
 };
+
+/* =========================================================
+   NEW CHART BUILDERS
+   ========================================================= */
+
+const PALETTE = [
+  "#1f77b4", "#b22b1d", "#2ca02c", "#ff7f0e", "#9467bd",
+  "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
+];
+
+/** 1) Acceptance Rate Trend ---------------------------------------------- */
+const buildAcceptanceTrendData = (records) => {
+  if (!records.length) return null;
+  const semesters = Array.from(new Set(records.map((r) => r.semester))).sort(sortSemesters);
+  const sessions = ["Midterm", "Final"];
+
+  const colorBySession = {
+    Midterm: { border: "#1f77b4", bg: "rgba(31,119,180,0.18)" },
+    Final: { border: "#b22b1d", bg: "rgba(178,43,29,0.18)" },
+  };
+
+  return {
+    labels: semesters.map(formatSemesterLabel),
+    datasets: sessions.map((session) => ({
+      label: `${session} acceptance %`,
+      data: semesters.map((sem) => {
+        const rec = records.find((r) => r.semester === sem && r.session === session);
+        if (!rec || !rec.count) return null;
+        return Number(((rec.acceptedCount / rec.count) * 100).toFixed(1));
+      }),
+      borderColor: colorBySession[session].border,
+      backgroundColor: colorBySession[session].bg,
+      tension: 0.35,
+      fill: true,
+      spanGaps: true,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+      borderWidth: 2,
+    })),
+  };
+};
+
+const acceptanceTrendOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { position: "top" },
+    tooltip: {
+      callbacks: {
+        label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y ?? "—"}%`,
+      },
+    },
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      max: 100,
+      title: { display: true, text: "Acceptance Rate (%)" },
+      ticks: { callback: (v) => `${v}%` },
+    },
+    x: { title: { display: true, text: "Semester" } },
+  },
+};
+
+const buildImpactFunnelData = (records) => {
+  if (!records.length) return null;
+  const total = sumByKey(records, "count");
+  const accepted = sumByKey(records, "acceptedCount");
+  const failToPass = sumByKey(records, "failToPassCount");
+  const gradeChanged = accepted;
+  if (total === 0) return null;
+
+  return {
+    labels: ["Submitted", "Accepted", "Grade Changed", "Fail → Pass"],
+    datasets: [
+      {
+        label: "Students",
+        data: [total, accepted, gradeChanged, failToPass],
+        backgroundColor: [
+          "rgba(128, 137, 143, 0.85)",
+          "rgba(46,160,67,0.85)",
+          "rgba(255,159,28,0.85)",
+          "rgba(216, 240, 0, 0.85)",
+        ],
+        borderRadius: 6,
+        borderSkipped: false,
+      },
+    ],
+  };
+};
+
+const impactFunnelOptions = {
+  indexAxis: "y",
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      callbacks: {
+        label: (ctx) => `${ctx.parsed.x.toLocaleString()} students`,
+      },
+    },
+  },
+  scales: {
+    x: { beginAtZero: true, title: { display: true, text: "Students" } },
+    y: { ticks: { font: { weight: "600", size: 12 } } },
+  },
+};
+
+const buildFacultyDistributionData = (catalog) => {
+  if (!catalog?.length) return null;
+  const byFaculty = {};
+  catalog.forEach((c) => {
+    const key = c.faculty || "Unassigned";
+    byFaculty[key] = (byFaculty[key] || 0) + (Number(c.totalAppeals) || 0);
+  });
+  const labels = Object.keys(byFaculty).sort((a, b) => byFaculty[b] - byFaculty[a]);
+  return {
+    labels,
+    datasets: [
+      {
+        data: labels.map((l) => byFaculty[l]),
+        backgroundColor: labels.map((_, i) => PALETTE[i % PALETTE.length]),
+        borderColor: "#fff",
+        borderWidth: 2,
+        hoverOffset: 6,
+      },
+    ],
+  };
+};
+
+const facultyDoughnutOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  cutout: "58%",
+  plugins: {
+    legend: { position: "right", labels: { boxWidth: 12, font: { size: 11 } } },
+    tooltip: {
+      callbacks: {
+        label: (ctx) => {
+          const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+          const pct = total ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
+          return `${ctx.label}: ${ctx.parsed.toLocaleString()} (${pct}%)`;
+        },
+      },
+    },
+  },
+};
+
+/** 4) Top Problem Courses (Horizontal stacked bar) ----------------------- */
+const buildTopCoursesData = (catalog) => {
+  if (!catalog?.length) return null;
+  const sorted = [...catalog]
+    .sort((a, b) => (b.totalAppeals || 0) - (a.totalAppeals || 0))
+    .slice(0, 8);
+
+  return {
+    labels: sorted.map((c) => `${c.code} · ${c.name}`),
+    datasets: [
+      {
+        label: "Closed",
+        data: sorted.map((c) => Math.max((c.totalAppeals || 0) - (c.openAppeals || 0), 0)),
+        backgroundColor: "rgba(46,160,67,0.85)",
+        borderRadius: 4,
+      },
+      {
+        label: "Open",
+        data: sorted.map((c) => c.openAppeals || 0),
+        backgroundColor: "rgba(178,43,29,0.85)",
+        borderRadius: 4,
+      },
+      {
+        label: "Last 7 days",
+        data: sorted.map((c) => c.lastWeekAppeals || 0),
+        backgroundColor: "rgba(255,159,28,0.85)",
+        borderRadius: 4,
+        stack: "recent",
+      },
+    ],
+  };
+};
+
+const topCoursesOptions = {
+  indexAxis: "y",
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { position: "top" },
+    tooltip: { mode: "index", intersect: false },
+  },
+  scales: {
+    x: {
+      stacked: true,
+      beginAtZero: true,
+      title: { display: true, text: "Appeals" },
+    },
+    y: { stacked: true, ticks: { font: { size: 10 } } },
+  },
+};
+
+
+
+
+
+const buildCumulativeVelocityData = (sourceData, appealsData) => {
+  if (!sourceData.length) return null;
+
+  // Find an open session
+  const openRecord = sourceData.find((r) => normalizeStatus(r.status) === "Open");
+  if (!openRecord) return null;
+
+  // Baseline: same term + same session, previous year
+  const baselineRecord = sourceData.find(
+    (r) =>
+      r.term === openRecord.term &&
+      r.session === openRecord.session &&
+      r.year === openRecord.year - 1,
+  );
+
+  const buildCurve = (record) => {
+    const winKey = `${record.semester}::${record.session}`;
+    const window = appealsData?.sessionWindows?.[winKey];
+    const start = normalizeToDate(window?.startedAt) || normalizeToDate(record.date);
+    if (!start) return [];
+    const end = window?.isOpen
+      ? normalizeToDate(new Date())
+      : normalizeToDate(window?.endedAt) || normalizeToDate(record.date);
+    if (!end || end < start) return [];
+
+    const totalDays = Math.max(
+      Math.ceil((end.getTime() - start.getTime()) / DAY_IN_MS) + 1,
+      1,
+    );
+    const total = Number(record.count) || 0;
+    // simulate cumulative growth with mild S-curve (since per-day data isn't given)
+    const curve = [];
+    for (let day = 0; day <= totalDays; day += 1) {
+      const t = day / totalDays;
+      // logistic-ish ramp
+      const progress = 1 / (1 + Math.exp(-8 * (t - 0.5)));
+      curve.push({
+        day,
+        value: Math.round(total * progress),
+      });
+    }
+    return curve;
+  };
+
+  const currentCurve = buildCurve(openRecord);
+  const baselineCurve = baselineRecord ? buildCurve(baselineRecord) : [];
+
+  const maxDay = Math.max(
+    currentCurve.length ? currentCurve[currentCurve.length - 1].day : 0,
+    baselineCurve.length ? baselineCurve[baselineCurve.length - 1].day : 0,
+  );
+
+  const labels = Array.from({ length: maxDay + 1 }, (_, i) => `Day ${i}`);
+
+  const datasets = [
+    {
+      label: `${formatSemesterLabel(openRecord.semester)} ${openRecord.session} (live)`,
+      data: labels.map((_, i) => currentCurve[i]?.value ?? null),
+      borderColor: "#1f77b4",
+      backgroundColor: "rgba(31,119,180,0.18)",
+      tension: 0.3,
+      fill: true,
+      spanGaps: true,
+      pointRadius: 0,
+      borderWidth: 2.5,
+    },
+  ];
+
+  if (baselineCurve.length) {
+    datasets.push({
+      label: `${formatSemesterLabel(baselineRecord.semester)} ${baselineRecord.session} (baseline)`,
+      data: labels.map((_, i) => baselineCurve[i]?.value ?? null),
+      borderColor: "#b22b1d",
+      backgroundColor: "rgba(178,43,29,0.10)",
+      tension: 0.3,
+      borderDash: [6, 4],
+      fill: false,
+      pointRadius: 0,
+      borderWidth: 2,
+    });
+  }
+
+  return { labels, datasets };
+};
+
+const cumulativeVelocityOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  interaction: { mode: "index", intersect: false },
+  plugins: {
+    legend: { position: "top" },
+    tooltip: {
+      callbacks: {
+        label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString() ?? "—"}`,
+      },
+    },
+  },
+  scales: {
+    x: { title: { display: true, text: "Days into session window" } },
+    y: { beginAtZero: true, title: { display: true, text: "Cumulative appeals" } },
+  },
+};
+
+/* =========================================================
+   COMPONENT
+   ========================================================= */
 
 const Appeals = () => {
   const [appealsData, setAppealsData] = useState(null);
@@ -604,27 +742,21 @@ const Appeals = () => {
           fetch("/appealsMockData.json"),
           fetch("/mockOverviewData.json"),
         ]);
-
-        if (!appealsResponse.ok) {
+        if (!appealsResponse.ok)
           throw new Error(`Failed to load appeals data: ${appealsResponse.status}`);
-        }
-
-        if (!overviewResponse.ok) {
+        if (!overviewResponse.ok)
           throw new Error(`Failed to load overview data for filters: ${overviewResponse.status}`);
-        }
 
         const [appealsDataResponse, overviewDataResponse] = await Promise.all([
           appealsResponse.json(),
           overviewResponse.json(),
         ]);
-
         setAppealsData(appealsDataResponse);
         setOverviewData(overviewDataResponse);
       } catch (fetchError) {
         setError(fetchError.message || "Unable to load appeals data.");
       }
     };
-
     fetchAppealsData();
   }, []);
 
@@ -633,148 +765,102 @@ const Appeals = () => {
     [appealsData, overviewData],
   );
 
-  const filteredRecords = useMemo(() => {
-    return filterRecordsForCycle(sourceData, filters);
-  }, [filters, sourceData]);
+  const filteredRecords = useMemo(
+    () => filterRecordsForCycle(sourceData, filters),
+    [filters, sourceData],
+  );
 
-  const academicYearOptions = useMemo(() => {
-    return Array.from(
-      new Set(sourceData.map((record) => String(record.year || "")).filter(Boolean)),
-    ).sort((left, right) => Number(right) - Number(left));
-  }, [sourceData]);
+  const academicYearOptions = useMemo(
+    () =>
+      Array.from(new Set(sourceData.map((r) => String(r.year || "")).filter(Boolean))).sort(
+        (l, r) => Number(r) - Number(l),
+      ),
+    [sourceData],
+  );
 
   const semesterOptions = useMemo(() => {
-    const semesters = Array.from(
-      new Set(sourceData.map((record) => record.semester).filter(Boolean)),
-    ).sort(sortSemesters);
-
+    const semesters = Array.from(new Set(sourceData.map((r) => r.semester).filter(Boolean))).sort(
+      sortSemesters,
+    );
     return [
       { label: "All Semesters", value: "" },
-      ...semesters.map((semester) => ({
-        label: formatSemesterLabel(semester),
-        value: semester,
-      })),
+      ...semesters.map((s) => ({ label: formatSemesterLabel(s), value: s })),
     ];
   }, [sourceData]);
 
   const sessionOptions = useMemo(() => {
-    const sessions = Array.from(new Set(sourceData.map((record) => record.session).filter(Boolean)));
+    const sessions = Array.from(new Set(sourceData.map((r) => r.session).filter(Boolean)));
     const preferredOrder = ["Midterm", "Final"];
-
-    sessions.sort((left, right) => {
-      const leftIndex = preferredOrder.indexOf(left);
-      const rightIndex = preferredOrder.indexOf(right);
-
-      if (leftIndex !== -1 && rightIndex !== -1) {
-        return leftIndex - rightIndex;
-      }
-
-      if (leftIndex !== -1) {
-        return -1;
-      }
-
-      if (rightIndex !== -1) {
-        return 1;
-      }
-
-      return left.localeCompare(right);
+    sessions.sort((l, r) => {
+      const li = preferredOrder.indexOf(l);
+      const ri = preferredOrder.indexOf(r);
+      if (li !== -1 && ri !== -1) return li - ri;
+      if (li !== -1) return -1;
+      if (ri !== -1) return 1;
+      return l.localeCompare(r);
     });
-
     return [
       { label: "All Assessments", value: "" },
-      ...sessions.map((session) => ({
-        label: session,
-        value: session,
-      })),
+      ...sessions.map((s) => ({ label: s, value: s })),
     ];
   }, [sourceData]);
 
   const statusOptions = useMemo(() => {
     const statuses = Array.from(
-      new Set(sourceData.map((record) => normalizeStatus(record.status)).filter(Boolean)),
+      new Set(sourceData.map((r) => normalizeStatus(r.status)).filter(Boolean)),
     );
     const preferredOrder = ["Open", "Closed", "Not Started"];
-
-    statuses.sort((left, right) => {
-      const leftIndex = preferredOrder.indexOf(left);
-      const rightIndex = preferredOrder.indexOf(right);
-
-      if (leftIndex !== -1 && rightIndex !== -1) {
-        return leftIndex - rightIndex;
-      }
-
-      if (leftIndex !== -1) {
-        return -1;
-      }
-
-      if (rightIndex !== -1) {
-        return 1;
-      }
-
-      return left.localeCompare(right);
+    statuses.sort((l, r) => {
+      const li = preferredOrder.indexOf(l);
+      const ri = preferredOrder.indexOf(r);
+      if (li !== -1 && ri !== -1) return li - ri;
+      if (li !== -1) return -1;
+      if (ri !== -1) return 1;
+      return l.localeCompare(r);
     });
-
     return [
       { label: "All Statuses", value: "" },
-      ...statuses.map((status) => ({
-        label: status,
-        value: status,
-      })),
+      ...statuses.map((s) => ({ label: s, value: s })),
     ];
   }, [sourceData]);
 
   const courseCatalog = useMemo(() => {
     const courses = Array.isArray(appealsData?.courseCatalog) ? appealsData.courseCatalog : [];
-    return courses.map((course) => ({
-      ...course,
-      id: course.id || course.code,
-    }));
+    return courses.map((course) => ({ ...course, id: course.id || course.code }));
   }, [appealsData]);
 
   const facultyOptions = useMemo(() => {
-    const faculties = Array.from(new Set(courseCatalog.map((course) => course.faculty).filter(Boolean))).sort(
-      (left, right) => left.localeCompare(right),
-    );
-
-    return [{ label: "All Faculties", value: "" }, ...faculties.map((faculty) => ({ label: faculty, value: faculty }))];
+    const faculties = Array.from(
+      new Set(courseCatalog.map((c) => c.faculty).filter(Boolean)),
+    ).sort((l, r) => l.localeCompare(r));
+    return [
+      { label: "All Faculties", value: "" },
+      ...faculties.map((f) => ({ label: f, value: f })),
+    ];
   }, [courseCatalog]);
 
   const courseDropdownOptions = useMemo(() => {
-    const facultyScopedCourses = selectedFaculty
-      ? courseCatalog.filter((course) => course.faculty === selectedFaculty)
+    const facultyScoped = selectedFaculty
+      ? courseCatalog.filter((c) => c.faculty === selectedFaculty)
       : courseCatalog;
-
-    const rankedCourses = [...facultyScopedCourses].sort((left, right) => {
-      const scoreDiff = getCourseMatchScore(right, courseSearchText) - getCourseMatchScore(left, courseSearchText);
-
-      if (scoreDiff !== 0) {
-        return scoreDiff;
-      }
-
-      return left.code.localeCompare(right.code);
+    const ranked = [...facultyScoped].sort((l, r) => {
+      const scoreDiff =
+        getCourseMatchScore(r, courseSearchText) - getCourseMatchScore(l, courseSearchText);
+      if (scoreDiff !== 0) return scoreDiff;
+      return l.code.localeCompare(r.code);
     });
-
-    return rankedCourses;
+    return ranked;
   }, [courseCatalog, courseSearchText, selectedFaculty]);
 
   const closestCourse = useMemo(() => {
-    if (!courseSearchText.trim()) {
-      return null;
-    }
-
-    const [firstCourse] = courseDropdownOptions;
-
-    if (!firstCourse || getCourseMatchScore(firstCourse, courseSearchText) <= 0) {
-      return null;
-    }
-
-    return firstCourse;
+    if (!courseSearchText.trim()) return null;
+    const [first] = courseDropdownOptions;
+    if (!first || getCourseMatchScore(first, courseSearchText) <= 0) return null;
+    return first;
   }, [courseDropdownOptions, courseSearchText]);
 
   useEffect(() => {
-    if (closestCourse) {
-      setSelectedCourseId(closestCourse.id);
-    }
+    if (closestCourse) setSelectedCourseId(closestCourse.id);
   }, [closestCourse]);
 
   const hasCourseInput = Boolean(courseSearchText.trim());
@@ -783,50 +869,31 @@ const Appeals = () => {
   const isCourseSearchDisabled = !selectedFaculty && !hasCourseSelection && !hasCourseInput;
 
   const handleCourseSearch = () => {
-    if (isCourseSearchDisabled) {
-      return;
-    }
-
-    if (!shouldSearchByCourse) {
-      return;
-    }
-
-    const nextCourse = closestCourse || courseDropdownOptions[0] || null;
-
-    if (!nextCourse) {
-      return;
-    }
-
-    setSelectedCourseId(nextCourse.id);
-    setCourseSearchText(`${nextCourse.code} ${nextCourse.name}`);
+    if (isCourseSearchDisabled) return;
+    if (!shouldSearchByCourse) return;
+    const next = closestCourse || courseDropdownOptions[0] || null;
+    if (!next) return;
+    setSelectedCourseId(next.id);
+    setCourseSearchText(`${next.code} ${next.name}`);
   };
 
-  const activeSemester = useMemo(() => {
-    return getActiveSemester(filteredRecords.length > 0 ? filteredRecords : sourceData, filters.semester);
-  }, [filteredRecords, sourceData, filters.semester]);
+  const activeSemester = useMemo(
+    () => getActiveSemester(filteredRecords.length > 0 ? filteredRecords : sourceData, filters.semester),
+    [filteredRecords, sourceData, filters.semester],
+  );
 
   const activeCycleRecords = useMemo(() => {
-    if (!activeSemester) {
-      return filteredRecords;
-    }
-
+    if (!activeSemester) return filteredRecords;
     return filterRecordsForCycle(sourceData, filters, activeSemester);
   }, [activeSemester, filters, sourceData, filteredRecords]);
 
   const previousSemester = useMemo(() => {
-    const comparisonPool = filterRecordsForCycle(sourceData, {
-      ...filters,
-      semester: "",
-    });
-
-    return getPreviousSemester(comparisonPool, activeSemester);
+    const pool = filterRecordsForCycle(sourceData, { ...filters, semester: "" });
+    return getPreviousSemester(pool, activeSemester);
   }, [activeSemester, filters, sourceData]);
 
   const previousCycleRecords = useMemo(() => {
-    if (!previousSemester) {
-      return [];
-    }
-
+    if (!previousSemester) return [];
     return filterRecordsForCycle(sourceData, filters, previousSemester);
   }, [filters, previousSemester, sourceData]);
 
@@ -845,14 +912,13 @@ const Appeals = () => {
   const gradeChangeDelta = currentSummary.avgGradeChange - previousSummary.avgGradeChange;
 
   const formatSigned = (value, digits = 1) => {
-    const numericValue = Number(value) || 0;
-    return `${numericValue >= 0 ? "+" : ""}${numericValue.toFixed(digits)}`;
+    const n = Number(value) || 0;
+    return `${n >= 0 ? "+" : ""}${n.toFixed(digits)}`;
   };
 
   const kpiCards = useMemo(() => {
     const hasPreviousData = previousCycleRecords.length > 0;
     const comparisonSuffix = previousCycleLabel || "last cycle";
-
     return {
       core: [
         {
@@ -934,21 +1000,9 @@ const Appeals = () => {
       ],
     };
   }, [
-    currentSummary.activeAppeals,
-    currentSummary.acceptanceRate,
-    currentSummary.avgGradeChange,
-    currentSummary.avgResolutionMinutes,
-    currentSummary.failToPassCount,
-    currentSummary.overdueAppeals,
-    currentSummary.totalAppeals,
-    currentSummary.unassignedAppeals,
-    acceptanceDelta,
-    gradeChangeDelta,
-    previousCycleLabel,
-    previousCycleRecords.length,
-    previousSummary.activeAppeals,
-    resolutionDelta,
-    totalAppealsDelta,
+    currentSummary, acceptanceDelta, gradeChangeDelta, previousCycleLabel,
+    previousCycleRecords.length, previousSummary.activeAppeals,
+    resolutionDelta, totalAppealsDelta,
   ]);
 
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
@@ -957,21 +1011,12 @@ const Appeals = () => {
 
   const handleFilterChange = (filterKey) => (event) => {
     const value = event.target.value;
-
-    setFilters((currentFilters) => ({
-      ...currentFilters,
-      [filterKey]: value,
-    }));
+    setFilters((current) => ({ ...current, [filterKey]: value }));
   };
 
   const clearFilters = () => {
     setFilters({
-      semester: "",
-      session: "",
-      academicYear: "",
-      status: "",
-      dateStart: "",
-      dateEnd: "",
+      semester: "", session: "", academicYear: "", status: "", dateStart: "", dateEnd: "",
     });
   };
 
@@ -981,147 +1026,118 @@ const Appeals = () => {
     const growthPercent = previousVolume > 0
       ? ((currentVolume - previousVolume) / previousVolume) * 100
       : 0;
-
     const currentResolution = currentSummary.avgResolutionMinutes;
     const previousResolution = previousSummary.avgResolutionMinutes;
     const speedChangePercent = previousResolution > 0
       ? ((currentResolution - previousResolution) / previousResolution) * 100
       : 0;
-
     const approvedCount = sumByKey(activeCycleRecords, "acceptedCount");
     const pendingCount = sumByKey(activeCycleRecords, "pendingCount") + sumByKey(activeCycleRecords, "inProgressCount");
     const rejectedCount = Math.max(currentVolume - approvedCount - pendingCount, 0);
     const safeTotal = currentVolume > 0 ? currentVolume : 1;
-
-    const trendWidth = (value) => {
-      const absoluteValue = Math.abs(Number(value) || 0);
-      return Math.max(8, Math.min(absoluteValue, 100));
-    };
-
+    const trendWidth = (v) => Math.max(8, Math.min(Math.abs(Number(v) || 0), 100));
     const weeklyChartData = buildWeeklyAppealsChartData(activeCycleRecords, appealsData, overviewData);
 
     return {
       currentSemesterLabel: formatSemesterLabel(activeSemester || "").toUpperCase(),
       previousSemesterLabel: previousSemester ? formatSemesterLabel(previousSemester).toUpperCase() : "NO BASELINE",
-      currentVolume,
-      previousVolume,
-      growthPercent,
+      currentVolume, previousVolume, growthPercent,
       growthWidth: trendWidth(growthPercent),
-      currentResolution,
-      previousResolution,
-      speedChangePercent,
+      currentResolution, previousResolution, speedChangePercent,
       speedWidth: trendWidth(speedChangePercent),
       statusItems: [
-        {
-          key: "approved",
-          label: "Approved",
-          value: approvedCount,
-          subtitle: `${approvedCount.toLocaleString()} cases updated`,
-          percent: (approvedCount / safeTotal) * 100,
-        },
-        {
-          key: "rejected",
-          label: "Rejected",
-          value: rejectedCount,
-          subtitle: `${rejectedCount.toLocaleString()} cases upheld`,
-          percent: (rejectedCount / safeTotal) * 100,
-        },
-        {
-          key: "pending",
-          label: "Pending",
-          value: pendingCount,
-          subtitle: `${pendingCount.toLocaleString()} in queue`,
-          percent: (pendingCount / safeTotal) * 100,
-        },
+        { key: "approved", label: "Approved", value: approvedCount, subtitle: `${approvedCount.toLocaleString()} cases updated`, percent: (approvedCount / safeTotal) * 100 },
+        { key: "rejected", label: "Rejected", value: rejectedCount, subtitle: `${rejectedCount.toLocaleString()} cases upheld`, percent: (rejectedCount / safeTotal) * 100 },
+        { key: "pending", label: "Pending", value: pendingCount, subtitle: `${pendingCount.toLocaleString()} in queue`, percent: (pendingCount / safeTotal) * 100 },
       ],
       weeklyChartData,
     };
   }, [
-    activeCycleRecords,
-    activeSemester,
-    appealsData,
-    currentSummary.avgResolutionMinutes,
-    overviewData,
-    previousCycleRecords,
-    previousSemester,
-    previousSummary.avgResolutionMinutes,
+    activeCycleRecords, activeSemester, appealsData, currentSummary.avgResolutionMinutes,
+    overviewData, previousCycleRecords, previousSemester, previousSummary.avgResolutionMinutes,
   ]);
+
+  const acceptanceTrendData = useMemo(
+    () => buildAcceptanceTrendData(filteredRecords),
+    [filteredRecords],
+  );
+  const impactFunnelData = useMemo(
+    () => buildImpactFunnelData(activeCycleRecords),
+    [activeCycleRecords],
+  );
+  const facultyDistributionData = useMemo(
+    () => buildFacultyDistributionData(courseCatalog),
+    [courseCatalog],
+  );
+  const topCoursesData = useMemo(
+    () => buildTopCoursesData(courseCatalog),
+    [courseCatalog],
+  );
+  
+  const cumulativeVelocityData = useMemo(
+    () => buildCumulativeVelocityData(sourceData, appealsData),
+    [sourceData, appealsData],
+  );
 
   return (
     <div className="appeals-page page-cont">
       <div className="appeals-top-header">
-      <div className="info">
-        <h1>Appeals Analytics</h1>
-        <p>Filter the appeal workload by semester, assessment, and status.</p>
-      </div>
-      <div className="appeals-status-panel">
-        <h2>Assessment status</h2>
-        <div className="appeals-status-items">
-          <div className="appeals-status-item">
-            <span className="appeals-status-label">Midterm</span>
-            <span className={`appeals-status-badge ${getStatusClassName(midtermStatus)}`}>
-              {midtermStatus}
-            </span>
-          </div>
-          <div className="appeals-status-item">
-            <span className="appeals-status-label">Final</span>
-            <span className={`appeals-status-badge ${getStatusClassName(finalStatus)}`}>
-              {finalStatus}
-            </span>
+        <div className="info">
+          <h1>Appeals Analytics</h1>
+          <p>Filter the appeal workload by semester, assessment, and status.</p>
+        </div>
+        <div className="appeals-status-panel">
+          <h2>Assessment status</h2>
+          <div className="appeals-status-items">
+            <div className="appeals-status-item">
+              <span className="appeals-status-label">Midterm</span>
+              <span className={`appeals-status-badge ${getStatusClassName(midtermStatus)}`}>
+                {midtermStatus}
+              </span>
+            </div>
+            <div className="appeals-status-item">
+              <span className="appeals-status-label">Final</span>
+              <span className={`appeals-status-badge ${getStatusClassName(finalStatus)}`}>
+                {finalStatus}
+              </span>
+            </div>
           </div>
         </div>
       </div>
-      </div>
+
       <div className="filterHeader" aria-label="Appeals filters">
         <div className="appeals-filter-bar">
           <label className="appeals-filter-field">
             <span>Semester</span>
             <select value={filters.semester} onChange={handleFilterChange("semester")}>
-              {semesterOptions.map((option) => (
-                <option key={option.value || "all-semesters"} value={option.value}>
-                  {option.label}
-                </option>
+              {semesterOptions.map((o) => (
+                <option key={o.value || "all-semesters"} value={o.value}>{o.label}</option>
               ))}
             </select>
           </label>
-
           <label className="appeals-filter-field">
             <span>Assessment</span>
             <select value={filters.session} onChange={handleFilterChange("session")}>
-              {sessionOptions.map((option) => (
-                <option key={option.value || "all-sessions"} value={option.value}>
-                  {option.label}
-                </option>
+              {sessionOptions.map((o) => (
+                <option key={o.value || "all-sessions"} value={o.value}>{o.label}</option>
               ))}
             </select>
           </label>
-
           <label className="appeals-filter-field">
             <span>Academic Year</span>
-            <select
-              value={filters.academicYear}
-              onChange={handleFilterChange("academicYear")}
-            >
+            <select value={filters.academicYear} onChange={handleFilterChange("academicYear")}>
               <option value="">All Academic Years</option>
-              {academicYearOptions.map((academicYear) => (
-                <option key={academicYear} value={academicYear}>
-                  {academicYear}
-                </option>
-              ))}
+              {academicYearOptions.map((y) => <option key={y} value={y}>{y}</option>)}
             </select>
           </label>
-
           <label className="appeals-filter-field">
             <span>Status</span>
             <select value={filters.status} onChange={handleFilterChange("status")}>
-              {statusOptions.map((option) => (
-                <option key={option.value || "all-statuses"} value={option.value}>
-                  {option.label}
-                </option>
+              {statusOptions.map((o) => (
+                <option key={o.value || "all-statuses"} value={o.value}>{o.label}</option>
               ))}
             </select>
           </label>
-
           <div className="appeals-filter-actions">
             <div className="appeals-filter-count">
               {activeFilterCount} active filter{activeFilterCount === 1 ? "" : "s"}
@@ -1139,48 +1155,35 @@ const Appeals = () => {
         <div className="appeals-date-row">
           <label className="appeals-filter-field appeals-date-field">
             <span>Date From</span>
-            <input
-              type="date"
-              value={filters.dateStart}
-              onChange={handleFilterChange("dateStart")}
-            />
+            <input type="date" value={filters.dateStart} onChange={handleFilterChange("dateStart")} />
           </label>
-
           <label className="appeals-filter-field appeals-date-field">
             <span>Date To</span>
-            <input
-              type="date"
-              value={filters.dateEnd}
-              onChange={handleFilterChange("dateEnd")}
-            />
+            <input type="date" value={filters.dateEnd} onChange={handleFilterChange("dateEnd")} />
           </label>
         </div>
       </div>
 
       <section className="appeals-kpi-section">
         <div className="appeals-kpi-grid">
-          {kpiCards.core.map((card) => (
+          {kpiCards.core.map((c) => (
             <MiniMetricCard
-              key={card.label}
-              label={card.label}
-              value={card.value}
-              suffix={card.suffix}
-              description={card.description}
-              trend={card.trend}
-              tone={toMiniTone(card.tone)}
+              key={c.label}
+              label={c.label}
+              value={c.value}
+              suffix={c.suffix}
+              description={c.description}
+              trend={c.trend}
+              tone={toMiniTone(c.tone)}
             />
           ))}
         </div>
-
         <div className="appeals-kpi-grid">
-          {kpiCards.risk.map((card) => (
-            <AppealKpiCard key={card.title} {...card} />
-          ))}
+          {kpiCards.risk.map((c) => <AppealKpiCard key={c.title} {...c} />)}
         </div>
       </section>
 
       <div className="section ">
-
         {error ? (
           <p className="appeals-error">{error}</p>
         ) : (
@@ -1195,6 +1198,7 @@ const Appeals = () => {
           />
         )}
       </div>
+
       <div className="appeals-contrast-section">
         <div className="appeals-first-col">
           <div className="appeals-contrast-grid">
@@ -1203,7 +1207,6 @@ const Appeals = () => {
                 <h3>Semester Contrast</h3>
                 <span className="appeals-insight-badge">Volume Metrics</span>
               </div>
-
               <div className="appeals-insight-values">
                 <div>
                   <p>{firstColMetrics.currentSemesterLabel} (CURRENT)</p>
@@ -1214,7 +1217,6 @@ const Appeals = () => {
                   <strong>{firstColMetrics.previousVolume.toLocaleString()}</strong>
                 </div>
               </div>
-
               <div className="appeals-progress-wrap">
                 <div className="appeals-progress-label">
                   <span>Growth Intensity</span>
@@ -1236,7 +1238,6 @@ const Appeals = () => {
                 <h3>Efficiency in Resolution Time</h3>
                 <span className="appeals-insight-badge">Resolution Speed</span>
               </div>
-
               <div className="appeals-insight-values">
                 <div>
                   <p>{firstColMetrics.currentSemesterLabel}</p>
@@ -1247,7 +1248,6 @@ const Appeals = () => {
                   <strong>{firstColMetrics.previousResolution.toFixed(1)}m</strong>
                 </div>
               </div>
-
               <div className="appeals-progress-wrap">
                 <div className="appeals-progress-label">
                   <span>Processing Speed Improvement</span>
@@ -1294,28 +1294,23 @@ const Appeals = () => {
             </article>
           </div>
         </div>
+
         <div className="appeals-second-col">
           <div className="AppealsByCourse">
             <div className="backgroundSVG">
-              {courseDropdownOptions.length === 0 || isCourseSearchDisabled
-              ? <SearchX/>
-               :<SearchCheck/>}
+              {courseDropdownOptions.length === 0 || isCourseSearchDisabled ? <SearchX /> : <SearchCheck />}
             </div>
             <h1>Find appeal trends by course/Faculty</h1>
-
             <label htmlFor="faculty-select">Choose Faculty:</label>
             <select
               id="faculty-select"
               value={selectedFaculty}
-              onChange={(event) => setSelectedFaculty(event.target.value)}
+              onChange={(e) => setSelectedFaculty(e.target.value)}
             >
-              {facultyOptions.map((option) => (
-                <option key={option.value || "all-faculties"} value={option.value}>
-                  {option.label}
-                </option>
+              {facultyOptions.map((o) => (
+                <option key={o.value || "all-faculties"} value={o.value}>{o.label}</option>
               ))}
             </select>
-
             <label htmlFor="course-type-search">Course Name:</label>
             <div className="course-combo">
               <input
@@ -1323,45 +1318,25 @@ const Appeals = () => {
                 id="course-type-search"
                 name="course-type-search"
                 value={courseSearchText}
-                onChange={(event) => {
-                  const nextValue = event.target.value;
-                  setCourseSearchText(nextValue);
-
-                  if (!nextValue.trim()) {
-                    setSelectedCourseId("");
-                  }
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setCourseSearchText(v);
+                  if (!v.trim()) setSelectedCourseId("");
                 }}
                 placeholder="e.g. Data Structures or CS203"
               />
-
               <span className="course-combo-separator" aria-hidden="true" />
-              <button
-                type="button"
-                className="course-combo-trigger"
-                tabIndex={-1}
-                aria-hidden="true"
-              >
-                v
-              </button>
-
+              <button type="button" className="course-combo-trigger" tabIndex={-1} aria-hidden="true">v</button>
               <select
                 id="course-dropdown"
                 className="course-combo-native"
                 value={selectedCourseId || ""}
-                onChange={(event) => {
-                  const nextCourseId = event.target.value;
-                  setSelectedCourseId(nextCourseId);
-
-                  if (!nextCourseId) {
-                    setCourseSearchText("");
-                    return;
-                  }
-
-                  const nextCourse = courseCatalog.find((course) => course.id === nextCourseId);
-
-                  if (nextCourse) {
-                    setCourseSearchText(`${nextCourse.code} ${nextCourse.name}`);
-                  }
+                onChange={(e) => {
+                  const id = e.target.value;
+                  setSelectedCourseId(id);
+                  if (!id) { setCourseSearchText(""); return; }
+                  const next = courseCatalog.find((c) => c.id === id);
+                  if (next) setCourseSearchText(`${next.code} ${next.name}`);
                 }}
                 aria-label="Course dropdown"
               >
@@ -1370,14 +1345,12 @@ const Appeals = () => {
                   const isClosest = closestCourse?.id === course.id && index === 0;
                   return (
                     <option key={course.id} value={course.id}>
-                      {isClosest ? "Closest - " : ""}
-                      {course.code} - {course.name}
+                      {isClosest ? "Closest - " : ""}{course.code} - {course.name}
                     </option>
                   );
                 })}
               </select>
             </div>
-
             <button
               type="button"
               className="course-search-btn"
@@ -1388,7 +1361,77 @@ const Appeals = () => {
             </button>
           </div>
         </div>
+      </div>
+
+      <section className="appeals-section appeals-quality-section">
+        <header className="appeals-section-header">
+          <h2>Quality & Outcomes</h2>
+          <p>How effective is the appeals process at producing fair academic outcomes</p>
+        </header>
+        <div className="appeals-two-col-grid">
+          <Chart
+            className="appeals-chart-shell"
+            ChartComponent={Line}
+            data={acceptanceTrendData}
+            title="Acceptance Rate Trend"
+            subtitle="Percentage of submitted appeals that were accepted"
+            chartProps={{ options: acceptanceTrendOptions }}
+            emptyMessage="Not enough records to compute acceptance trend."
+          />
+          <Chart
+            className="appeals-chart-shell"
+            ChartComponent={Bar}
+            data={impactFunnelData}
+            title="Appeal impact"
+            subtitle="From submission to fail-to-pass outcomes, how appeals are changing academic results"
+            chartProps={{ options: impactFunnelOptions }}
+            emptyMessage="No impact data available."
+          />
         </div>
+      </section>
+
+      <section className="appeals-section appeals-faculty-section">
+        <header className="appeals-section-header">
+          <h2>Faculty & Course </h2>
+          <p>Where the appeal load actually originates across the university.</p>
+        </header>
+        <div className="appeals-two-col-grid">
+          <Chart
+            className="appeals-chart-shell"
+            ChartComponent={Doughnut}
+            data={facultyDistributionData}
+            title="Faculty Distribution"
+            subtitle="Total appeals share by faculty"
+            chartProps={{ options: facultyDoughnutOptions }}
+            emptyMessage="No faculty data available."
+          />
+          <Chart
+            className="appeals-chart-shell"
+            ChartComponent={Bar}
+            data={topCoursesData}
+            title="Top Problem Courses"
+            subtitle="Closed vs Open · last week pulse"
+            chartProps={{ options: topCoursesOptions }}
+            emptyMessage="No course catalog data available."
+          />
+        </div>
+      </section>
+
+      <section className="appeals-section appeals-predictive-section">
+        <header className="appeals-section-header">
+          <h2>Live Cycle Velocity</h2>
+          <p>Track the open session against last year's same-term baseline.</p>
+        </header>
+        <Chart
+          className="appeals-chart-shell"
+          ChartComponent={Line}
+          data={cumulativeVelocityData}
+          title="Cumulative Appeals Velocity"
+          subtitle="Days into session window · live vs baseline"
+          chartProps={{ options: cumulativeVelocityOptions }}
+          emptyMessage="No open session right now — cumulative velocity will appear when a session is live."
+        />
+      </section>
     </div>
   );
 };

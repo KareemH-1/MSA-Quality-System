@@ -817,3 +817,45 @@
     height: 180px;
   }
 }
+
+.appeals-section {
+  margin-top: 32px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(23, 53, 79, 0.06);
+}
+
+.appeals-section-header {
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(23, 53, 79, 0.08);
+}
+
+.appeals-section-header h2 {
+  margin: 0 0 4px 0;
+  font-size: 1.15rem;
+  color: #17354f;
+}
+
+.appeals-section-header p {
+  margin: 0;
+  color: #7d8796;
+  font-size: 0.85rem;
+}
+
+.appeals-two-col-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.appeals-two-col-grid > * {
+  min-height: 340px;
+}
+
+@media (max-width: 1024px) {
+  .appeals-two-col-grid {
+    grid-template-columns: 1fr;
+  }
+}
