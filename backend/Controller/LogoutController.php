@@ -1,21 +1,34 @@
 <?php
-require_once '../config/config.php';
 
+class LogoutController
+{
+    public function logout(): array
+    {
+        session_start();
 
-session_start();
+        $_SESSION = [];
 
-$_SESSION = array();
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            setcookie(
+                session_name(),
+                '',
+                time() - 42000,
+                $params['path'],
+                $params['domain'],
+                $params['secure'],
+                $params['httponly']
+            );
+        }
 
-if (ini_get("session.use_cookies")) {
-    $params = session_get_cookie_params();
-    setcookie(session_name(), '', time() - 42000,
-        $params["path"], $params["domain"],
-        $params["secure"], $params["httponly"]
-    );
+        session_destroy();
+
+        return [
+            'statusCode' => 200,
+            'body' => [
+                'status' => 'success',
+                'message' => 'Logged out successfully',
+            ],
+        ];
+    }
 }
-session_destroy();
-
-echo json_encode([
-    "status" => "success",
-    "message" => "Logged out successfully"
-]);

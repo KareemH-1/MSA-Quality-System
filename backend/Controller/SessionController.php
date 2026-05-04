@@ -1,22 +1,31 @@
 <?php
 
-require_once '../config/config.php';
+class SessionController
+{
+    public function getSession(): array
+    {
+        session_start();
 
-session_start();
+        if (!empty($_SESSION['user_id']) && !empty($_SESSION['role'])) {
+            return [
+                'statusCode' => 200,
+                'body' => [
+                    'status' => 'success',
+                    'user' => [
+                        'user_id' => $_SESSION['user_id'],
+                        'name' => $_SESSION['name'] ?? '',
+                        'role' => $_SESSION['role'],
+                    ],
+                ],
+            ];
+        }
 
-if (!empty($_SESSION['user_id']) && !empty($_SESSION['role'])) {
-    echo json_encode([
-        "status" => "success",
-        "user" => [
-            "user_id" => $_SESSION['user_id'],
-            "name" => $_SESSION['name'] ?? '',
-            "role" => $_SESSION['role'],
-        ]
-    ]);
-    exit();
+        return [
+            'statusCode' => 200,
+            'body' => [
+                'status' => 'success',
+                'user' => null,
+            ],
+        ];
+    }
 }
-
-echo json_encode([
-    "status" => "success",
-    "user" => null
-]);

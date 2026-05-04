@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const response = await api.get('/Controller/SessionController.php');
+        const response = await api.get('/View/SessionView.php');
         const sessionUser = response.data?.user;
 
         if (alive) {
