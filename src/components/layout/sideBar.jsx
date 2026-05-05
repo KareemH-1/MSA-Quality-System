@@ -54,13 +54,17 @@ const SideBar = ({ isOpen, pages = [] }) => {
         <nav className="sidebar-nav">
           {pages.map((page) => {
             const SidebarIcon = page.sidebarIcon ?? HomeIcon;
+            const iconFill = page.sidebarIconFill === false ? "none" : "currentColor";
+            const iconClassName = page.sidebarIconFill === false
+              ? "sideItemIcon sideItemIcon--outline"
+              : "sideItemIcon";
 
             return (
               <div
                 key={page.path}
                 className={`sidebar-item ${currentPath === page.path ? "active" : ""}`}
               >
-                <SidebarIcon size={16} className="sideItemIcon" />
+                <SidebarIcon size={16} className={iconClassName} fill={iconFill} />
                 <Link to={page.path}>{page.sidebarLabel ?? "Home"}</Link>
               </div>
             );

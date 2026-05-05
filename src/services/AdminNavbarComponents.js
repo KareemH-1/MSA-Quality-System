@@ -12,4 +12,18 @@ const getAdminManageUserNavbarComponents = (currentItem, setCurrentItem) => {
   ];
 };
 
-export { getAdminManageUserNavbarComponents};
+const getAdminFacultyNavbarComponents = (currentItem, setCurrentItem) => {
+  const handleFacultyClick = () => {
+    setCurrentItem("Faculties");
+  };
+
+  return [
+    {
+      name: "Faculties",
+      onClick: handleFacultyClick,
+      active: currentItem === "Faculties",
+    },
+  ];
+};
+
+export { getAdminManageUserNavbarComponents, getAdminFacultyNavbarComponents };

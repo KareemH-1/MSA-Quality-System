@@ -25,7 +25,10 @@ class StudentAppealView extends JsonView
 				break;
 			}
 			case 'enrolled-courses': {
-				$semester = isset($_GET['semester']) && $_GET['semester'] !== '' ? (string)$_GET['semester'] : null;
+				$semester = null;
+				if (isset($_GET['semester']) && $_GET['semester'] !== '') {
+					$semester = (string)$_GET['semester'];
+				}
 				$result = $this->controller->getEnrolledCourses($semester);
 				break;
 			}

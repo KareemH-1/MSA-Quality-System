@@ -61,6 +61,7 @@ const ManageUsers = ({
   const [modalOpen, setModalOpen] = React.useState(false);
   const [modalMode, setModalMode] = React.useState("add");
   const [editingUser, setEditingUser] = React.useState(null);
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const filteredUsers = React.useMemo(() => {
     return usersList.filter((u) => {
@@ -96,25 +97,96 @@ const ManageUsers = ({
   };
 
   const handleDelete = (user) => {
+    // Prevent self-deletion
+    if (user.role === 'Admin') {
+      alert('Admins cannot delete themselves. Please contact another admin.');
+      return;
+    }
+    
     if (
       !window.confirm(`Delete user "${user.username}"? This cannot be undone.`)
     )
       return;
-    setUsersList((prev) => prev.filter((u) => u.id !== user.id));
+    
+    setIsLoading(true);
+    const startTime = Date.now();
+    
+    fetch('/api/View/ManageUsersView.php', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: user.email }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === 'success') {
+          const elapsed = Date.now() - startTime;
+          console.log(`Delete completed in ${elapsed}ms`);
+          window.location.reload();
+        } else {
+          setIsLoading(false);
+          alert(`Delete failed: ${data.message || 'Unknown error'}`);
+        }
+      })
+      .catch((e) => {
+        setIsLoading(false);
+        console.error('Delete failed', e);
+        alert('Delete failed: ' + e.message);
+      });
   };
 
   const handleSaveUser = (payload, mode) => {
-    if (mode === "add") {
-      const newId =
-        usersList.length > 0
-          ? Math.max(...usersList.map((u) => u.id || 0)) + 1
-          : 1;
-      setUsersList((prev) => [...prev, normalizeUserRecord({ ...payload, id: newId })]);
+    const body = {
+      name: payload.username,
+      email: payload.email,
+      password: payload.password,
+      role: payload.role,
+      role_details: {
+        faculty: payload.Faculty,
+        level: payload.level,
+        courses: payload.courses,
+        Managed_Courses: payload.managedCourses,
+      },
+    };
+
+    if (mode === 'add') {
+      fetch('/api/View/ManageUsersView.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.status === 'success') {
+            window.location.reload();
+          } else {
+            alert(`Add user failed: ${data.message || 'Unknown error'}`);
+          }
+        })
+        .catch((e) => {
+          console.error('Add user failed', e);
+          alert('Add user failed: ' + e.message);
+        });
     } else {
-      setUsersList((prev) =>
-        prev.map((u) => (u.id === payload.id ? normalizeUserRecord({ ...u, ...payload }) : u))
-      );
+      // update via PUT
+      fetch('/api/View/ManageUsersView.php', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.status === 'success') {
+            window.location.reload();
+          } else {
+            alert(`Update user failed: ${data.message || 'Unknown error'}`);
+          }
+        })
+        .catch((e) => {
+          console.error('Update user failed', e);
+          alert('Update user failed: ' + e.message);
+        });
     }
+
     setModalOpen(false);
     setEditingUser(null);
   };
@@ -246,9 +318,10 @@ const ManageUsers = ({
                             <button
                               className="deleteBtn"
                               onClick={() => handleDelete(user)}
+                              disabled={isLoading}
                             >
                               <UserX />
-                              Delete
+                              {isLoading ? 'Deleting...' : 'Delete'}
                             </button>
                           </td>
                         </tr>

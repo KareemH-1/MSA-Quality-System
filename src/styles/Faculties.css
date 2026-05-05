@@ -1,0 +1,404 @@
+.FacultyManagement {
+  width: 100%;
+  padding: 10px 40px 40px;
+  text-align: left;
+}
+
+.FacultyManagement .faculty-header {
+  margin-bottom: 24px;
+}
+
+.FacultyManagement .faculty-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.FacultyManagement .faculty-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.FacultyManagement .summary-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid #e6e9ee;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(16, 24, 40, 0.06);
+}
+
+.FacultyManagement .summary-card svg {
+  width: 22px;
+  height: 22px;
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.FacultyManagement .summary-card--primary {
+  border-color: rgba(178, 43, 29, 0.18);
+  box-shadow: 0 10px 30px rgba(178, 43, 29, 0.08);
+}
+
+.FacultyManagement .summary-card span {
+  display: block;
+  color: #667085;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.FacultyManagement .summary-card strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--foundation-color);
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.FacultyManagement .faculty-content {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.FacultyManagement .faculty-panel {
+  border: 1px solid #e3e7ee;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+}
+
+.FacultyManagement .faculty-panel--form {
+  position: sticky;
+  top: 18px;
+  padding: 22px;
+  background: #ffffff;
+}
+
+.FacultyManagement .panel-title p,
+.FacultyManagement .panel-title h2,
+.FacultyManagement .faculty-note,
+.FacultyManagement .faculty-card__courses p,
+.FacultyManagement .faculty-card__courses span,
+.FacultyManagement .faculty-count {
+  margin: 0;
+}
+
+.FacultyManagement .panel-title p {
+  color: var(--accent-color);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.FacultyManagement .panel-title h2 {
+  margin-top: 6px;
+  color: var(--foundation-color);
+  font-size: 1.35rem;
+}
+
+.FacultyManagement .faculty-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.FacultyManagement .faculty-form label {
+  color: var(--foundation-color);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.FacultyManagement .faculty-form input,
+.FacultyManagement .faculty-search {
+  width: 100%;
+}
+
+.FacultyManagement .faculty-form input,
+.FacultyManagement .faculty-search input {
+  border: 1px solid #d7dde5;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: var(--foundation-color);
+  font-family: var(--font-main);
+  font-size: 0.96rem;
+  outline: none;
+  transition: border-color var(--anim-fast), box-shadow var(--anim-fast), background-color var(--anim-fast);
+}
+
+.FacultyManagement .faculty-form input {
+  padding: 12px 14px;
+}
+
+.FacultyManagement .faculty-search input {
+  padding: 11px 14px 11px 36px;
+  background: transparent;
+  border: none;
+}
+
+.FacultyManagement .faculty-form input:focus,
+.FacultyManagement .faculty-search:focus-within {
+  border-color: rgba(178, 43, 29, 0.45);
+  box-shadow: 0 0 0 4px rgba(178, 43, 29, 0.08);
+  background: #ffffff;
+}
+
+.FacultyManagement .faculty-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--primary-color);
+  color: #ffffff;
+  font-family: var(--font-main);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform var(--anim-fast), filter var(--anim-fast);
+}
+
+.FacultyManagement .faculty-submit:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+}
+
+.FacultyManagement .faculty-submit:disabled {
+  cursor: progress;
+  opacity: 0.75;
+  transform: none;
+}
+
+.FacultyManagement .faculty-note {
+  margin-top: 14px;
+  color: #667085;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.FacultyManagement .faculty-panel--list {
+  padding: 20px;
+}
+
+.FacultyManagement .faculty-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.FacultyManagement .faculty-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 420px;
+  border: 1px solid #d7dde5;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.FacultyManagement .faculty-search svg {
+  position: absolute;
+  left: 14px;
+  color: #667085;
+  z-index: 1;
+}
+
+.FacultyManagement .faculty-count {
+  color: #667085;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.FacultyManagement .faculty-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.FacultyManagement .faculty-card,
+.FacultyManagement .faculty-empty {
+  border: 1px solid #e4e8ef;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.FacultyManagement .faculty-card {
+  padding: 18px;
+}
+
+.FacultyManagement .faculty-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.FacultyManagement .faculty-card__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.FacultyManagement .faculty-card__head span {
+  display: inline-block;
+  color: var(--accent-color);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.FacultyManagement .faculty-card__head h3 {
+  margin: 6px 0 0;
+  color: var(--foundation-color);
+  font-size: 1.05rem;
+}
+
+.FacultyManagement .faculty-card__head svg {
+  width: 20px;
+  height: 20px;
+  color: rgba(178, 43, 29, 0.95);
+}
+
+.FacultyManagement .faculty-delete {
+  border: 1px solid #f0c9c4;
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: #fff5f4;
+  color: #9f1d1d;
+  font-family: var(--font-main);
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background-color var(--anim-fast), border-color var(--anim-fast), color var(--anim-fast);
+}
+
+.FacultyManagement .faculty-delete:hover {
+  background: #ffe7e4;
+  border-color: #e8aca3;
+}
+
+.FacultyManagement .faculty-delete:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.FacultyManagement .faculty-card__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.FacultyManagement .faculty-card__stats div {
+  padding: 12px;
+  border-radius: 14px;
+  background: #f6f8fb;
+}
+
+.FacultyManagement .faculty-card__stats strong {
+  display: block;
+  color: var(--foundation-color);
+  font-size: 1.15rem;
+}
+
+.FacultyManagement .faculty-card__stats span {
+  display: block;
+  margin-top: 4px;
+  color: #667085;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.FacultyManagement .faculty-card__courses {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #e6ebf2;
+}
+
+.FacultyManagement .faculty-card__courses span {
+  color: #667085;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.FacultyManagement .faculty-card__courses p {
+  margin-top: 8px;
+  color: var(--foundation-color);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.FacultyManagement .faculty-empty {
+  grid-column: 1 / -1;
+  padding: 32px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+}
+
+.FacultyManagement .faculty-empty svg {
+  width: 28px;
+  height: 28px;
+  color: var(--primary-color);
+}
+
+.FacultyManagement .faculty-empty h3 {
+  margin: 0;
+  color: var(--foundation-color);
+}
+
+.FacultyManagement .faculty-empty p {
+  margin: 0;
+  color: #667085;
+}
+
+@media (max-width: 1100px) {
+  .FacultyManagement .faculty-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .FacultyManagement .faculty-content {
+    grid-template-columns: 1fr;
+  }
+
+  .FacultyManagement .faculty-panel--form {
+    position: static;
+  }
+}
+
+@media (max-width: 720px) {
+  .FacultyManagement {
+    padding-inline: 18px;
+  }
+
+  .FacultyManagement .faculty-summary,
+  .FacultyManagement .faculty-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .FacultyManagement .faculty-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

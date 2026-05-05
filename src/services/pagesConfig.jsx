@@ -1,15 +1,17 @@
+import { Suspense } from "react";
 import QaDashboard from "../pages/QA_Admin/QaDashboard";
 import UserManagement from "../pages/Admin/UserManagement";
+import Faculties from "../pages/Admin/Faculties";
 import SystemLogs from "../pages/Admin/SystemLogs";
 import Login from "../pages/Login";
 import NotFound from "../pages/NotFound";
 import StudentDashboard from "../pages/Student/StudentDashboard";
 import { getQaDashboardNavbarComponents } from "./QaDashboardNavbarComponents";
-import { getAdminManageUserNavbarComponents } from "./AdminNavbarComponents";
+import { getAdminFacultyNavbarComponents, getAdminManageUserNavbarComponents } from "./AdminNavbarComponents";
 import { getStudentNavbarComponents } from "./StudentNavbarComponents";
 
 import { ROLES } from "../constants/roles";
-import { Settings, LayoutDashboard, UserRound, Activity } from "lucide-react";
+import { Settings, LayoutDashboard, UserRound, Activity, Building2 } from "lucide-react";
 import Contact from "../pages/Contact";
 import { normalizeRole } from "./roleUtils";
 
@@ -45,9 +47,22 @@ export const PAGE_CONFIG = {
     showSidebar: true,
     sidebarLabel: "Manage Users",
     sidebarIcon: UserRound,
+    sidebarIconFill: true,
     showNavbar: true,
     defaultNavItem: "User Management",
     getNavbarComponents: getAdminManageUserNavbarComponents,
+    roles: [ROLES.ADMIN],
+  },
+  FacultyManagement: {
+    path: "/faculties",
+    component: Faculties,
+    showSidebar: true,
+    sidebarLabel: "Faculties",
+    sidebarIcon: Building2,
+    sidebarIconFill: false,
+    showNavbar: true,
+    defaultNavItem: "Faculties",
+    getNavbarComponents: getAdminFacultyNavbarComponents,
     roles: [ROLES.ADMIN],
   },
   Logs: {

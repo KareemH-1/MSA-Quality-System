@@ -1,6 +1,7 @@
 import React from 'react'
 import ManageUsers from '../../components/Admin/UserManagement/ManageUsers';
 import ImportDataPage from '../../components/General/ImportDataPage';
+import Loader from '../../components/Loader';
 
 const parseListValue = (value) => {
     return String(value || "")
@@ -64,15 +65,20 @@ const UserManagement = ({ currentNavItem }) => {
     const [importFile, setImportFile] = React.useState(null);
     const [isImportViewOpen, setIsImportViewOpen] = React.useState(false);
     const [userData, setUserData] = React.useState({ users: [], faculties: [] });
+    const [isLoading, setIsLoading] = React.useState(true);
 
     React.useEffect(() => {
         const loadUsers = async () => {
+            setIsLoading(true);
             try {
-                const response = await fetch("/MockUsers.json");
+                const response = await fetch("/api/View/ManageUsersView.php");
                 const data = await response.json();
                 setUserData(data);
-            } catch {
+            } catch (e) {
+                console.error('Failed to load users', e);
                 setUserData({ users: [], faculties: [] });
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -91,22 +97,36 @@ const UserManagement = ({ currentNavItem }) => {
 
     const handleConfirmImport = (importedDataset) => {
         const importedUsers = buildImportedUsers(importedDataset || {});
-        const nextMaxId = Math.max(0, ...userData.users.map((u) => u.id || 0));
-        const usersWithIds = importedUsers.map((user, index) => ({
-            ...user,
-            id: nextMaxId + index + 1
-        }));
-        const allUsers = [...userData.users, ...usersWithIds];
-        const allFaculties = Array.from(
-            new Set([
-                ...userData.faculties,
-                ...allUsers
-                    .map((user) => user.Faculty || user.faculty)
-                    .filter((faculty) => String(faculty || "").trim() !== "")
-            ])
-        );
-        setUserData({ users: allUsers, faculties: allFaculties });
-        closeImportView();
+        // Send bulk import to server
+        const payload = {
+            bulk: true,
+            users: importedUsers.map((u) => ({
+                name: u.username || u.Username || '',
+                email: u.email,
+                password: u.password || '',
+                role: u.role,
+                role_details: {
+                    faculty: u.Faculty || u.faculty || null,
+                    level: u.level || null,
+                    courses: u.courses || [],
+                },
+            })),
+        };
+
+        fetch('/api/View/ManageUsersView.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        })
+            .then((r) => r.json())
+            .then(() => {
+                // reload page data from server
+                window.location.reload();
+            })
+            .catch((e) => {
+                console.error('Bulk import failed', e);
+                closeImportView();
+            });
     };
 
     return (
@@ -119,14 +139,20 @@ const UserManagement = ({ currentNavItem }) => {
                 textAlign: "left"
             }}
         >
-            {currentNavItem === "User Management" && (
-                isImportViewOpen ? (
-                    <ImportDataPage
-                        file={importFile}
-                        onCancel={closeImportView}
-                        onConfirmImport={handleConfirmImport}                        existingUsers={userData.users}                    />
-                ) : (
-                    <ManageUsers onOpenImportPage={openImportView} userData={userData} />
+            {isLoading ? (
+                <Loader />
+            ) : (
+                currentNavItem === "User Management" && (
+                    isImportViewOpen ? (
+                        <ImportDataPage
+                            file={importFile}
+                            onCancel={closeImportView}
+                            onConfirmImport={handleConfirmImport}
+                            existingUsers={userData.users}
+                        />
+                    ) : (
+                        <ManageUsers onOpenImportPage={openImportView} userData={userData} />
+                    )
                 )
             )}
         </div>

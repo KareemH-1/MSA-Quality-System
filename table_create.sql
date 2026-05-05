@@ -14,7 +14,10 @@ CREATE TABLE users (
     password_changed_at TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (faculty_id) REFERENCES faculties(faculty_id) ON DELETE SET NULL
+    FOREIGN KEY (faculty_id) REFERENCES faculties(faculty_id) ON DELETE SET NULL,
+    INDEX idx_faculty_id (faculty_id),
+    INDEX idx_role_faculty (role, faculty_id),
+    INDEX idx_role (role)
 );
 
 
@@ -28,7 +31,9 @@ CREATE TABLE courses (
     faculty_id INT,
     module_leader_id INT,
     FOREIGN KEY (faculty_id) REFERENCES faculties(faculty_id) ON DELETE CASCADE,
-    FOREIGN KEY (module_leader_id) REFERENCES users(user_id) ON DELETE SET NULL
+    FOREIGN KEY (module_leader_id) REFERENCES users(user_id) ON DELETE SET NULL,
+    INDEX idx_faculty_id (faculty_id),
+    INDEX idx_module_leader_id (module_leader_id)
 );
 
 CREATE TABLE course_students (

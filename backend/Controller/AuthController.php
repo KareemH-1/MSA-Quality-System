@@ -48,6 +48,7 @@ class AuthController
         session_start();
         $_SESSION['user_id'] = $foundUser['user_id'];
         $_SESSION['name'] = $foundUser['name'];
+        $_SESSION['email'] = $foundUser['email'];
         $_SESSION['role'] = $foundUser['role'];
 
         return [
