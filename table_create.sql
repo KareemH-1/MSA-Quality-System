@@ -180,3 +180,19 @@ CREATE TABLE files (
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (uploaded_by) REFERENCES users(user_id) ON DELETE SET NULL
 );
+
+CREATE TABLE instructor_profiles (
+    profile_id INT AUTO_INCREMENT PRIMARY KEY,
+    instructor_id INT NOT NULL UNIQUE,
+    bio TEXT,
+    office_location VARCHAR(255),
+    office_hours VARCHAR(255),
+    phone_number VARCHAR(20),
+    email VARCHAR(255),
+    research_interests TEXT,
+    qualifications TEXT,
+    photo_url VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (instructor_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
