@@ -1,14 +1,15 @@
 import QaDashboard from "../pages/QA_Admin/QaDashboard";
 import UserManagement from "../pages/Admin/UserManagement";
-import SystemLogs from "../pages/Admin/SystemLogs"
-;
+import SystemLogs from "../pages/Admin/SystemLogs";
 import Login from "../pages/Login";
 import NotFound from "../pages/NotFound";
+import StudentDashboard from "../pages/Student/StudentDashboard";
 import { getQaDashboardNavbarComponents } from "./QaDashboardNavbarComponents";
 import { getAdminManageUserNavbarComponents } from "./AdminNavbarComponents";
+import { getStudentNavbarComponents } from "./StudentNavbarComponents";
 
 import { ROLES } from "../constants/roles";
-import { Settings, LayoutDashboard , UserRound, Activity} from "lucide-react";
+import { Settings, LayoutDashboard, UserRound, Activity } from "lucide-react";
 import Contact from "../pages/Contact";
 import { normalizeRole } from "./roleUtils";
 
@@ -23,15 +24,14 @@ export const PAGE_CONFIG = {
     component: QaDashboard,
     showSidebar: true,
     sidebarLabel: "Dashboard",
-    sidebarIcon:LayoutDashboard ,
+    sidebarIcon: LayoutDashboard,
     showNavbar: true,
     defaultNavItem: "Overview",
     getNavbarComponents: getQaDashboardNavbarComponents,
-    roles: [ROLES.QA]
+    roles: [ROLES.QA],
   },
 
-
-  contact:{
+  contact: {
     path: "/contact",
     component: Contact,
     showSidebar: false,
@@ -39,7 +39,7 @@ export const PAGE_CONFIG = {
     showNavbar: false,
   },
 
-  UserManagement:{
+  UserManagement: {
     path: "/user-management",
     component: UserManagement,
     showSidebar: true,
@@ -48,17 +48,29 @@ export const PAGE_CONFIG = {
     showNavbar: true,
     defaultNavItem: "User Management",
     getNavbarComponents: getAdminManageUserNavbarComponents,
-    roles: [ROLES.ADMIN]
+    roles: [ROLES.ADMIN],
   },
-  Logs:{
+  Logs: {
     path: "/logs",
     component: SystemLogs,
     showSidebar: true,
     sidebarLabel: "System Health & Logs",
     sidebarIcon: Activity,
     showNavbar: true,
-    roles: [ROLES.ADMIN]
-  }
+    roles: [ROLES.ADMIN],
+  },
+
+  studentDashboard: {
+    path: "/student-dashboard",
+    component: StudentDashboard,
+    showSidebar: true,
+    sidebarLabel: "Student Dashboard",
+    sidebarIcon: LayoutDashboard,
+    showNavbar: true,
+    defaultNavItem: "Home",
+    getNavbarComponents: getStudentNavbarComponents,
+    roles: [ROLES.STUDENT],
+  },
 };
 
 export const NOT_FOUND_PAGE = {
@@ -69,6 +81,7 @@ export const NOT_FOUND_PAGE = {
 export const ROLE_DEFAULT_PAGES = {
   [ROLES.QA]: "/dashboard",
   [ROLES.ADMIN]: "/user-management",
+  [ROLES.STUDENT]: "/student-dashboard",
 };
 
 export const getDefaultPageForRole = (role) => {
