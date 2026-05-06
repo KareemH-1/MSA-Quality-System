@@ -367,6 +367,150 @@
   margin-top: 0.25rem;
 }
 
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.modal-box {
+  background: var(--neutral-color);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 60px rgba(0, 33, 71, 0.2);
+  overflow: hidden;
+  display: grid;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(0, 33, 71, 0.08);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.modal-header p {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.8rem;
+  color: var(--text-color);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.4rem;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  transition: 0.2s ease;
+  line-height: 1;
+}
+
+.modal-close-btn:hover {
+  background: var(--tint-color);
+  color: var(--primary-color);
+}
+
+.modal-body {
+  padding: 1.5rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.modal-field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.modal-field label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.modal-field select,
+.modal-field textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(0, 33, 71, 0.15);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: var(--font-main);
+  color: var(--foundation-color);
+  background: var(--surface-high);
+  transition: 0.2s ease;
+  resize: none;
+  box-sizing: border-box;
+}
+
+.modal-field select:focus,
+.modal-field textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 33, 71, 0.08);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 1.5rem;
+  border-top: 1px solid rgba(0, 33, 71, 0.08);
+}
+
+.modal-cancel-btn {
+  padding: 0.6rem 1.25rem;
+  border: 1px solid rgba(0, 33, 71, 0.15);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.modal-cancel-btn:hover {
+  background: var(--tint-color);
+}
+
+.modal-submit-btn {
+  padding: 0.6rem 1.25rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--primary-color);
+  color: var(--neutral-color);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.modal-submit-btn:hover {
+  background: var(--secondary-color);
+  transform: translateY(-1px);
+}
+
 @media (max-width: 640px) {
   .appeals-page {
     gap: 1.5rem;

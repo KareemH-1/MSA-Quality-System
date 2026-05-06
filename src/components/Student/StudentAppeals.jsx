@@ -7,6 +7,18 @@ export default function StudentAppeals() {
   const [sessions, setSessions] = useState([]);
   const [appealCounts, setAppealCounts] = useState([]);
   const [appealRows, setAppealRows] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [appealReason, setAppealReason] = useState("");
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState("");
+  const [selectedSession, setSelectedSession] = useState(null);
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedSession(null);
+    setAppealReason("");
+    setSelectedCourse("");
+  };
 
   const formatShortDate = (value) => {
     if (!value) return "";
@@ -31,12 +43,15 @@ export default function StudentAppeals() {
     const loadAll = async () => {
       setLoading(true);
       try {
-        const [sessionsRes, appealsRes, appealRowsRes] = await Promise.all([
-          api.get("/View/StudentAppealView.php?action=sessions"),
-          api.get("/View/StudentAppealView.php?action=my-appeals"),
-          api.get("/View/StudentAppealView.php?action=my-appeal-rows"),
-        ]);
+        const [sessionsRes, appealsRes, appealRowsRes, coursesRes] =
+          await Promise.all([
+            api.get("/View/StudentAppealView.php?action=sessions"),
+            api.get("/View/StudentAppealView.php?action=my-appeals"),
+            api.get("/View/StudentAppealView.php?action=my-appeal-rows"),
+            api.get("/View/StudentAppealView.php?action=enrolled-courses"),
+          ]);
 
+        setEnrolledCourses(coursesRes.data?.courses ?? []);
         setSessions(sessionsRes.data?.sessions ?? []);
         setAppealCounts(appealsRes.data?.appeals ?? []);
         setAppealRows(appealRowsRes.data?.appeals ?? []);
@@ -60,7 +75,9 @@ export default function StudentAppeals() {
             within 5-7 business days.
           </p>
         </div>
-        <button type="button">New Appeal</button>
+        <button type="button" onClick={() => setIsModalOpen(true)}>
+          New Appeal
+        </button>
       </div>
 
       {loading ? (
@@ -94,7 +111,15 @@ export default function StudentAppeals() {
                         ? "Appeals Used: —"
                         : `${used}/${maxAllowed} Appeals Used`}
                     </p>
-                    <button type="button">Submit Appeal</button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedSession(session);
+                        setIsModalOpen(true);
+                      }}
+                    >
+                      Submit Appeal
+                    </button>
                   </div>
                 );
               })}
@@ -174,6 +199,60 @@ export default function StudentAppeals() {
             )}
           </div>
         </>
+      )}
+
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <h3>Submit New Appeal</h3>
+                <p>{selectedSession?.type ?? "General Appeal"}</p>
+              </div>
+              <button className="modal-close-btn" onClick={closeModal}>
+                &times;
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="modal-field">
+                <label>Course</label>
+                <select
+                  value={selectedCourse}
+                  onChange={(e) => setSelectedCourse(e.target.value)}
+                >
+                  <option value="" disabled>
+                    Select a course
+                  </option>
+                  {enrolledCourses.map((course) => (
+                    <option key={course.course_id} value={course.course_id}>
+                      {course.code} - {course.name}{" "}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="modal-field">
+                <label>Reason</label>
+                <textarea
+                  placeholder="Enter your reason for the appeal..."
+                  value={appealReason}
+                  onChange={(e) => setAppealReason(e.target.value)}
+                  rows={4}
+                />
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button className="modal-cancel-btn" onClick={closeModal}>
+                Cancel
+              </button>
+              <button className="modal-submit-btn" type="button">
+                Submit Appeal
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
