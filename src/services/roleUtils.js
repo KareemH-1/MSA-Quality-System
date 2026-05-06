@@ -1,12 +1,21 @@
 export const ROLE_ALIASES = {
   QA_Admin: "QA",
+  qa_admin: "QA",
   QA: "QA",
+  qa: "QA",
   Admin: "Admin",
+  admin: "Admin",
   Dean: "Dean",
+  dean: "Dean",
   Module_Leader: "ModuleLeader",
   ModuleLeader: "ModuleLeader",
+  module_leader: "ModuleLeader",
+  moduleleader: "ModuleLeader",
+  "module leader": "ModuleLeader",
   Instructor: "Instructor",
+  instructor: "Instructor",
   Student: "Student",
+  student: "Student",
 };
 
 export const normalizeRole = (role) => {

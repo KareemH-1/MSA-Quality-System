@@ -15,6 +15,9 @@ class ManageUsersController
     private function decontructDataByRole($data)
     {
         $role = $data['role'] ?? null;
+        if ($role === 'ModuleLeader') {
+            $role = 'Module_Leader';
+        }
         $rd = $data['role_details'] ?? [];
         if ($role === 'Student') {
             return [

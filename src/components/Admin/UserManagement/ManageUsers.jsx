@@ -25,7 +25,10 @@ const ROLE_LABELS = {
 
 const normalizeUserRecord = (user) => ({
   ...user,
-  role: normalizeRole(user?.role),
+  role:
+    normalizeRole(user?.role) === 'User' && Number(user?.managedCourseCount || 0) > 0
+      ? 'ModuleLeader'
+      : normalizeRole(user?.role),
 });
 
 const ManageUsers = ({
@@ -296,7 +299,7 @@ const ManageUsers = ({
                         <tr key={user.id}>
                           <td>{user.username}</td>
                           <td>{user.email}</td>
-                          <td>{ROLE_LABELS[normalizeRole(user.role)] || getRoleLabel(user.role)}</td>
+                          <td>{ROLE_LABELS[normalizeRole(user.role)] || getRoleLabel(user.role) || (Number(user.managedCourseCount || 0) > 0 ? 'Module Leader' : 'User')}</td>
                           <td>{userFaculty || "-"}</td>
                           <td>
                             {userFaculty

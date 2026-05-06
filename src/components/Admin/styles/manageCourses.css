@@ -1,0 +1,204 @@
+.ManageCourses {
+  padding: 20px;
+}
+.ManageCourses .mngHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 16px;
+}
+.ManageCourses .title span {
+  font-size: 12px;
+  color: #64748b;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+.ManageCourses .title h1 {
+  margin: 4px 0 0;
+  font-size: 24px;
+  color: #0f172a;
+}
+.ManageCourses .end .addCourse {
+  background: var(--primary-color);
+  color: #ffffff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+
+}
+.ManageCourses .end .addCourse:hover {
+  background: var(--foundation-color);
+  transition: background-color 0.15s ease;
+}
+.ManageCourses .contentMng {
+  background: #ffffff;
+  padding: 18px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+.ManageCourses .filtersRow {
+  margin-bottom: 14px;
+}
+.ManageCourses .filtersRow input {
+  width: min(100%, 420px);
+  padding: 10px 12px;
+  border: 1px solid #d8dee9;
+  border-radius: 10px;
+}
+.ManageCourses .courseTable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.ManageCourses .courseTable th,
+.ManageCourses .courseTable td {
+  text-align: left;
+  padding: 12px 10px;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+.ManageCourses .courseTable tbody tr {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.ManageCourses .courseTable tbody tr:hover {
+  background: #f8fafc;
+}
+.ManageCourses .courseTable tbody tr.isSelected {
+  background: #eff6ff;
+}
+.ManageCourses .courseTable td button {
+  margin-right: 8px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  cursor: pointer;
+  font-weight: 600;
+}
+.ManageCourses .courseTable td .editBtn {
+  background: #e0f2fe;
+  border-color: #bae6fd;
+}
+.ManageCourses .courseTable td .deleteBtn {
+  background: #fee2e2;
+  border-color: #fecaca;
+}
+.ManageCourses .courseStatsPanel {
+  margin-top: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  background: #f8fafc;
+}
+.ManageCourses .emptyStats {
+  color: #475569;
+  font-size: 14px;
+}
+.ManageCourses .statsHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.ManageCourses .statsHead h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #0f172a;
+}
+.ManageCourses .statsHead p {
+  margin: 4px 0 0;
+  color: #64748b;
+}
+.ManageCourses .secondaryBtn {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.ManageCourses .statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+.ManageCourses .statsCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ManageCourses .statsCard strong {
+  font-size: 22px;
+  color: #0f172a;
+}
+.ManageCourses .statsCard span {
+  color: #64748b;
+  font-size: 13px;
+}
+.ManageCourses .statsCard.highlight {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.18) inset;
+}
+.ManageCourses .courseSemesterPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.ManageCourses .courseSemesterPicker select {
+  min-width: 160px;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+}
+.ManageCourses .semesterAddBtn {
+  border: 1px solid #1d4ed8;
+  background: #1d4ed8;
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.ManageCourses .semesterSelectedList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.ManageCourses .semesterChip {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.ManageCourses .semesterChip.active {
+  background: #1d4ed8;
+  color: #ffffff;
+  border-color: #1d4ed8;
+}
+
+@media (max-width: 900px) {
+  .ManageCourses .mngHeader,
+  .ManageCourses .statsHead {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ManageCourses .courseTable {
+    overflow-x: auto;
+  }
+}

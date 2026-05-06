@@ -86,7 +86,7 @@ class ManageUsers {
             if ($facultyId !== null) {
                 $fid = $facultyId;
             }
-            $stmt->bind_param('sssiii', $name, $email, $hashed, $role, $lvl, $fid);
+            $stmt->bind_param('ssssii', $name, $email, $hashed, $role, $lvl, $fid);
             if (!$stmt->execute()) {
                 $stmt->close();
                 $this->conn->rollback();
@@ -217,15 +217,24 @@ class ManageUsers {
 
         // Get all courses at once (avoid N+1 queries)
         $allCourses = [];
-        $csql = "SELECT faculty_id, code, name FROM courses";
+        $managedCoursesByUser = [];
+        $csql = "SELECT faculty_id, code, name, module_leader_id FROM courses";
         $cstmt = $this->conn->prepare($csql);
         $cstmt->execute();
         $fid = null;
         $ccode = null;
         $cname = null;
-        $cstmt->bind_result($fid, $ccode, $cname);
+        $cmoduleLeaderId = null;
+        $cstmt->bind_result($fid, $ccode, $cname, $cmoduleLeaderId);
         while ($cstmt->fetch()) {
             if ($fid === null) {
+                if ($cmoduleLeaderId !== null) {
+                    $leaderKey = (string)$cmoduleLeaderId;
+                    if (!isset($managedCoursesByUser[$leaderKey])) {
+                        $managedCoursesByUser[$leaderKey] = [];
+                    }
+                    $managedCoursesByUser[$leaderKey][] = ['code' => $ccode, 'name' => $cname];
+                }
                 continue;
             }
 
@@ -234,6 +243,14 @@ class ManageUsers {
                 $allCourses[$facultyKey] = [];
             }
             $allCourses[$facultyKey][] = ['code' => $ccode, 'name' => $cname];
+
+            if ($cmoduleLeaderId !== null) {
+                $leaderKey = (string)$cmoduleLeaderId;
+                if (!isset($managedCoursesByUser[$leaderKey])) {
+                    $managedCoursesByUser[$leaderKey] = [];
+                }
+                $managedCoursesByUser[$leaderKey][] = ['code' => $ccode, 'name' => $cname];
+            }
         }
         $cstmt->close();
 
@@ -263,6 +280,16 @@ class ManageUsers {
             ];
         }
         $stmt->close();
+
+        for ($i = 0; $i < count($users); $i++) {
+            $user = $users[$i];
+            $userIdKey = (string)$user['id'];
+            $managedCourses = $managedCoursesByUser[$userIdKey] ?? [];
+            $managedCourseCount = count($managedCourses);
+
+            $users[$i]['managedCourses'] = $managedCourses;
+            $users[$i]['managedCourseCount'] = $managedCourseCount;
+        }
 
         return ['users' => $users, 'faculties' => $faculties];
     }

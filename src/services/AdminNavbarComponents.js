@@ -26,4 +26,18 @@ const getAdminFacultyNavbarComponents = (currentItem, setCurrentItem) => {
   ];
 };
 
-export { getAdminManageUserNavbarComponents, getAdminFacultyNavbarComponents };
+const getAdminCoursesNavbarComponents = (currentItem, setCurrentItem) => {
+  const handleCoursesClick = () => {
+    setCurrentItem("Courses");
+  };
+
+  return [
+    {
+      name: "Courses",
+      onClick: handleCoursesClick,
+      active: currentItem === "Courses",
+    },
+  ];
+};
+
+export { getAdminManageUserNavbarComponents, getAdminFacultyNavbarComponents, getAdminCoursesNavbarComponents };

@@ -27,7 +27,7 @@ CREATE TABLE courses (
     code VARCHAR(50) NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL,
     level INT NOT NULL,
-    semester VARCHAR(50) NOT NULL,
+    semesters JSON DEFAULT NULL,
     faculty_id INT,
     module_leader_id INT,
     FOREIGN KEY (faculty_id) REFERENCES faculties(faculty_id) ON DELETE CASCADE,

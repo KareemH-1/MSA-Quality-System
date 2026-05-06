@@ -32,6 +32,7 @@ const buildVisiblePages = (currentPage, totalPages, siblingCount) => {
 const PagificationContainer = ({
   children,
   data = [],
+  totalItems: totalItemsProp = null,
   rowsPerPage,
   currentPage,
   setCurrentPage,
@@ -41,7 +42,8 @@ const PagificationContainer = ({
   rowsPerPageOptions = [10, 20, 50, 100],
   onRowsPerPageChange = null,
   initialRowsPerPage = 10,
-  enableRowsPerPageControl = true
+  enableRowsPerPageControl = true,
+  disableLocalPagination = false,
 }) => {
   const [internalCurrentPage, setInternalCurrentPage] = useState(1);
   const [internalRowsPerPage, setInternalRowsPerPage] = useState(initialRowsPerPage);
@@ -55,7 +57,7 @@ const PagificationContainer = ({
   const setResolvedCurrentPage = isPageControlled ? setCurrentPage : setInternalCurrentPage;
   const setResolvedRowsPerPage = isRowsPerPageControlled ? onRowsPerPageChange : setInternalRowsPerPage;
 
-  const totalItems = Array.isArray(data) ? data.length : 0;
+  const totalItems = typeof totalItemsProp === "number" ? totalItemsProp : (Array.isArray(data) ? data.length : 0);
   const safeRowsPerPage = Math.max(1, resolvedRowsPerPage);
   const totalPages = Math.max(1, Math.ceil(totalItems / safeRowsPerPage));
   const safeCurrentPage = Math.min(Math.max(1, resolvedCurrentPage), totalPages);
@@ -64,9 +66,13 @@ const PagificationContainer = ({
     enableRowsPerPageControl && Array.isArray(rowsPerPageOptions) && rowsPerPageOptions.length > 0;
 
   const paginatedData = useMemo(() => {
+    if (disableLocalPagination) {
+      return Array.isArray(data) ? data : [];
+    }
+
     const start = (safeCurrentPage - 1) * safeRowsPerPage;
     return (Array.isArray(data) ? data : []).slice(start, start + safeRowsPerPage);
-  }, [data, safeCurrentPage, safeRowsPerPage]);
+  }, [data, disableLocalPagination, safeCurrentPage, safeRowsPerPage]);
 
   useEffect(() => {
     if (safeCurrentPage !== resolvedCurrentPage) {

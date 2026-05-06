@@ -67,11 +67,21 @@ class Faculty
                 $studentStmt->close();
             }
 
-            $instructorCount = 0;
-            $instructorSql = "SELECT COUNT(*) FROM users WHERE faculty_id = ? AND role = 'Instructor'";
+                        $instructorCount = 0;
+                        $instructorSql = "SELECT COUNT(DISTINCT user_id) FROM (
+                                                                SELECT u.user_id AS user_id
+                                                                FROM users u
+                                                                WHERE u.faculty_id = ?
+                                                                    AND u.role IN ('Instructor', 'Module_Leader', 'ModuleLeader')
+                                                                UNION
+                                                                SELECT c.module_leader_id AS user_id
+                                                                FROM courses c
+                                                                WHERE c.faculty_id = ?
+                                                                    AND c.module_leader_id IS NOT NULL
+                                                            ) AS faculty_instructors";
             $instructorStmt = $this->conn->prepare($instructorSql);
             if ($instructorStmt) {
-                $instructorStmt->bind_param('i', $facultyId);
+                                $instructorStmt->bind_param('ii', $facultyId, $facultyId);
                 $instructorStmt->execute();
                 $countValue = null;
                 $instructorStmt->bind_result($countValue);
