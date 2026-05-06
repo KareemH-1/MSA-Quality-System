@@ -30,7 +30,10 @@ export default function StudentAppeals() {
       });
       setSubmitStatus("success");
 
-      
+      const updatedAppeals = await api.get(
+        "/View/StudentAppealView.php?action=my-appeals",
+      );
+      setAppealCounts(updatedAppeals.data?.appeals ?? []);
 
       const updatedAppealsRes = await api.get(
         "/View/StudentAppealView.php?action=my-appeal-rows",
@@ -111,9 +114,7 @@ export default function StudentAppeals() {
             within 5-7 business days.
           </p>
         </div>
-        <button type="button" onClick={() => setIsModalOpen(true)}>
-          New Appeal
-        </button>
+        <button type="button">New Appeal</button>
       </div>
 
       {loading ? (
@@ -153,8 +154,11 @@ export default function StudentAppeals() {
                         setSelectedSession(session);
                         setIsModalOpen(true);
                       }}
+                      disabled={used !== null && used >= maxAllowed} // ← add this
                     >
-                      Submit Appeal
+                      {used !== null && used >= maxAllowed
+                        ? "Limit Reached"
+                        : "Submit Appeal"}
                     </button>
                   </div>
                 );

@@ -63,12 +63,23 @@
 }
 
 .active-appeals {
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
   padding: 2rem;
   border-radius: 12px;
   border: 1px solid rgba(0, 33, 71, 0.08);
+  background: orange;
   background: var(--surface-high);
   box-shadow: var(--shadow-soft);
+}
+
+.active-appeals::after {
+  content: "";
+  display: block;
+  height: 2px;
+  background: var(--muted-color);
+  margin: 0 2em -2rem 2rem; 
 }
 
 .appeal-sessions-grid {
@@ -140,6 +151,13 @@
 .appeal-session-box button:hover {
   background: var(--secondary-color);
   transform: translateY(-1px);
+}
+
+.appeal-session-box button:disabled {
+  background: var(--soft-color);
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.6;
 }
 
 .appeal-policy-box {
