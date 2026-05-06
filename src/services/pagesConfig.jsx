@@ -6,12 +6,16 @@ import SystemLogs from "../pages/Admin/SystemLogs";
 import Login from "../pages/Login";
 import NotFound from "../pages/NotFound";
 import StudentDashboard from "../pages/Student/StudentDashboard";
+import StudentServices from "../pages/Student/StudentServices";
 import { getQaDashboardNavbarComponents } from "./QaDashboardNavbarComponents";
 import {
   getAdminFacultyNavbarComponents,
   getAdminManageUserNavbarComponents,
 } from "./AdminNavbarComponents";
-import { getStudentNavbarComponents } from "./StudentNavbarComponents";
+import {
+  getStudentNavbarComponents,
+  getStudentServicesNavbarComponents,
+} from "./StudentNavbarComponents";
 
 import { ROLES } from "../constants/roles";
 import {
@@ -85,15 +89,27 @@ export const PAGE_CONFIG = {
     roles: [ROLES.ADMIN],
   },
 
-  studentDashboard: {
-    path: "/student-dashboard",
+  studentHome: {
+    path: "/student-home",
     component: StudentDashboard,
     showSidebar: true,
-    sidebarLabel: "Student Dashboard",
-    sidebarIcon: LayoutDashboard,
-    showNavbar: true,
+    sidebarLabel: "Home",
+    sidebarIcon: Home,
+    showNavbar: false,
     defaultNavItem: "Home",
     getNavbarComponents: getStudentNavbarComponents,
+    roles: [ROLES.STUDENT],
+  },
+
+  studentServices: {
+    path: "/student-services",
+    component: StudentServices,
+    showSidebar: true,
+    sidebarLabel: "Services",
+    sidebarIcon: Activity,
+    showNavbar: true,
+    defaultNavItem: "Appeals",
+    getNavbarComponents: getStudentServicesNavbarComponents,
     roles: [ROLES.STUDENT],
   },
 };
@@ -106,7 +122,7 @@ export const NOT_FOUND_PAGE = {
 export const ROLE_DEFAULT_PAGES = {
   [ROLES.QA]: "/dashboard",
   [ROLES.ADMIN]: "/user-management",
-  [ROLES.STUDENT]: "/student-dashboard",
+  [ROLES.STUDENT]: "/student-home",
 };
 
 export const getDefaultPageForRole = (role) => {
