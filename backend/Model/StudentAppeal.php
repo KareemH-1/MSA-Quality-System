@@ -76,7 +76,7 @@ class StudentAppeal
 
     public function getStudentAppeals(int $studentId): array
     {
-      $sql = "SELECT a.appeal_id, a.course_id, c.code as course_code, c.name as course_name, a.session_id, s.type as session_type, a.original_grade, a.reason, a.status FROM " . $this->table . " a JOIN courses c ON a.course_id = c.course_id JOIN appeal_sessions s ON a.session_id = s.session_id WHERE a.student_id = ? ORDER BY a.submitted_at DESC";
+      $sql = "SELECT a.appeal_id, a.course_id, c.code as course_code, c.name as course_name, f.name as faculty_name, a.session_id, s.type as session_type, a.original_grade, a.new_grade, a.reason, a.note, a.status, a.submitted_at, a.resolved_at, u.name as instructor_name FROM " . $this->table . " a JOIN courses c ON a.course_id = c.course_id JOIN faculties f ON c.faculty_id = f.faculty_id JOIN appeal_sessions s ON a.session_id = s.session_id LEFT JOIN users u ON a.assigned_instructor_id = u.user_id WHERE a.student_id = ? ORDER BY a.submitted_at DESC";
       $stmt = $this->conn->prepare($sql);
 
       if (!$stmt) return [];

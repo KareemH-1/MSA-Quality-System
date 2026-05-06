@@ -1,4 +1,4 @@
-import StudentHome from "../../components/Student/StudentHome";
+import StudentHome from "../../components/Student/StudentOverallDashboard";
 import StudentAppeals from "../../components/Student/StudentAppeals";
 import StudentSurveys from "../../components/Student/StudentSurveys";
 
