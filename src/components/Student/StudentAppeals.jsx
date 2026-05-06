@@ -12,12 +12,48 @@ export default function StudentAppeals() {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState("");
   const [selectedSession, setSelectedSession] = useState(null);
+  const [submitStatus, setSubmitStatus] = useState(null);
+  const [originalGrade, setOriginalGrade] = useState("");
+
+  const handleSubmitAppeal = async () => {
+    if (!selectedCourse || !originalGrade || !appealReason.trim()) {
+      setSubmitStatus("validation-error");
+      return;
+    }
+
+    try {
+      await api.post("/View/StudentAppealView.php?action=submit", {
+        session_id: selectedSession.session_id,
+        course_id: selectedCourse,
+        original_grade: originalGrade,
+        reason: appealReason.trim(),
+      });
+      setSubmitStatus("success");
+
+      
+
+      const updatedAppealsRes = await api.get(
+        "/View/StudentAppealView.php?action=my-appeal-rows",
+      );
+      setAppealRows(updatedAppealsRes.data?.appeals ?? []);
+
+      setTimeout(() => {
+        closeModal();
+        setSubmitStatus(null);
+      }, 1500);
+    } catch (e) {
+      console.error("Failed to submit appeal:", e);
+      setSubmitStatus("api-error");
+    }
+  };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedSession(null);
     setAppealReason("");
     setSelectedCourse("");
+    setOriginalGrade("");
+    setSubmitStatus(null);
   };
 
   const formatShortDate = (value) => {
@@ -233,6 +269,35 @@ export default function StudentAppeals() {
               </div>
 
               <div className="modal-field">
+                <label>Your Current Grade</label>
+                <select
+                  value={originalGrade}
+                  onChange={(e) => setOriginalGrade(e.target.value)}
+                >
+                  <option value="" disabled>
+                    Select your grade
+                  </option>
+                  {[
+                    "A+",
+                    "A",
+                    "A-",
+                    "B+",
+                    "B",
+                    "B-",
+                    "C+",
+                    "C",
+                    "C-",
+                    "D",
+                    "F",
+                  ].map((g) => (
+                    <option key={g} value={g}>
+                      {g}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="modal-field">
                 <label>Reason</label>
                 <textarea
                   placeholder="Enter your reason for the appeal..."
@@ -244,10 +309,30 @@ export default function StudentAppeals() {
             </div>
 
             <div className="modal-footer">
+              {submitStatus === "success" && (
+                <p className="modal-status success">
+                  ✓ Appeal submitted successfully!
+                </p>
+              )}
+              {submitStatus === "validation-error" && (
+                <p className="modal-status error">
+                  ✗ Please select a course and write a reason.
+                </p>
+              )}
+              {submitStatus === "api-error" && (
+                <p className="modal-status error">
+                  ✗ Submission failed. Please try again.
+                </p>
+              )}
+
               <button className="modal-cancel-btn" onClick={closeModal}>
                 Cancel
               </button>
-              <button className="modal-submit-btn" type="button">
+              <button
+                className="modal-submit-btn"
+                type="button"
+                onClick={handleSubmitAppeal}
+              >
                 Submit Appeal
               </button>
             </div>

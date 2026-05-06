@@ -511,6 +511,24 @@
   transform: translateY(-1px);
 }
 
+.modal-status {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  margin-right: auto; /* pushes it left, buttons stay right */
+}
+
+.modal-status.success {
+  background: rgba(8, 243, 220, 0.15);
+  color: var(--success-color);
+}
+
+.modal-status.error {
+  background: rgba(255, 218, 214, 0.8);
+  color: var(--accent-color);
+}
+
 @media (max-width: 640px) {
   .appeals-page {
     gap: 1.5rem;
