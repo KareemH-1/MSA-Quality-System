@@ -107,6 +107,23 @@ class StudentAppealController
     ];
   }
 
+  public function getMyAppealRows(): array
+  {
+    $authError = $this->requireStudent();
+    if ($authError) return $authError;
+
+    $studentId = (int)$_SESSION['user_id'];
+    $appeals = $this->appealModel->getStudentAppeals($studentId);
+
+    return [
+      'statusCode' => 200,
+      'body' => [
+        'status' => 'success',
+        'appeals' => $appeals,
+      ],
+    ];
+  }
+
   public function submit(array $data): array
   {
     if ($authError = $this->requireStudent()) return $authError;

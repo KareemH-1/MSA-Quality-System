@@ -36,6 +36,10 @@ class StudentAppealView extends JsonView
 				$result = $this->controller->getMyAppeals();
 				break;
 			}
+			case 'my-appeal-rows': {
+				$result = $this->controller->getMyAppealRows();
+				break;
+			}
 			case 'submit': {
 				if (strtoupper($method) !== 'POST') {
 					$result = [
@@ -58,7 +62,7 @@ class StudentAppealView extends JsonView
 					'body' => [
 						'status' => 'error',
 						'message' => 'Unknown action',
-						'allowed' => ['sessions', 'enrolled-courses', 'my-appeals', 'submit'],
+						'allowed' => ['sessions', 'enrolled-courses', 'my-appeals', 'my-appeal-rows', 'submit'],
 					],
 				];
 				break;

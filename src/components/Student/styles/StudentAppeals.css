@@ -1,0 +1,390 @@
+.appeals-page {
+  display: grid;
+  gap: 2rem;
+  padding: 0 0 3rem 0;
+}
+
+.appeals-page .header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.appeals-page .header div {
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.appeals-page .header h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--primary-color);
+  letter-spacing: -0.02em;
+}
+
+.appeals-page .header p {
+  margin: 0.5rem 0 0 0;
+  font-size: 1rem;
+  color: var(--text-color);
+  max-width: 500px;
+  line-height: 1.6;
+}
+
+.appeals-page .header button {
+  margin: 1rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  background: var(--primary-color);
+  color: var(--neutral-color);
+  border: none;
+  border-radius: 8px;
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.appeals-page .header button:hover {
+  background: var(--secondary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 33, 71, 0.15);
+}
+
+.appeals-page .header::after {
+  content: "";
+  width: 100%;
+  height: 2px;
+  margin-left: 5rem;
+  background: var(--muted-color);
+}
+
+.active-appeals {
+  gap: 1.5rem;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 33, 71, 0.08);
+  background: var(--surface-high);
+  box-shadow: var(--shadow-soft);
+}
+
+.appeal-sessions-grid {
+  background-color: var(--tint-color);
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 1.5rem;
+}
+
+.active-appeals h2 {
+  margin: 0;
+  padding: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  grid-column: 1 / -1;
+}
+
+.appeal-session-box {
+  padding: 1.25rem;
+  border-radius: 10px;
+  border-left: 4px solid transparent;
+  background: var(--neutral-color);
+  display: grid;
+  gap: 0.75rem;
+  transition: 0.2s ease;
+}
+
+.appeal-session-box:hover {
+  border-left: 4px solid rgba(0, 33, 71, 0.1);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 33, 71, 0.1);
+}
+
+.appeal-session-box h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.appeal-session-box p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  line-height: 1.5;
+}
+
+.appeal-session-box button {
+  align-self: start;
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: var(--primary-color);
+  color: var(--neutral-color);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--anim-fast);
+}
+
+.appeal-session-box button:hover {
+  background: var(--secondary-color);
+  transform: translateY(-1px);
+}
+
+.appeal-policy-box {
+  padding: 1.25rem;
+  border-radius: 10px;
+  background: var(--tint-color);
+  border-left: 4px solid transparent;
+  display: grid;
+  gap: 0.75rem;
+  transition: 0.2s ease;
+}
+
+.appeal-policy-box:hover {
+  border-left: 4px solid var(--accent-color);
+  transform: translateY(-2px);
+}
+
+.appeal-policy-box h3 {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.appeal-policy-box p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+@media (min-width: 768px) {
+  .active-appeals {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+.your-appeals {
+  display: grid;
+  gap: 1.5rem;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 33, 71, 0.08);
+  background: var(--surface-high);
+  box-shadow: var(--shadow-soft);
+}
+
+.your-appeals h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  grid-column: 1 / -1;
+}
+
+.appeal-card {
+  padding: 1.25rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  border-left: 4px solid var(--primary-color);
+  background: var(--neutral-color);
+  display: grid;
+  gap: 1rem;
+  transition: var(--anim-fast);
+}
+
+.appeal-card:hover {
+  border-left: 4px solid var(--accent-color);
+  box-shadow: 0 4px 12px rgba(0, 33, 71, 0.1);
+}
+
+.appeal-card .header-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.appeal-card .header-card .right-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.appeal-card .header-card h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.appeal-card .header-card > p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-color);
+}
+
+.appeal-card .header-card span {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--primary-color);
+  width: fit-content;
+}
+
+.status.pending {
+  background-color: var(--tint-color);
+  color: var(--tertiary-color);
+}
+
+.status.resolved {
+  background: var(--success-color);
+  color: var(--success-color);
+}
+
+.status.rejected {
+  background: var(--error-color);
+  color: var(--accent-color);
+}
+
+.appeal-card .grade {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: var(--tint-color);
+  border-radius: 8px;
+  margin-top: 0.5rem;
+}
+
+.appeal-card .grade h4 {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-color);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.appeal-card .grade p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.appeal-card .new-grade {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.appeal-card .old-grade {
+  font-size: 0.9rem;
+  color: var(--soft-color);
+}
+
+.appeal-card .comment-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.appeal-card .reason,
+.appeal-card .respons {
+  padding: 1rem;
+  border-radius: 0 8px 8px 0;
+  background: var(--tint-color);
+  display: grid;
+  gap: 0.5rem;
+  transition: 0.2s ease;
+}
+
+.appeal-card .reason {
+  border-left: 4px solid var(--bridge-teal);
+}
+
+.appeal-card .reason:hover {
+  border-left-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 33, 71, 0.1);
+}
+
+.appeal-card .respons {
+  border-radius: 8px;
+  border-left: 4px solid transparent;
+}
+
+.appeal-card .respons:hover {
+  border-left-color: var(--bridge-teal);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 33, 71, 0.1);
+}
+
+.appeal-card .reason h4,
+.appeal-card .respons h4 {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-color);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.appeal-card .reason p,
+.appeal-card .respons p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--foundation-color);
+  line-height: 1.6;
+}
+
+.appeal-card .respons p:last-child {
+  font-size: 0.8rem;
+  color: var(--text-color);
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 640px) {
+  .appeals-page {
+    gap: 1.5rem;
+    padding: 0 0 2rem 0;
+  }
+
+  .active-appeals,
+  .your-appeals {
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+
+  .appeals-page .header {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .appeal-card .grade {
+    flex-wrap: wrap;
+  }
+}
