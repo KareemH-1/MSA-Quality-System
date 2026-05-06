@@ -7,11 +7,21 @@ import Login from "../pages/Login";
 import NotFound from "../pages/NotFound";
 import StudentDashboard from "../pages/Student/StudentDashboard";
 import { getQaDashboardNavbarComponents } from "./QaDashboardNavbarComponents";
-import { getAdminFacultyNavbarComponents, getAdminManageUserNavbarComponents } from "./AdminNavbarComponents";
+import {
+  getAdminFacultyNavbarComponents,
+  getAdminManageUserNavbarComponents,
+} from "./AdminNavbarComponents";
 import { getStudentNavbarComponents } from "./StudentNavbarComponents";
 
 import { ROLES } from "../constants/roles";
-import { Settings, LayoutDashboard, UserRound, Activity, Building2 } from "lucide-react";
+import {
+  Settings,
+  LayoutDashboard,
+  UserRound,
+  Activity,
+  Building2,
+  Home,
+} from "lucide-react";
 import Contact from "../pages/Contact";
 import { normalizeRole } from "./roleUtils";
 

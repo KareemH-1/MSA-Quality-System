@@ -69,7 +69,6 @@
   padding: 2rem;
   border-radius: 12px;
   border: 1px solid rgba(0, 33, 71, 0.08);
-  background: orange;
   background: var(--surface-high);
   box-shadow: var(--shadow-soft);
 }
@@ -79,7 +78,7 @@
   display: block;
   height: 2px;
   background: var(--muted-color);
-  margin: 0 2em -2rem 2rem; 
+  margin: 0 2em -2rem 2rem;
 }
 
 .appeal-sessions-grid {

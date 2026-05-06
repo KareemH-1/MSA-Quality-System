@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../../api/axios";
+import SubmitAppealModal from "../../components/Student/SubmitAppealModal";
 import "./styles/StudentAppeals.css";
 
 export default function StudentAppeals() {
@@ -8,56 +9,7 @@ export default function StudentAppeals() {
   const [appealCounts, setAppealCounts] = useState([]);
   const [appealRows, setAppealRows] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [appealReason, setAppealReason] = useState("");
-  const [enrolledCourses, setEnrolledCourses] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState("");
   const [selectedSession, setSelectedSession] = useState(null);
-  const [submitStatus, setSubmitStatus] = useState(null);
-  const [originalGrade, setOriginalGrade] = useState("");
-
-  const handleSubmitAppeal = async () => {
-    if (!selectedCourse || !originalGrade || !appealReason.trim()) {
-      setSubmitStatus("validation-error");
-      return;
-    }
-
-    try {
-      await api.post("/View/StudentAppealView.php?action=submit", {
-        session_id: selectedSession.session_id,
-        course_id: selectedCourse,
-        original_grade: originalGrade,
-        reason: appealReason.trim(),
-      });
-      setSubmitStatus("success");
-
-      const updatedAppeals = await api.get(
-        "/View/StudentAppealView.php?action=my-appeals",
-      );
-      setAppealCounts(updatedAppeals.data?.appeals ?? []);
-
-      const updatedAppealsRes = await api.get(
-        "/View/StudentAppealView.php?action=my-appeal-rows",
-      );
-      setAppealRows(updatedAppealsRes.data?.appeals ?? []);
-
-      setTimeout(() => {
-        closeModal();
-        setSubmitStatus(null);
-      }, 1500);
-    } catch (e) {
-      console.error("Failed to submit appeal:", e);
-      setSubmitStatus("api-error");
-    }
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedSession(null);
-    setAppealReason("");
-    setSelectedCourse("");
-    setOriginalGrade("");
-    setSubmitStatus(null);
-  };
 
   const formatShortDate = (value) => {
     if (!value) return "";
@@ -78,31 +30,36 @@ export default function StudentAppeals() {
     return s || e;
   };
 
+  const loadAll = async () => {
+    setLoading(true);
+    try {
+      const [sessionsRes, appealsRes, appealRowsRes] = await Promise.all([
+        api.get("/View/StudentAppealView.php?action=sessions"),
+        api.get("/View/StudentAppealView.php?action=my-appeals"),
+        api.get("/View/StudentAppealView.php?action=my-appeal-rows"),
+      ]);
+      setSessions(sessionsRes.data?.sessions ?? []);
+      setAppealCounts(appealsRes.data?.appeals ?? []);
+      setAppealRows(appealRowsRes.data?.appeals ?? []);
+    } catch (e) {
+      console.error("Failed to load appeals data:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadAll = async () => {
-      setLoading(true);
-      try {
-        const [sessionsRes, appealsRes, appealRowsRes, coursesRes] =
-          await Promise.all([
-            api.get("/View/StudentAppealView.php?action=sessions"),
-            api.get("/View/StudentAppealView.php?action=my-appeals"),
-            api.get("/View/StudentAppealView.php?action=my-appeal-rows"),
-            api.get("/View/StudentAppealView.php?action=enrolled-courses"),
-          ]);
-
-        setEnrolledCourses(coursesRes.data?.courses ?? []);
-        setSessions(sessionsRes.data?.sessions ?? []);
-        setAppealCounts(appealsRes.data?.appeals ?? []);
-        setAppealRows(appealRowsRes.data?.appeals ?? []);
-      } catch (e) {
-        console.error("Failed to load appeals data:", e);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadAll();
   }, []);
+
+  const handleAppealSuccess = async () => {
+    const [updatedAppeals, updatedRows] = await Promise.all([
+      api.get("/View/StudentAppealView.php?action=my-appeals"),
+      api.get("/View/StudentAppealView.php?action=my-appeal-rows"),
+    ]);
+    setAppealCounts(updatedAppeals.data?.appeals ?? []);
+    setAppealRows(updatedRows.data?.appeals ?? []);
+  };
 
   return (
     <div className="appeals-page">
@@ -114,7 +71,9 @@ export default function StudentAppeals() {
             within 5-7 business days.
           </p>
         </div>
-        <button type="button">New Appeal</button>
+        <button type="button" onClick={() => setIsModalOpen(true)}>
+          New Appeal
+        </button>
       </div>
 
       {loading ? (
@@ -154,7 +113,7 @@ export default function StudentAppeals() {
                         setSelectedSession(session);
                         setIsModalOpen(true);
                       }}
-                      disabled={used !== null && used >= maxAllowed} // ← add this
+                      disabled={used !== null && used >= maxAllowed}
                     >
                       {used !== null && used >= maxAllowed
                         ? "Limit Reached"
@@ -241,108 +200,15 @@ export default function StudentAppeals() {
         </>
       )}
 
-      {isModalOpen && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <div>
-                <h3>Submit New Appeal</h3>
-                <p>{selectedSession?.type ?? "General Appeal"}</p>
-              </div>
-              <button className="modal-close-btn" onClick={closeModal}>
-                &times;
-              </button>
-            </div>
-
-            <div className="modal-body">
-              <div className="modal-field">
-                <label>Course</label>
-                <select
-                  value={selectedCourse}
-                  onChange={(e) => setSelectedCourse(e.target.value)}
-                >
-                  <option value="" disabled>
-                    Select a course
-                  </option>
-                  {enrolledCourses.map((course) => (
-                    <option key={course.course_id} value={course.course_id}>
-                      {course.code} - {course.name}{" "}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="modal-field">
-                <label>Your Current Grade</label>
-                <select
-                  value={originalGrade}
-                  onChange={(e) => setOriginalGrade(e.target.value)}
-                >
-                  <option value="" disabled>
-                    Select your grade
-                  </option>
-                  {[
-                    "A+",
-                    "A",
-                    "A-",
-                    "B+",
-                    "B",
-                    "B-",
-                    "C+",
-                    "C",
-                    "C-",
-                    "D",
-                    "F",
-                  ].map((g) => (
-                    <option key={g} value={g}>
-                      {g}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="modal-field">
-                <label>Reason</label>
-                <textarea
-                  placeholder="Enter your reason for the appeal..."
-                  value={appealReason}
-                  onChange={(e) => setAppealReason(e.target.value)}
-                  rows={4}
-                />
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              {submitStatus === "success" && (
-                <p className="modal-status success">
-                  ✓ Appeal submitted successfully!
-                </p>
-              )}
-              {submitStatus === "validation-error" && (
-                <p className="modal-status error">
-                  ✗ Please select a course and write a reason.
-                </p>
-              )}
-              {submitStatus === "api-error" && (
-                <p className="modal-status error">
-                  ✗ Submission failed. Please try again.
-                </p>
-              )}
-
-              <button className="modal-cancel-btn" onClick={closeModal}>
-                Cancel
-              </button>
-              <button
-                className="modal-submit-btn"
-                type="button"
-                onClick={handleSubmitAppeal}
-              >
-                Submit Appeal
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <SubmitAppealModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedSession(null);
+        }}
+        selectedSession={selectedSession}
+        onSuccess={handleAppealSuccess}
+      />
     </div>
   );
 }
