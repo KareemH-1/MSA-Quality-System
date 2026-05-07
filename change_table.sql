@@ -47,3 +47,13 @@ INSERT INTO survey_questions (survey_id, section, question_text, is_required, di
 ALTER TABLE survey_responses
 ADD COLUMN course_id INT(11) NOT NULL AFTER survey_id,
 ADD INDEX (course_id);
+
+ALTER TABLE survey_questions 
+ADD COLUMN question_type ENUM('likert', 'text') NOT NULL DEFAULT 'likert';
+
+UPDATE survey_questions 
+SET question_type = 'text' 
+WHERE section = 'Suggestions';
+
+ALTER TABLE answers 
+ADD COLUMN likert_score TINYINT NULL AFTER answer_text;

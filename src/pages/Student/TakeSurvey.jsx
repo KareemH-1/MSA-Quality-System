@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import api from "../../api/axios";
 import "./styles/TakeSurvey.css";
 
@@ -66,19 +67,49 @@ export default function TakeSurvey() {
   };
 
   const handleSubmit = async () => {
+    // Check required questions
+    const unanswered = sections
+      .flatMap((s) => s.questions)
+      .filter((q) => q.is_required && !answers[q.question_id]);
+
+    if (unanswered.length > 0) {
+      toast.error(`Please complete all required questions.`, {
+        position: "bottom-right",
+        autoClose: 4000,
+      });
+      return;
+    }
+
+    const allQuestions = sections.flatMap((s) => s.questions);
     const payload = {
       survey_id: Number(surveyId),
       course_id: Number(courseId),
-      answers: Object.entries(answers).map(([question_id, answer_text]) => ({
-        question_id: Number(question_id),
-        answer_text,
-      })),
+      answers: Object.entries(answers).map(([question_id, answer_text]) => {
+        const question = allQuestions.find(
+          (q) => q.question_id === Number(question_id),
+        );
+        return {
+          question_id: Number(question_id),
+          answer_text,
+          question_type: question?.question_type ?? "likert",
+        };
+      }),
     };
 
     try {
       await api.post("/View/StudentSurveyView.php?action=submit", payload);
       navigate("/student-services");
+      toast.success("Survey submitted successfully!", {
+        position: "bottom-right",
+        autoClose: 3000,
+      });
     } catch (err) {
+      console.error("Submit error:", err.response?.data);
+
+      toast.error("Something went wrong. Please try again.", {
+        position: "bottom-right",
+        autoClose: 4000,
+      });
       console.error(err);
     }
   };
@@ -86,10 +117,15 @@ export default function TakeSurvey() {
   if (loading) return <p className="loading-state">Loading survey...</p>;
 
   const totalQuestions = sections.reduce(
-    (acc, s) => acc + s.questions.length,
+    (acc, s) => acc + s.questions.filter((q) => q.is_required).length,
     0,
   );
-  const answeredQuestions = Object.keys(answers).length;
+  const answeredQuestions = sections.reduce(
+    (acc, s) =>
+      acc +
+      s.questions.filter((q) => q.is_required && answers[q.question_id]).length,
+    0,
+  );
   const progress =
     totalQuestions === 0
       ? 0
@@ -136,11 +172,28 @@ export default function TakeSurvey() {
                   {q.question_text}
                   {q.is_required && <span className="required-star">*</span>}
                 </p>
-                <LikertScale
-                  questionId={q.question_id}
-                  value={answers[q.question_id] ?? ""}
-                  onChange={handleAnswer}
-                />
+                {console.log(
+                  "Rendering question",
+                  q.question_id,
+                  "with type",
+                  q.question_type,
+                )}
+                {q.question_type === "text" ? (
+                  <textarea
+                    className="text-answer"
+                    value={answers[q.question_id] ?? ""}
+                    onChange={(e) =>
+                      handleAnswer(q.question_id, e.target.value)
+                    }
+                    placeholder="Type your answer here..."
+                  />
+                ) : (
+                  <LikertScale
+                    questionId={q.question_id}
+                    value={answers[q.question_id] ?? ""}
+                    onChange={handleAnswer}
+                  />
+                )}
               </div>
             ))}
           </div>

@@ -1,9 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
 :root {
-  --font-main:"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-main:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-secondary: "Lora", serif;
   --font-data: "JetBrains Mono", monospace;
-  --font-display: "Space Grotesk", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display:
+    "Space Grotesk", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
 
   --bridge-teal: #004369;
   --warm-sand: #eae0d5;
@@ -20,21 +23,36 @@
 
   --neutral-color: #fbf9fa; /* 248, 249, 250 */
   --tint-color: #f1f5f9; /* 241, 245, 249 */
-  --footer-color: #E7E8E9; /* 231, 232, 233 */
+  --footer-color: #e7e8e9; /* 231, 232, 233 */
   --soft-color: #adb5bd; /* 173, 161, 189 */
   --muted-color: #495857; /* 73, 80, 87 */
   --text-color: #64748b; /* 100, 116, 139 */
   --foundation-color: #191c1d; /* 25, 25, 29 */
 
-  --success-color: #08f3dc; /* 8, 243, 220 */
-  --warning-color: #fdf2e9; /* 253, 242, 233 */
-  --error-color: #ffdad6; /* 255, 218, 214 */
-  --info-color: #e0f2fe; /* 224, 242, 254 */
+  /* Success - Green */
+  --success-color: #16a34a;
+  --success-light: #dcfce7;
+  --success-text: #14532d;
+
+  /* Warning - Amber */
+  --warning-color: #d97706;
+  --warning-light: #fef3c7;
+  --warning-text: #78350f;
+
+  /* Error - Red */
+  --error-color: #dc2626;
+  --error-light: #fee2e2;
+  --error-text: #7f1d1d;
+
+  /* Info - Blue */
+  --info-color: #0284c7;
+  --info-light: #e0f2fe;
+  --info-text: #0c4a6e;
 
   --gradient-visual-soul: linear-gradient(135deg, #001a38 0%, #0a0c0d 100%);
   --card-accent-line: #b22b1d;
 
-  --surface-low: #FFFFFFCC;
+  --surface-low: #ffffffcc;
   --surface-high: #f8f9fa;
   --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.04);
 
@@ -189,7 +207,7 @@ body {
 .visual-card .card-header .Perf.positive {
   background: rgba(47, 144, 40, 0.15);
   color: rgba(15, 155, 45, 1);
-} 
+}
 
 .visual-card.white .card-header .Perf.positive {
   background: rgba(17, 255, 0, 0.2);
@@ -254,7 +272,7 @@ body {
   position: relative;
   overflow-x: hidden;
 }
-.app-footer{
+.app-footer {
   position: absolute;
   bottom: 0;
   width: 100%;
@@ -273,7 +291,7 @@ body {
   transition: margin-left var(--anim-standard);
 }
 
-.page-cont{
+.page-cont {
   position: relative;
 }
 

@@ -63,7 +63,7 @@ export default function StudentAppeals() {
 
   return (
     <div className="appeals-page">
-      <div className="header">
+      <div className="head">
         <div>
           <h1>Grade Appeals</h1>
           <p>
@@ -71,9 +71,6 @@ export default function StudentAppeals() {
             within 5-7 business days.
           </p>
         </div>
-        <button type="button" onClick={() => setIsModalOpen(true)}>
-          New Appeal
-        </button>
       </div>
 
       {loading ? (

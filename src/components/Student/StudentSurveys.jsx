@@ -9,6 +9,9 @@ export default function StudentSurveys() {
 
   const navigate = useNavigate();
 
+  const pendingSurveys = surveys.filter((s) => !s.is_submitted);
+  const submittedSurveys = surveys.filter((s) => s.is_submitted);
+
   const formatShortDate = (value) => {
     if (!value) return "";
     const d = new Date(value);
@@ -52,11 +55,72 @@ export default function StudentSurveys() {
     );
   };
 
+  function SurveyCard({ survey, onOpen }) {
+    const submitted =
+      survey.is_submitted ??
+      survey.submitted ??
+      survey.already_submitted ??
+      false;
+
+    return (
+      <div className="survey-card">
+        <div className="survey-card-header">
+          <div>
+            <h3>{survey.title ?? survey.survey_title ?? "Survey"}</h3>
+            <p className="course-name">
+              {survey.course_code ? `${survey.course_code} - ` : ""}
+              {survey.course_name ?? "Course"}
+            </p>
+          </div>
+          <span
+            className={`status-badge ${submitted ? "submitted" : "pending"}`}
+          >
+            {submitted ? "Submitted" : "Pending"}
+          </span>
+        </div>
+
+        <div className="survey-card-body">
+          <p className="description">
+            {submitted
+              ? (survey.description ?? "")
+              : "Please complete this survey."}
+          </p>
+          <div className="survey-meta">
+            <p>
+              <strong>Window:</strong>{" "}
+              {formatWindow(survey.start_date, survey.end_date)}
+            </p>
+            {survey.instructor_name && (
+              <p>
+                <strong>Instructor:</strong> {survey.instructor_name}
+              </p>
+            )}
+            {survey.semester && (
+              <p>
+                <strong>Semester:</strong> {survey.semester}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="survey-card-footer">
+          <button
+            className={`open-survey-btn ${submitted ? "disabled" : ""}`}
+            onClick={() => onOpen(survey)}
+            disabled={submitted}
+          >
+            {submitted ? "Already Submitted" : "Open Survey"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="student-surveys-page">
-      <div className="header">
+      <div className="head">
         <div>
-          <h1>Student Surveys</h1>
+          <h1>Surveys</h1>
           <p>
             Complete your assigned surveys and provide feedback for your
             enrolled courses.
@@ -74,84 +138,38 @@ export default function StudentSurveys() {
           <p>You currently do not have any surveys assigned.</p>
         </div>
       ) : (
-        <div className="survey-grid">
-          {surveys.map((survey) => {
-            const submitted =
-              survey.is_submitted ??
-              survey.submitted ??
-              survey.already_submitted ??
-              false;
-
-            return (
-              <div
-                className="survey-card"
-                key={`${survey.survey_id}-${survey.course_id}`}
-              >
-                <div className="survey-card-header">
-                  <div>
-                    <h3>{survey.title ?? survey.survey_title ?? "Survey"}</h3>
-                    <p className="course-name">
-                      {survey.course_code ? `${survey.course_code} - ` : ""}
-                      {survey.course_name ?? "Course"}
-                    </p>
-                  </div>
-
-                  <span
-                    className={`status-badge ${submitted ? "submitted" : "pending"}`}
-                  >
-                    {submitted ? "Submitted" : "Pending"}
-                  </span>
-                </div>
-
-                <div className="survey-card-body">
-                  <p className="description">
-                    {submitted
-                      ? (survey.description ?? "")
-                      : "Please complete this survey."}
-                  </p>
-
-                  <div className="survey-meta">
-                    <p>
-                      <strong>Window:</strong>{" "}
-                      {formatWindow(survey.start_date, survey.end_date)}
-                    </p>
-                    {survey.instructor_name && (
-                      <p>
-                        <strong>Instructor:</strong> {survey.instructor_name}
-                      </p>
-                    )}
-                    {survey.semester && (
-                      <p>
-                        <strong>Semester:</strong> {survey.semester}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="survey-card-footer">
-                  <button
-                    className={`open-survey-btn ${submitted ? "disabled" : ""}`}
-                    onClick={() => handleOpenSurvey(survey)}
-                    disabled={submitted}
-                  >
-                    {submitted ? "Already Submitted" : "Open Survey"}
-                  </button>
-                </div>
+        <div className="surveys-container">
+          {pendingSurveys.length > 0 && (
+            <div className="survey-group">
+              <h2 className="group-title pending-title">Pending</h2>
+              <div className="survey-grid">
+                {pendingSurveys.map((survey) => (
+                  <SurveyCard
+                    key={`${survey.survey_id}-${survey.course_id}`}
+                    survey={survey}
+                    onOpen={handleOpenSurvey}
+                  />
+                ))}
               </div>
-            );
-          })}
+            </div>
+          )}
+
+          {submittedSurveys.length > 0 && (
+            <div className="survey-group">
+              <h2 className="group-title completed-title">Completed</h2>
+              <div className="survey-grid">
+                {submittedSurveys.map((survey) => (
+                  <SurveyCard
+                    key={`${survey.survey_id}-${survey.course_id}`}
+                    survey={survey}
+                    onOpen={handleOpenSurvey}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
-
-      {/* <SubmitSurveyModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedSurvey(null);
-        }}
-        selectedSurvey={selectedSurvey}
-        onSuccess={handleSurveySuccess}
-      /> */}
     </div>
   );
 }

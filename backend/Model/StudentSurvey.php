@@ -65,6 +65,7 @@ class StudentSurvey
         question_id,
         section,
         question_text,
+        question_type,
         is_required,
         display_order
       FROM survey_questions
@@ -92,6 +93,7 @@ class StudentSurvey
       $sections[$section]['questions'][] = [
         'question_id'   => (int)$row['question_id'],
         'question_text' => $row['question_text'],
+        'question_type' => $row['question_type'],
         'is_required'   => (bool)$row['is_required'],
         'display_order' => (int)$row['display_order'],
       ];
@@ -168,25 +170,32 @@ class StudentSurvey
   
 
       $sql = "
-        INSERT INTO answers (response_id, question_id, answer_text)
-        VALUES (?, ?, ?)
+        INSERT INTO answers (response_id, question_id, answer_text, likert_score)
+        VALUES (?, ?, ?, ?)
       ";
 
       $stmt = $this->conn->prepare($sql);
       if (!$stmt) throw new Exception("Prepare failed: answers");
 
       foreach ($answers as $answer) {
-          $questionId = (int)$answer['question_id'];
-          $answerText = (string)($answer['answer_text'] ?? '');
+        $questionId = (int)$answer['question_id'];
+        $type = $answer['question_type'] ?? 'likert';
+        
+        $answerText = $type === 'text'   ? (string)($answer['answer_text'] ?? '') : null;
+        $likertScore = $type === 'likert' ? (int)($answer['answer_text'] ?? 0) : null;
 
-          $stmt->bind_param("iis", $responseId, $questionId, $answerText);
-          $stmt->execute();
+        $stmt->bind_param("iiss", $responseId, $questionId, $answerText, $likertScore);
+        
+        if (!$stmt->execute()) {
+          throw new Exception("Answer insert failed: " . $stmt->error); 
+        }
       }
 
       $this->conn->commit();
       return true;
 
     } catch (Exception $e) {
+      error_log("submitSurvey failed: " . $e->getMessage()); 
       $this->conn->rollback();
       return false;
     }

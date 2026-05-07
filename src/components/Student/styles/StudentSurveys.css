@@ -1,10 +1,10 @@
 .student-surveys-page {
   display: grid;
   gap: 2rem;
-  padding: 0 0 3rem 0;
+  padding: 0rem 2rem 2rem 2rem;
 }
 
-.student-surveys-page .header {
+.student-surveys-page .head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -12,7 +12,7 @@
   flex-wrap: wrap;
 }
 
-.student-surveys-page .header h1 {
+.student-surveys-page .head h1 {
   margin: 0;
   font-size: clamp(1.8rem, 3vw, 2.4rem);
   font-family: var(--font-display);
@@ -21,7 +21,7 @@
   letter-spacing: -0.02em;
 }
 
-.student-surveys-page .header p {
+.student-surveys-page .head p {
   margin: 0.5rem 0 0 0;
   font-size: 1rem;
   color: var(--text-color);
@@ -68,6 +68,8 @@
   display: grid;
   gap: 1.5rem;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  border-top: 2px solid rgba(0, 33, 71, 0.1);
+  padding-top: 1rem;
 }
 
 .student-surveys-page .survey-card {
@@ -120,13 +122,13 @@
 }
 
 .student-surveys-page .status-badge.pending {
-  background: rgba(254, 98, 78, 0.15);
-  color: var(--tertiary-color);
+  background: var(--info-light);
+  color: var(--info-text);
 }
 
 .student-surveys-page .status-badge.submitted {
-  background: rgba(8, 243, 220, 0.15);
-  color: var(--success-color);
+  background: var(--success-light);
+  color: var(--success-text);
 }
 
 .student-surveys-page .survey-card-body {
@@ -190,10 +192,34 @@
 }
 
 .open-survey-btn.disabled {
+  margin-top: 1.3rem;
   background: var(--soft-color);
   color: var(--text-color);
   cursor: not-allowed;
   opacity: 0.6;
+}
+.survey-group {
+  margin-bottom: 40px;
+}
+
+.group-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border-bottom: 2px solid var(--primary-color);
+  width: fit-content;
+}
+
+.pending-title {
+  background-color: var(--info-light);
+  color: var(--info-text);
+}
+
+.completed-title {
+  background-color: var(--success-light);
+  color: var(--success-text);
 }
 
 @media (max-width: 640px) {
@@ -206,7 +232,7 @@
     grid-template-columns: 1fr;
   }
 
-  .student-surveys-page .header {
+  .student-surveys-page .head {
     flex-direction: column;
     gap: 1.5rem;
   }

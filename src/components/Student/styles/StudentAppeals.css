@@ -1,24 +1,29 @@
+* {
+  box-sizing: border-box;
+}
+
 .appeals-page {
   display: grid;
   gap: 2rem;
-  padding: 0 0 3rem 0;
+  padding: 0 2rem 2rem 2rem;
+  margin: 0;
 }
 
-.appeals-page .header {
+.appeals-page .head {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 2rem;
   flex-wrap: wrap;
 }
 
-.appeals-page .header div {
+.appeals-page .head div {
   padding: 0.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.appeals-page .header h1 {
+.appeals-page .head h1 {
   margin: 0;
   font-size: clamp(1.8rem, 3vw, 2.4rem);
   font-family: var(--font-display);
@@ -27,7 +32,7 @@
   letter-spacing: -0.02em;
 }
 
-.appeals-page .header p {
+.appeals-page .head p {
   margin: 0.5rem 0 0 0;
   font-size: 1rem;
   color: var(--text-color);
@@ -35,7 +40,7 @@
   line-height: 1.6;
 }
 
-.appeals-page .header button {
+.appeals-page .head button {
   margin: 1rem;
   padding: 0.75rem 1.5rem;
   font-weight: 600;
@@ -48,18 +53,10 @@
   transition: 0.2s ease;
 }
 
-.appeals-page .header button:hover {
+.appeals-page .head button:hover {
   background: var(--secondary-color);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 33, 71, 0.15);
-}
-
-.appeals-page .header::after {
-  content: "";
-  width: 100%;
-  height: 2px;
-  margin-left: 5rem;
-  background: var(--muted-color);
 }
 
 .active-appeals {
