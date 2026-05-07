@@ -43,6 +43,7 @@ class StudentSurvey
       LEFT JOIN users u ON ip.instructor_id = u.user_id   -- ← fixed
       LEFT JOIN survey_responses sr
         ON  sr.survey_id  = s.survey_id
+        AND sr.course_id  = c.course_id   
         AND sr.student_id = ?
       ORDER BY
           FIELD(status, 'pending', 'upcoming', 'expired', 'completed'),
@@ -154,14 +155,14 @@ class StudentSurvey
 
     try {
       $sql = "
-        INSERT INTO survey_responses (student_id, survey_id, submitted_at)
-        VALUES (?, ?, NOW())
+        INSERT INTO survey_responses (student_id, survey_id, course_id, submitted_at)
+        VALUES (?, ?, ?, NOW())
       ";
 
       $stmt = $this->conn->prepare($sql);
       if (!$stmt) throw new Exception("Prepare failed: response");
 
-      $stmt->bind_param("ii", $studentId, $surveyId);
+      $stmt->bind_param("iii", $studentId, $surveyId, $courseId);
       $stmt->execute();
       $responseId = (int)$this->conn->insert_id;
   

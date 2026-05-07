@@ -42,3 +42,8 @@ INSERT INTO survey_questions (survey_id, section, question_text, is_required, di
 (1, 'Suggestions', 'What did you like most about this course?', 0, 26),
 (1, 'Suggestions', 'What could be improved?', 0, 27),
 (1, 'Suggestions', 'Any additional comments for the instructor?', 0, 28);
+
+
+ALTER TABLE survey_responses
+ADD COLUMN course_id INT(11) NOT NULL AFTER survey_id,
+ADD INDEX (course_id);

@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
+import { useNavigate } from "react-router-dom";
 import "./styles/StudentSurveys.css";
 
 export default function StudentSurveys() {
   const [loading, setLoading] = useState(false);
   const [surveys, setSurveys] = useState([]);
+
+  const navigate = useNavigate();
 
   const formatShortDate = (value) => {
     if (!value) return "";
@@ -44,7 +47,9 @@ export default function StudentSurveys() {
   }, []);
 
   const handleOpenSurvey = (survey) => {
-    console.log("Open survey:", survey);
+    navigate(
+      `/student-services/survey/${survey.survey_id}/${survey.course_id}`,
+    );
   };
 
   return (
@@ -100,7 +105,9 @@ export default function StudentSurveys() {
 
                 <div className="survey-card-body">
                   <p className="description">
-                    {survey.description ?? "Please complete this survey."}
+                    {submitted
+                      ? (survey.description ?? "")
+                      : "Please complete this survey."}
                   </p>
 
                   <div className="survey-meta">
@@ -123,7 +130,7 @@ export default function StudentSurveys() {
 
                 <div className="survey-card-footer">
                   <button
-                    type="button"
+                    className={`open-survey-btn ${submitted ? "disabled" : ""}`}
                     onClick={() => handleOpenSurvey(survey)}
                     disabled={submitted}
                   >

@@ -7,6 +7,7 @@ import Login from "../pages/Login";
 import NotFound from "../pages/NotFound";
 import StudentDashboard from "../pages/Student/StudentDashboard";
 import StudentServices from "../pages/Student/StudentServices";
+import TakeSurvey from "../pages/Student/TakeSurvey";
 import { getQaDashboardNavbarComponents } from "./QaDashboardNavbarComponents";
 import {
   getAdminFacultyNavbarComponents,
@@ -110,6 +111,13 @@ export const PAGE_CONFIG = {
     showNavbar: true,
     defaultNavItem: "Appeals",
     getNavbarComponents: getStudentServicesNavbarComponents,
+    roles: [ROLES.STUDENT],
+  },
+  takeSurvey: {
+    path: "/student-services/survey/:surveyId/:courseId",
+    component: TakeSurvey,
+    showSidebar: false,
+    showNavbar: false,
     roles: [ROLES.STUDENT],
   },
 };
