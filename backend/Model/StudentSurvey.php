@@ -18,31 +18,32 @@ class StudentSurvey
     SELECT
         s.survey_id,
         s.title          AS survey_title,
-        s.start_at,
-        s.end_at,
+        s.start_at       AS start_date,
+        s.end_at         AS end_date,
         c.course_id,
         c.code           AS course_code,
         c.name           AS course_name,
         f.name           AS faculty_name,
-        (
-            SELECT COUNT(*) FROM survey_questions sq WHERE sq.survey_id = s.survey_id
-        )                AS total_questions,
+        (SELECT COUNT(*) FROM survey_questions sq WHERE sq.survey_id = s.survey_id) AS total_questions,
         CASE
             WHEN sr.response_id IS NOT NULL THEN 'completed'
             WHEN NOW() < s.start_at          THEN 'upcoming'
             WHEN NOW() > s.end_at            THEN 'expired'
             ELSE 'pending'
         END              AS status,
-        sr.submitted_at
+        sr.submitted_at,
+        u.name           AS instructor_name
       FROM course_surveys cs
       JOIN surveys  s ON cs.survey_id  = s.survey_id
       JOIN courses  c ON cs.course_id  = c.course_id
       JOIN faculties f ON c.faculty_id = f.faculty_id
       JOIN course_students cst ON cst.course_id = c.course_id AND cst.student_id = ?
+      LEFT JOIN course_instructors ci ON ci.course_id = c.course_id
+      LEFT JOIN instructor_profiles ip ON ci.instructor_id = ip.instructor_id
+      LEFT JOIN users u ON ip.instructor_id = u.user_id   -- ← fixed
       LEFT JOIN survey_responses sr
-          ON  sr.survey_id  = s.survey_id
-          AND sr.course_id  = c.course_id
-          AND sr.student_id = ?
+        ON  sr.survey_id  = s.survey_id
+        AND sr.student_id = ?
       ORDER BY
           FIELD(status, 'pending', 'upcoming', 'expired', 'completed'),
           s.end_at ASC
@@ -153,14 +154,14 @@ class StudentSurvey
 
     try {
       $sql = "
-        INSERT INTO survey_responses (student_id, survey_id, course_id, submitted_at)
-        VALUES (?, ?, ?, NOW())
+        INSERT INTO survey_responses (student_id, survey_id, submitted_at)
+        VALUES (?, ?, NOW())
       ";
 
       $stmt = $this->conn->prepare($sql);
       if (!$stmt) throw new Exception("Prepare failed: response");
 
-      $stmt->bind_param("iii", $studentId, $surveyId, $courseId);
+      $stmt->bind_param("ii", $studentId, $surveyId);
       $stmt->execute();
       $responseId = (int)$this->conn->insert_id;
   

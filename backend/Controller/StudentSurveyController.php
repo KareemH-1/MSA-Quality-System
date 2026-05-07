@@ -52,28 +52,17 @@
       if($err = $this->requireStudent()) return $err;
 
       $studentId = (int)$_SESSION['user_id'];
-      $rows = $this->surveyModel->getStudentSurveys($studentId);
+      $surveys = $this->surveyModel->getStudentSurveys($studentId);
 
-      $pending = [];
-      $completed = [];
-
-      foreach ($rows as $row){
-        switch ($row['status']){
-          case 'Pending':
-            $pending[] = $row;
-            break;
-          case 'Completed':
-            $completed[] = $row;
-            break;
-        }
+      foreach ($surveys as &$survey) {
+        $survey['is_submitted'] = $survey['status'] === 'completed';
       }
 
       return [
         'statusCode' => 200,
         'body' => [
           'status' => 'success',
-          'pendingSurveys' => $pending,
-          'completedSurveys' => $completed,
+          'surveys' => $surveys,
         ],
       ];
     }
@@ -104,7 +93,7 @@
       ];
     }
 
-    $sections = $this->surveyModel->getSurveyQuestions($surveyId);
+    $sections = $this->surveyModel->getSurveyQuestions($surveyId, $courseId);
 
 
     return [
@@ -174,7 +163,7 @@
       ];
     }
 
-    $questions = $this->surveyModel->getSurveyQuestions($surveyId);
+    $questions = $this->surveyModel->getSurveyQuestions($surveyId, $courseId);
     $answeredIds = array_column($answers, 'question_id');
 
     foreach($questions as $section){

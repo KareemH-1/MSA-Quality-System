@@ -19,6 +19,11 @@ class StudentSurveyView extends JsonView
     $action = $_GET['action'] ?? '';
     $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
+    $result = [
+      'statusCode' => 400,
+      'body' => ['status' => 'error', 'message' => 'Unknown action'],
+    ];
+
     switch($action){
       case 'my-surveys': {
         $result = $this->controller->getMySurveys();
@@ -61,8 +66,12 @@ class StudentSurveyView extends JsonView
         break;
       }
     }
+
+    $this->respond($result['statusCode'], $result['body']);
   }
+  
 }
 
-
+  $view = new StudentSurveyView();
+  $view->handle();
 ?>
