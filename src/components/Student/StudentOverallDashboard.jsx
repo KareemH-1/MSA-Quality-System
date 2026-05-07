@@ -3,6 +3,7 @@ import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 import SubmitAppealModal from "../../components/Student/SubmitAppealModal";
 import "./styles/StudentOverallDashboard.css";
+import { FileText, CheckCircle, Bell, Calendar, Clock } from "lucide-react";
 
 const MONTHS = [
   "JAN",
@@ -196,16 +197,33 @@ export default function StudentOverallDashboard() {
 
       <div className="number-status">
         <div className="box pending-box">
-          <p>Pending Appeals</p>
-          <h2>{pendingAppeals}</h2>
+          <div className="box-icon">
+            <FileText size={24} />
+          </div>
+          <div className="box-content">
+            <p>Pending Appeals</p>
+            <h2>{pendingAppeals}</h2>
+          </div>
         </div>
+
         <div className="box survey-box">
-          <p>Completed Surveys</p>
-          <h2>{completedSurveys}</h2>
+          <div className="box-icon">
+            <CheckCircle size={24} />
+          </div>
+          <div className="box-content">
+            <p>Completed Surveys</p>
+            <h2>{completedSurveys}</h2>
+          </div>
         </div>
+
         <div className="box notification-box">
-          <p>Notifications</p>
-          <h2>{unreadNotifications}</h2>
+          <div className="box-icon">
+            <Bell size={24} />
+          </div>
+          <div className="box-content">
+            <p>Notifications</p>
+            <h2>{unreadNotifications}</h2>
+          </div>
         </div>
       </div>
 

@@ -49,7 +49,7 @@
 }
 
 .number-status > div:hover {
-  transform: translateY(-2px);
+  transform: translateY(-5px);
   box-shadow: 0 4px 12px rgba(0, 33, 71, 0.1);
 }
 
@@ -72,7 +72,7 @@
 
 .box {
   width: 100%;
-  border-top: 3px solid var(--bridge-teal) !important;
+  border-top: 4px solid var(--bridge-teal) !important;
   transition:
     border-top-color 0.2s ease,
     transform 0.2s ease,
@@ -91,6 +91,18 @@
 }
 .notification-box:hover {
   border-top-color: var(--warning-color) !important;
+}
+
+.pending-box .box-icon {
+  color: var(--info-color);
+}
+
+.survey-box .box-icon {
+  color: var(--success-color);
+}
+
+.notification-box .box-icon {
+  color: var(--warning-color);
 }
 
 
@@ -189,7 +201,7 @@
 .upcoming-deadlines {
   padding: 1.5rem;
   border-radius: 12px;
-  border: 1px solid rgba(0, 33, 71, 0.08);
+  border: 1px solid rgba(0, 33, 71, 0.08); 
   background: var(--neutral-color);
   box-shadow: var(--shadow-soft);
   display: grid;
@@ -331,6 +343,7 @@
   border-radius: 10px;
   background: var(--tint-color);
   border: 1px solid rgba(0, 33, 71, 0.06);
+  border: 3px solid transparent;
   border-left: 3px solid var(--bridge-teal);
   transition: 0.2s;
 }
@@ -338,6 +351,7 @@
 .activity-item:hover {
   transform: translateX(4px);
   box-shadow: 0 2px 8px rgba(0, 33, 71, 0.08);
+  border: 3px solid var(--bridge-teal);
 }
 
 .activity-item .time {

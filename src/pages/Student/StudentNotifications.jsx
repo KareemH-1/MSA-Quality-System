@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNotifications } from "../../hooks/useNotifications";
 import "./styles/StudentNotifications.css";
 
+const MotionDiv = motion.div;
+
 const TYPE_CONFIG = {
   appeal: {
     label: "Appeal",
@@ -45,7 +47,7 @@ function NotificationItem({ notification, onMarkRead }) {
   const isUnread = !notification.is_read;
 
   return (
-    <motion.div
+    <MotionDiv
       layout
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
@@ -77,7 +79,7 @@ function NotificationItem({ notification, onMarkRead }) {
       </div>
 
       {isUnread && <span className="notif-card-unread-dot" />}
-    </motion.div>
+    </MotionDiv>
   );
 }
 
