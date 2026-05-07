@@ -78,6 +78,7 @@ export default function StudentOverallDashboard() {
   const [appealSessions, setAppealSessions] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   const navigate = useNavigate();
 
@@ -92,6 +93,7 @@ export default function StudentOverallDashboard() {
           appealSessionsRes,
           appealRowsRes,
           responsesRes,
+          notificationsRes,
         ] = await Promise.all([
           api.get("/View/SessionView.php"),
           api.get("/View/StudentAppealView.php?action=my-appeal-rows"),
@@ -100,7 +102,14 @@ export default function StudentOverallDashboard() {
           api.get("/View/StudentAppealView.php?action=sessions"),
           api.get("/View/StudentAppealView.php?action=my-appeal-rows"),
           api.get("/View/StudentSurveyView.php?action=student-responses"),
+          api.get("/View/NotificationView.php?action=unread-count"),
         ]);
+
+        setUnreadNotifications(
+          notificationsRes.data?.body?.unreadCount ??
+            notificationsRes.data?.unreadCount ??
+            0,
+        );
 
         setStudent(sessionRes.data?.user);
 
@@ -196,7 +205,7 @@ export default function StudentOverallDashboard() {
         </div>
         <div className="box notification-box">
           <p>Notifications</p>
-          <h2>0</h2>
+          <h2>{unreadNotifications}</h2>
         </div>
       </div>
 
@@ -207,7 +216,12 @@ export default function StudentOverallDashboard() {
             <h4>Submit Appeal</h4>
             <p>Is there anything you'd like to appeal?</p>
             <p>Start formal review process now.</p>
-            <button type="button" onClick={() => navigate("/student-services", { state: { tab: 'Appeals' } })}>
+            <button
+              type="button"
+              onClick={() =>
+                navigate("/student-services", { state: { tab: "Appeals" } })
+              }
+            >
               Submit New Appeal
             </button>
           </div>
@@ -228,7 +242,12 @@ export default function StudentOverallDashboard() {
             <h4>View Notifications</h4>
             <p>Don't miss important updates.</p>
             <p>Check for new messages and alerts.</p>
-            <button type="button">Go to Notifications</button>
+            <button
+              type="button"
+              onClick={() => navigate("/student-notifications")}
+            >
+              Go to Notifications
+            </button>
           </div>
         </div>
       </div>
