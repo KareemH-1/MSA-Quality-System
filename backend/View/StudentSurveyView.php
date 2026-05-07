@@ -25,6 +25,16 @@ class StudentSurveyView extends JsonView
     ];
 
     switch($action){
+      case 'student-responses': {
+        $result = $this->controller->getStudentResponses();
+        break;
+      }
+      
+      case 'all-surveys': {
+        $result = $this->controller->getAllSurveys();
+        break;
+      }
+
       case 'my-surveys': {
         $result = $this->controller->getMySurveys();
         break;

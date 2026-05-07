@@ -47,6 +47,37 @@
       return null; 
     }
 
+  public function getAllSurveys(): array
+  {
+    if ($err = $this->requireStudent()) return $err;
+
+    $surveys = $this->surveyModel->getAllSurveys();
+
+    return [
+      'statusCode' => 200,
+      'body' => [
+        'status' => 'success',
+        'surveys' => $surveys,
+      ],
+    ];
+  }
+
+  public function getStudentResponses(): array
+  {
+    if ($err = $this->requireStudent()) return $err;
+
+    $studentId = (int)$_SESSION['user_id'];
+    $responses = $this->surveyModel->getStudentResponses($studentId);
+
+    return [
+      'statusCode' => 200,
+      'body' => [
+        'status'    => 'success',
+        'responses' => $responses,
+      ],
+    ];
+  }
+
     public function getMySurveys(): array
     {
       if($err = $this->requireStudent()) return $err;

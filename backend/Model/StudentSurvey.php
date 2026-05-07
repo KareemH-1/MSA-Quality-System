@@ -11,6 +11,34 @@ class StudentSurvey
     $this->conn = $db;
   }
 
+  public function getAllSurveys(): array
+  {
+    $sql = "
+      SELECT
+        s.survey_id,
+        s.title,
+        s.start_at,
+        s.end_at,
+        s.created_by,
+        s.qr_code,
+        (SELECT COUNT(*) FROM survey_questions sq WHERE sq.survey_id = s.survey_id) AS total_questions,
+        (SELECT COUNT(*) FROM course_surveys cs WHERE cs.survey_id = s.survey_id) AS assigned_courses,
+        CASE
+          WHEN NOW() < s.start_at THEN 'upcoming'
+          WHEN NOW() > s.end_at   THEN 'expired'
+          ELSE 'active'
+        END AS status
+      FROM surveys s
+      ORDER BY s.start_at DESC
+    ";
+
+    $stmt = $this->conn->prepare($sql);
+    if (!$stmt) return [];
+
+    $stmt->execute();
+    return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+  }
+
   
   public function getStudentSurveys(int $studentId): array
   {
@@ -149,6 +177,32 @@ class StudentSurvey
     $stmt->bind_param("ii", $surveyId, $courseId);
     $stmt->execute();
     return $stmt->get_result()->num_rows > 0;
+  }
+
+  public function getStudentResponses(int $studentId): array
+  {
+    $sql = "
+      SELECT
+        sr.response_id,
+        sr.survey_id,
+        sr.course_id,
+        sr.submitted_at,
+        s.title         AS title,
+        c.name          AS course_name,
+        'survey'        AS type
+      FROM survey_responses sr
+      JOIN surveys s ON sr.survey_id = s.survey_id
+      JOIN courses c ON sr.course_id = c.course_id
+      WHERE sr.student_id = ?
+      ORDER BY sr.submitted_at DESC
+    ";
+
+    $stmt = $this->conn->prepare($sql);
+    if (!$stmt) return [];
+
+    $stmt->bind_param("i", $studentId);
+    $stmt->execute();
+    return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
   }
 
   public function submitSurvey(int $studentId, int $surveyId, int $courseId, array $answers): bool

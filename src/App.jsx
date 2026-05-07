@@ -142,7 +142,12 @@ function App() {
                         className={page.contentClassName}
                         style={{ marginBottom: "80px" }}
                       >
-                        <PageComponent currentNavItem={currentItem} />
+                        <PageComponent
+                          currentNavItem={currentItem}
+                          onTabChange={(item) =>
+                            setCurrentItemForPage(page.path, item)
+                          }
+                        />
                       </main>
                     </div>
                   }
