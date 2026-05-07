@@ -77,8 +77,30 @@ class NotificationController
       'statusCode' => 200,
       'body' => [
         'status' => 'success',
-        'unreadCount' => $this->notificationModel->getUnreadCountForStudent($this->getStudentId()),
+        'unreadCount' => $this->notificationModel->getUnreadCount($this->getStudentId()),
       ],
+    ];
+  }
+
+  public function markAsRead(int $notificationId): array
+  {
+    if ($err = $this->requireStudent()) return $err;
+    $ok = $this->notificationModel->markAsRead($notificationId, $this->getStudentId());
+
+    return [
+        'statusCode' => $ok ? 200 : 500,
+        'body' => ['status' => $ok ? 'success' : 'error'],
+    ];
+  }
+
+  public function markAllAsRead(): array
+  {
+    if ($err = $this->requireStudent()) return $err;
+    $ok = $this->notificationModel->markAllAsRead($this->getStudentId());
+
+    return [
+        'statusCode' => $ok ? 200 : 500,
+        'body' => ['status' => $ok ? 'success' : 'error'],
     ];
   }
 }

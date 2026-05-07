@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import api from "../../api/axios";
 
 export default function SubmitAppealModal({
@@ -11,7 +12,6 @@ export default function SubmitAppealModal({
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState("");
   const [originalGrade, setOriginalGrade] = useState("");
-  const [submitStatus, setSubmitStatus] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,13 +32,14 @@ export default function SubmitAppealModal({
     setAppealReason("");
     setSelectedCourse("");
     setOriginalGrade("");
-    setSubmitStatus(null);
     onClose();
   };
 
   const handleSubmit = async () => {
     if (!selectedCourse || !originalGrade || !appealReason.trim()) {
-      setSubmitStatus("validation-error");
+      toast.error("Please fill in all required fields.", {
+        position: "bottom-right",
+      });
       return;
     }
 
@@ -50,18 +51,21 @@ export default function SubmitAppealModal({
         reason: appealReason.trim(),
       });
 
-      setSubmitStatus("success");
-      onSuccess?.();
+      toast.success("Appeal submitted successfully!", {
+        position: "bottom-right",
+        autoClose: 2000,
+      });
 
-      setTimeout(() => {
-        closeModal();
-      }, 1500);
+      onSuccess?.();
+      closeModal(); 
     } catch (e) {
       console.error("Failed to submit appeal:", e);
-      setSubmitStatus("api-error");
+
+      toast.error("Submission failed. Please try again.", {
+        position: "bottom-right",
+      });
     }
   };
-
   if (!isOpen) return null;
 
   return (
@@ -126,21 +130,6 @@ export default function SubmitAppealModal({
         </div>
 
         <div className="modal-footer">
-          {submitStatus === "success" && (
-            <p className="modal-status success">
-              ✓ Appeal submitted successfully!
-            </p>
-          )}
-          {submitStatus === "validation-error" && (
-            <p className="modal-status error">
-              ✗ Please select a course and write a reason.
-            </p>
-          )}
-          {submitStatus === "api-error" && (
-            <p className="modal-status error">
-              ✗ Submission failed. Please try again.
-            </p>
-          )}
           <button className="modal-cancel-btn" onClick={closeModal}>
             Cancel
           </button>

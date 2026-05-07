@@ -7,7 +7,9 @@ import Login from "../pages/Login";
 import NotFound from "../pages/NotFound";
 import StudentDashboard from "../pages/Student/StudentDashboard";
 import StudentServices from "../pages/Student/StudentServices";
+import StudentNotifications from "../pages/Student/StudentNotifications";
 import TakeSurvey from "../pages/Student/TakeSurvey";
+import { Bell } from "lucide-react";
 import { getQaDashboardNavbarComponents } from "./QaDashboardNavbarComponents";
 import {
   getAdminFacultyNavbarComponents,
@@ -117,6 +119,16 @@ export const PAGE_CONFIG = {
     path: "/student-services/survey/:surveyId/:courseId",
     component: TakeSurvey,
     showSidebar: false,
+    showNavbar: false,
+    roles: [ROLES.STUDENT],
+  },
+
+  studentNotifications: {
+    path: "/student-notifications",
+    component: StudentNotifications,
+    showSidebar: true,
+    sidebarLabel: "Notifications",
+    sidebarIcon: Bell,
     showNavbar: false,
     roles: [ROLES.STUDENT],
   },
