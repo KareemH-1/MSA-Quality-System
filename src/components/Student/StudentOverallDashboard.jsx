@@ -207,7 +207,7 @@ export default function StudentOverallDashboard() {
             <h4>Submit Appeal</h4>
             <p>Is there anything you'd like to appeal?</p>
             <p>Start formal review process now.</p>
-            <button type="button" onClick={() => setIsModalOpen(true)}>
+            <button type="button" onClick={() => navigate("/student-services", { state: { tab: 'Appeals' } })}>
               Submit New Appeal
             </button>
           </div>

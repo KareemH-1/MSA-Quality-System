@@ -16,6 +16,7 @@
 .student-home .head h1 {
   margin: 0;
   font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-family: var(--font-main);
   font-weight: 700;
   color: var(--primary-color);
   letter-spacing: -0.02em;

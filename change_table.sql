@@ -57,3 +57,53 @@ WHERE section = 'Suggestions';
 
 ALTER TABLE answers 
 ADD COLUMN likert_score TINYINT NULL AFTER answer_text;
+
+-- testing data for notifications will be changed later to be dynamic
+INSERT INTO notifications
+(title, sender_id, sender_type, receiver_id, notify_by_email, is_read, sent_at)
+VALUES
+(
+  'A new course survey for CS301 - Web Development is now open.',
+  1,
+  'survey',
+  3,
+  1,
+  0,
+  NOW()
+),
+(
+  'Your Data Structures appeal has been submitted successfully.',
+  2,
+  'appeal',
+  3,
+  1,
+  1,
+  NOW()
+),
+(
+  'Your Operating Systems appeal has been resolved.',
+  2,
+  'appeal',
+  3,
+  1,
+  0,
+  NOW()
+),
+(
+  'Course evaluation survey deadline is approaching.',
+  1,
+  'survey',
+  3,
+  0,
+  0,
+  NOW()
+),
+(
+  'A new survey for CS203 - Data Structures is available now.',
+  1,
+  'survey',
+  3,
+  1,
+  1,
+  NOW()
+);
