@@ -24,13 +24,25 @@ class InstructorAppealView extends JsonView
         $result = $this->controller->getAssignedAppeals();
         break;
       }
+      case 'review': {
+        if ($method !== 'POST') {
+          $result = [
+            'statusCode' => 405,
+            'body' => ['status' => 'error', 'message' => 'Method not allowed'],
+          ];
+          break;
+        }
+        $data = $this->readJsonBody();
+        $result = $this->controller->reviewAppeal($data);
+        break;
+      }
       default: {
         $result = [
           'statusCode' => 400,
           'body' => [
             'status' => 'error',
             'message' => 'Unknown action',
-            'allowed' => ['assigned-appeals'],
+            'allowed' => ['assigned-appeals', 'review'],
           ],
         ];
         break;

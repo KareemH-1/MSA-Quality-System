@@ -39,4 +39,22 @@ class InstructorAppeal
     $stmt->execute();
     return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
   }
+
+  public function reviewAppeal(
+    int $appealId,
+    int $instructorId,
+    string $newStatus,
+    ?string $newGrade = null,
+    ?string $note = null
+  ): bool {
+    $sql = "UPDATE " . $this->table . " 
+            SET status = ?, new_grade = ?, note = ?, resolved_at = NOW() 
+            WHERE appeal_id = ? AND assigned_instructor_id = ?";
+    $stmt = $this->conn->prepare($sql);
+    if (!$stmt) return false;
+
+    $stmt->bind_param('sssii', $newStatus, $newGrade, $note, $appealId, $instructorId);
+    error_log("DEBUG: status='{$newStatus}' grade='{$newGrade}' note='{$note}' appeal={$appealId} instructor={$instructorId}");
+    return $stmt->execute();
+  }
 }
