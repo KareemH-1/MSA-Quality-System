@@ -9,6 +9,7 @@ import StudentDashboard from "../pages/Student/StudentDashboard";
 import StudentServices from "../pages/Student/StudentServices";
 import StudentNotifications from "../pages/Student/StudentNotifications";
 import TakeSurvey from "../pages/Student/TakeSurvey";
+import InstructorServices from "../pages/Instructor/InstructorServices";
 import { Bell } from "lucide-react";
 import { getQaDashboardNavbarComponents } from "./QaDashboardNavbarComponents";
 import {
@@ -132,6 +133,18 @@ export const PAGE_CONFIG = {
     showNavbar: false,
     roles: [ROLES.STUDENT],
   },
+
+  instructorServices: {
+    path: "/instructor-services",
+    component: InstructorServices,
+    showSidebar: true,
+    sidebarLabel: "Services",
+    sidebarIcon: Activity,
+    showNavbar: true,
+    defaultNavItem: "Appeals",
+    getNavbarComponents: getStudentServicesNavbarComponents,
+    roles: [ROLES.INSTRUCTOR],
+  },
 };
 
 export const NOT_FOUND_PAGE = {
@@ -143,6 +156,7 @@ export const ROLE_DEFAULT_PAGES = {
   [ROLES.QA]: "/dashboard",
   [ROLES.ADMIN]: "/user-management",
   [ROLES.STUDENT]: "/student-home",
+  [ROLES.INSTRUCTOR]: "/instructor-services",
 };
 
 export const getDefaultPageForRole = (role) => {

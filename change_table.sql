@@ -107,3 +107,7 @@ VALUES
   1,
   NOW()
 );
+
+UPDATE grade_appeals 
+SET assigned_instructor_id = 5 
+WHERE appeal_id = 3;

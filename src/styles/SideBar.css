@@ -8,7 +8,6 @@
   position: fixed;
   top: 20px;
   left: 10px;
-  z-index: 60;
   width: 28px;
   height: 28px;
   padding: 0;
@@ -25,6 +24,7 @@
   transition:
     left 0.4s ease,
     background-color 0.2s ease;
+  z-index: 99999 !important;
 }
 
 .sidebar-toggle-btn:hover {
@@ -100,7 +100,7 @@
   margin-right: 8px;
   display: inline-flex;
   align-items: center;
-  opacity: 0.7;  
+  opacity: 0.7;
   width: 28px;
   height: 28px;
 }
