@@ -1,17 +1,17 @@
 <?php
 
 require_once __DIR__ . '/../Model/Database.php';
-require_once __DIR__ . '/../Model/ModuleLeaderAppeal.php';
+require_once __DIR__ . '/../Model/ModuleLeader.php';
 
 class ModuleLeaderController
 {
-  private ModuleLeaderAppeal $appealModel;
+  private ModuleLeader $moduleLeaderModel;
 
   public function __construct()
   {
     $database = new Database();
     $db = $database->getConnection();
-    $this->appealModel = new ModuleLeaderAppeal($db);
+    $this->moduleLeaderModel = new ModuleLeader($db);
   }
 
   private function startSession()
@@ -53,7 +53,7 @@ class ModuleLeaderController
     if($err = $this->requireModuleLeader()) return $err;
 
     $moduleLeaderId = (int)$_SESSION['user_id'];
-    $appeals = $this->appealModel->getAppealsByCourses($moduleLeaderId);
+    $appeals = $this->moduleLeaderModel->getAppealsByCourses($moduleLeaderId);
     return [
       'statusCode' => 200,
       'body' => [
@@ -78,7 +78,7 @@ class ModuleLeaderController
       ];
     }
 
-    $instructors = $this->appealModel->getCourseInstructors($courseId);
+    $instructors = $this->moduleLeaderModel->getCourseInstructors($courseId);
     return [
       'statusCode' => 200,
       'body' => [
@@ -106,7 +106,7 @@ class ModuleLeaderController
       ];  
     }
 
-    $success = $this->appealModel->assignAppeal($appealId, $instructorId, $moduleLeaderId);
+    $success = $this->moduleLeaderModel->assignAppeal($appealId, $instructorId, $moduleLeaderId);
     if ($success) {
       return [
         'statusCode' => 200,
