@@ -354,6 +354,8 @@
   font-family: var(--font-main);
   color: var(--primary-color);
   resize: vertical;
+  min-height: 80px;
+  max-height: 200px;
   background: var(--neutral-color);
 }
 

@@ -10,6 +10,7 @@ import StudentServices from "../pages/Student/StudentServices";
 import StudentNotifications from "../pages/Student/StudentNotifications";
 import TakeSurvey from "../pages/Student/TakeSurvey";
 import InstructorServices from "../pages/Instructor/InstructorServices";
+import ModuleLeaderServices from "../pages/Module_Leader/ModuleLeaderServices";
 import { Bell } from "lucide-react";
 import { getQaDashboardNavbarComponents } from "./QaDashboardNavbarComponents";
 import {
@@ -145,6 +146,17 @@ export const PAGE_CONFIG = {
     getNavbarComponents: getStudentServicesNavbarComponents,
     roles: [ROLES.INSTRUCTOR],
   },
+  moduleLeaderServices: {
+    path: "/module-leader-services",
+    component: ModuleLeaderServices,
+    showSidebar: true,
+    sidebarLabel: "Services",
+    sidebarIcon: Activity,
+    showNavbar: true,
+    defaultNavItem: "Appeals",
+    getNavbarComponents: getStudentServicesNavbarComponents,
+    roles: [ROLES.MODULE_LEADER],
+  },
 };
 
 export const NOT_FOUND_PAGE = {
@@ -157,6 +169,7 @@ export const ROLE_DEFAULT_PAGES = {
   [ROLES.ADMIN]: "/user-management",
   [ROLES.STUDENT]: "/student-home",
   [ROLES.INSTRUCTOR]: "/instructor-services",
+  [ROLES.MODULE_LEADER]: "/module-leader-services",
 };
 
 export const getDefaultPageForRole = (role) => {

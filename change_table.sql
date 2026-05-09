@@ -111,3 +111,8 @@ VALUES
 UPDATE grade_appeals 
 SET assigned_instructor_id = 5 
 WHERE appeal_id = 3;
+
+ALTER TABLE grade_appeals
+ADD COLUMN assigned_by INT NULL AFTER assigned_instructor_id,
+ADD COLUMN assigned_at TIMESTAMP NULL AFTER assigned_by,
+ADD FOREIGN KEY (assigned_by) REFERENCES users(user_id);
