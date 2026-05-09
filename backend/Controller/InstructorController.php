@@ -1,17 +1,17 @@
 <?php
 
 require_once __DIR__ . '/../Model/Database.php';
-require_once __DIR__ . '/../Model/InstructorAppeal.php';
+require_once __DIR__ . '/../Model/Instructor.php';
 
-class InstructorAppealController
+class InstructorController
 {
-  private InstructorAppeal $appealModel;
+  private Instructor $instructorModel;
 
   public function __construct()
   {
     $database = new Database();
     $db = $database->getConnection();
-    $this->appealModel = new InstructorAppeal($db);
+    $this->instructorModel = new Instructor($db);
   }
 
   private function startSession()
@@ -54,7 +54,7 @@ class InstructorAppealController
     if($authError) return $authError;
 
     $instructorId = (int)$_SESSION['user_id'];
-    $appeals = $this->appealModel->getAssignedAppeals($instructorId);
+    $appeals = $this->instructorModel->getAssignedAppeals($instructorId);
     return [
       'statusCode' => 200,
       'body' => [
@@ -96,7 +96,7 @@ class InstructorAppealController
     $newGrade = $data['new_grade'] ?? null;
     $note = $data['note'] ?? null;
 
-    $ok = $this->appealModel->reviewAppeal($appealId, $instructorId, $newStatus, $newGrade, $note);
+    $ok = $this->instructorModel->reviewAppeal($appealId, $instructorId, $newStatus, $newGrade, $note);
 
     if(!$ok) {
         return [

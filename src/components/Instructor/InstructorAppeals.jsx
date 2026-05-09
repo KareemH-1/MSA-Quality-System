@@ -42,7 +42,7 @@ function ReviewModal({ appeal, onClose, onSuccess }) {
 
     try {
       const response = await api.post(
-        "/View/InstructorAppealView.php?action=review",
+        "/View/InstructorView.php?action=review",
         payload,
       );
 
@@ -200,7 +200,7 @@ export default function InstructorAppeals() {
     setLoading(true);
     try {
       const res = await api.get(
-        "/View/InstructorAppealView.php?action=assigned-appeals",
+        "/View/InstructorView.php?action=assigned-appeals",
       );
       setAllAppeals(res.data?.appeals ?? []);
     } catch (e) {

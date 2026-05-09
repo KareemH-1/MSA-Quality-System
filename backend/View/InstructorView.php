@@ -1,15 +1,15 @@
 <?php
 
 require_once 'JsonView.php';
-require_once '../Controller/InstructorAppealController.php';
+require_once '../Controller/InstructorController.php';
 
 class InstructorAppealView extends JsonView
 {
-  private InstructorAppealController $controller;
+  private InstructorController $controller;
 
   public function __construct()
   {
-    $this->controller = new InstructorAppealController();
+    $this->controller = new InstructorController();
   }
 
   public function handle(): void

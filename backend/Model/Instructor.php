@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../Service/NotificationService.php';
 
-class InstructorAppeal
+class Instructor
 {
   private mysqli $conn;
   private string $table = 'grade_appeals';
