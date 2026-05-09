@@ -3,7 +3,7 @@ import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 import SubmitAppealModal from "../../components/Student/SubmitAppealModal";
 import "./styles/StudentOverallDashboard.css";
-import { FileText, CheckCircle, Bell, Calendar, Clock } from "lucide-react";
+import { FileText, CheckCircle, Bell } from "lucide-react";
 
 const MONTHS = [
   "JAN",
@@ -20,13 +20,21 @@ const MONTHS = [
   "DEC",
 ];
 
+function formatTimeAgo(date) {
+  const diff = Math.floor((Date.now() - date) / 1000);
+  if (diff < 60) return "Just now";
+  if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+  if (diff < 86400 * 30) return `${Math.floor(diff / 86400)} days ago`;
+  return `${MONTHS[date.getMonth()]} ${date.getDate()}`;
+}
+
 function DeadlineItem({ endAt, title, subtitle, tag }) {
   const date = new Date(endAt);
   const tagClass =
     tag.toLowerCase() === "survey"
       ? "deadline-tag deadline-tag-survey"
       : "deadline-tag deadline-tag-appeal";
-
   return (
     <div className="deadline-item">
       <div className="deadline-date">
@@ -44,31 +52,20 @@ function DeadlineItem({ endAt, title, subtitle, tag }) {
 
 function ActivityItem({ submittedAt, title, subtitle, type }) {
   const date = new Date(submittedAt);
-  const timeAgo = formatTimeAgo(date);
   const tagClass =
     type === "survey"
       ? "deadline-tag deadline-tag-survey"
       : "deadline-tag deadline-tag-appeal";
-
   return (
     <div className="activity-item">
       <div className="activity-top">
-        <span className="time">{timeAgo}</span>
+        <span className="time">{formatTimeAgo(date)}</span>
         <span className={tagClass}>{type}</span>
       </div>
       <span className="description">{title}</span>
       <span className="activity-status">{subtitle}</span>
     </div>
   );
-}
-
-function formatTimeAgo(date) {
-  const diff = Math.floor((Date.now() - date) / 1000);
-  if (diff < 60) return "Just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
-  if (diff < 86400 * 30) return `${Math.floor(diff / 86400)} days ago`;
-  return `${MONTHS[date.getMonth()]} ${date.getDate()}`;
 }
 
 export default function StudentOverallDashboard() {
@@ -80,7 +77,6 @@ export default function StudentOverallDashboard() {
   const [recentActivity, setRecentActivity] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -97,12 +93,12 @@ export default function StudentOverallDashboard() {
           notificationsRes,
         ] = await Promise.all([
           api.get("/View/SessionView.php"),
-          api.get("/View/StudentAppealView.php?action=my-appeal-rows"),
-          api.get("/View/StudentSurveyView.php?action=my-surveys"),
-          api.get("/View/StudentSurveyView.php?action=all-surveys"),
-          api.get("/View/StudentAppealView.php?action=sessions"),
-          api.get("/View/StudentAppealView.php?action=my-appeal-rows"),
-          api.get("/View/StudentSurveyView.php?action=student-responses"),
+          api.get("/View/StudentView.php?action=my-appeal-rows"),
+          api.get("/View/StudentView.php?action=my-surveys"),
+          api.get("/View/StudentView.php?action=all-surveys"),
+          api.get("/View/StudentView.php?action=sessions"),
+          api.get("/View/StudentView.php?action=my-appeal-rows"),
+          api.get("/View/StudentView.php?action=student-responses"),
           api.get("/View/NotificationView.php?action=unread-count"),
         ]);
 
@@ -111,7 +107,6 @@ export default function StudentOverallDashboard() {
             notificationsRes.data?.unreadCount ??
             0,
         );
-
         setStudent(sessionRes.data?.user);
 
         const appeals = appealsRes.data?.appeals ?? [];
@@ -142,8 +137,6 @@ export default function StudentOverallDashboard() {
           subtitle: a.course_name,
           type: "appeal",
         }));
-        console.log("Appeal Activity:", appealActivity);
-        console.log("Appeal Rows:", appealRowsRes.data?.appeals ?? []);
 
         const surveyActivity = (responsesRes.data?.responses ?? []).map(
           (r) => ({
@@ -154,26 +147,20 @@ export default function StudentOverallDashboard() {
             type: "survey",
           }),
         );
-        console.log("Survey Activity:", surveyActivity);
-        console.log("Survey Responses:", responsesRes.data?.responses ?? []);
 
         const merged = [...appealActivity, ...surveyActivity].sort(
           (a, b) => new Date(b.submittedAt) - new Date(a.submittedAt),
         );
-
         setRecentActivity(merged.slice(0, 3));
       } catch (error) {
         console.error("Error fetching student data:", error);
       }
     };
-
     fetchAll();
   }, []);
 
   const handleAppealSuccess = async () => {
-    const res = await api.get(
-      "/View/StudentAppealView.php?action=my-appeal-rows",
-    );
+    const res = await api.get("/View/StudentView.php?action=my-appeal-rows");
     const appeals = res.data?.appeals ?? [];
     setPendingAppeals(
       appeals.filter((a) => a.status?.toLowerCase() === "pending").length,
@@ -205,7 +192,6 @@ export default function StudentOverallDashboard() {
             <h2>{pendingAppeals}</h2>
           </div>
         </div>
-
         <div className="box survey-box">
           <div className="box-icon">
             <CheckCircle size={24} />
@@ -215,7 +201,6 @@ export default function StudentOverallDashboard() {
             <h2>{completedSurveys}</h2>
           </div>
         </div>
-
         <div className="box notification-box">
           <div className="box-icon">
             <Bell size={24} />
@@ -276,7 +261,6 @@ export default function StudentOverallDashboard() {
             <h4>Upcoming Deadlines</h4>
             <span className="view-all">View Calendar</span>
           </div>
-
           {topSurveys.map((s) => (
             <DeadlineItem
               key={`survey-${s.survey_id}`}
@@ -286,7 +270,6 @@ export default function StudentOverallDashboard() {
               tag="Survey"
             />
           ))}
-
           {topAppeals.map((a) => (
             <DeadlineItem
               key={`appeal-${a.session_id}`}
@@ -296,7 +279,6 @@ export default function StudentOverallDashboard() {
               tag="Appeal"
             />
           ))}
-
           {topSurveys.length === 0 && topAppeals.length === 0 && (
             <p style={{ color: "var(--text-color)", fontSize: "0.85rem" }}>
               No upcoming deadlines.
@@ -306,7 +288,6 @@ export default function StudentOverallDashboard() {
 
         <div className="recent-activity">
           <h4>Recent Activity</h4>
-
           {recentActivity.map((item) => (
             <ActivityItem
               key={item.id}
@@ -316,7 +297,6 @@ export default function StudentOverallDashboard() {
               type={item.type}
             />
           ))}
-
           {recentActivity.length === 0 && (
             <p style={{ color: "var(--text-color)", fontSize: "0.85rem" }}>
               No recent activity.

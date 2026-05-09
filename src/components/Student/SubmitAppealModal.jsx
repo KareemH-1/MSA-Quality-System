@@ -17,14 +17,13 @@ export default function SubmitAppealModal({
     const fetchData = async () => {
       try {
         const res = await api.get(
-          "/View/StudentAppealView.php?action=enrolled-courses",
+          "/View/StudentView.php?action=enrolled-courses",
         );
         setEnrolledCourses(res.data?.courses ?? []);
       } catch (e) {
         console.error("Failed to load courses:", e);
       }
     };
-
     if (isOpen) fetchData();
   }, [isOpen]);
 
@@ -42,30 +41,27 @@ export default function SubmitAppealModal({
       });
       return;
     }
-
     try {
-      await api.post("/View/StudentAppealView.php?action=submit", {
+      await api.post("/View/StudentView.php?action=submit-appeal", {
         session_id: selectedSession?.session_id,
         course_id: selectedCourse,
         original_grade: originalGrade,
         reason: appealReason.trim(),
       });
-
       toast.success("Appeal submitted successfully!", {
         position: "bottom-right",
         autoClose: 2000,
       });
-
       onSuccess?.();
-      closeModal(); 
+      closeModal();
     } catch (e) {
       console.error("Failed to submit appeal:", e);
-
       toast.error("Submission failed. Please try again.", {
         position: "bottom-right",
       });
     }
   };
+
   if (!isOpen) return null;
 
   return (
@@ -80,7 +76,6 @@ export default function SubmitAppealModal({
             &times;
           </button>
         </div>
-
         <div className="modal-body">
           <div className="modal-field">
             <label>Course</label>
@@ -98,7 +93,6 @@ export default function SubmitAppealModal({
               ))}
             </select>
           </div>
-
           <div className="modal-field">
             <label>Your Current Grade</label>
             <select
@@ -117,7 +111,6 @@ export default function SubmitAppealModal({
               )}
             </select>
           </div>
-
           <div className="modal-field">
             <label>Reason</label>
             <textarea
@@ -128,7 +121,6 @@ export default function SubmitAppealModal({
             />
           </div>
         </div>
-
         <div className="modal-footer">
           <button className="modal-cancel-btn" onClick={closeModal}>
             Cancel

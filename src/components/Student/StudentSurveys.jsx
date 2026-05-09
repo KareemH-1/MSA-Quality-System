@@ -6,7 +6,6 @@ import "./styles/StudentSurveys.css";
 export default function StudentSurveys() {
   const [loading, setLoading] = useState(false);
   const [surveys, setSurveys] = useState([]);
-
   const navigate = useNavigate();
 
   const pendingSurveys = surveys.filter((s) => !s.is_submitted);
@@ -34,10 +33,8 @@ export default function StudentSurveys() {
   const loadSurveys = async () => {
     setLoading(true);
     try {
-      const res = await api.get(
-        "/View/StudentSurveyView.php?action=my-surveys",
-      );
-      setSurveys(res.data?.body?.surveys ?? res.data?.surveys ?? []);
+      const res = await api.get("/View/StudentView.php?action=my-surveys");
+      setSurveys(res.data?.surveys ?? []);
     } catch (error) {
       console.error("Failed to load surveys:", error);
     } finally {
@@ -56,12 +53,7 @@ export default function StudentSurveys() {
   };
 
   function SurveyCard({ survey, onOpen }) {
-    const submitted =
-      survey.is_submitted ??
-      survey.submitted ??
-      survey.already_submitted ??
-      false;
-
+    const submitted = survey.is_submitted ?? false;
     return (
       <div className="survey-card">
         <div className="survey-card-header">
@@ -78,7 +70,6 @@ export default function StudentSurveys() {
             {submitted ? "Submitted" : "Pending"}
           </span>
         </div>
-
         <div className="survey-card-body">
           <p className="description">
             {submitted
@@ -102,7 +93,6 @@ export default function StudentSurveys() {
             )}
           </div>
         </div>
-
         <div className="survey-card-footer">
           <button
             className={`open-survey-btn ${submitted ? "disabled" : ""}`}
@@ -153,7 +143,6 @@ export default function StudentSurveys() {
               </div>
             </div>
           )}
-
           {submittedSurveys.length > 0 && (
             <div className="survey-group">
               <h2 className="group-title completed-title">Completed</h2>

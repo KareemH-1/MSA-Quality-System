@@ -34,9 +34,9 @@ export default function StudentAppeals() {
     setLoading(true);
     try {
       const [sessionsRes, appealsRes, appealRowsRes] = await Promise.all([
-        api.get("/View/StudentAppealView.php?action=sessions"),
-        api.get("/View/StudentAppealView.php?action=my-appeals"),
-        api.get("/View/StudentAppealView.php?action=my-appeal-rows"),
+        api.get("/View/StudentView.php?action=sessions"),
+        api.get("/View/StudentView.php?action=my-appeals"),
+        api.get("/View/StudentView.php?action=my-appeal-rows"),
       ]);
       setSessions(sessionsRes.data?.sessions ?? []);
       setAppealCounts(appealsRes.data?.appeals ?? []);
@@ -54,8 +54,8 @@ export default function StudentAppeals() {
 
   const handleAppealSuccess = async () => {
     const [updatedAppeals, updatedRows] = await Promise.all([
-      api.get("/View/StudentAppealView.php?action=my-appeals"),
-      api.get("/View/StudentAppealView.php?action=my-appeal-rows"),
+      api.get("/View/StudentView.php?action=my-appeals"),
+      api.get("/View/StudentView.php?action=my-appeal-rows"),
     ]);
     setAppealCounts(updatedAppeals.data?.appeals ?? []);
     setAppealRows(updatedRows.data?.appeals ?? []);
@@ -90,7 +90,6 @@ export default function StudentAppeals() {
                   session?.max_appeals_per_student ??
                   1;
                 const used = item.appeal_count;
-
                 return (
                   <div className="appeal-session-box" key={session.session_id}>
                     <h3>
@@ -119,7 +118,6 @@ export default function StudentAppeals() {
                   </div>
                 );
               })}
-
               <div className="appeal-policy-box">
                 <h3>Appeal Policy</h3>
                 <p>
