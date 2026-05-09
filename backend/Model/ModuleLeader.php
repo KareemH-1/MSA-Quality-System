@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../Service/NotificationService.php';
+require_once __DIR__ . '/../Service/InAppNotificationObserver.php';
+require_once __DIR__ . '/../Service/EmailNotificationObserver.php';
 
 class ModuleLeader
 {
@@ -88,15 +90,24 @@ class ModuleLeader
     $infoResult = $infoStmt->get_result()->fetch_assoc();
 
     if($infoResult) {
+      $studentId = $infoResult['student_id'];
       $courseName = $infoResult['course_name'];
 
-      NotificationService::send(
-        $this->conn,
+      $service = NotificationService::create($this->conn);
+      
+      $service->send(
         "You have been assigned a new grade appeal for $courseName",
-        $instructorId,        
+        $instructorId,
         'appeal',
         $moduleLeaderId,
         true
+      );   
+      $service->send(
+        "Your grade appeal for $courseName is now under review by the instructor.",
+        $studentId, 
+        'appeal',
+        $instructorId,
+        true  
       );
     }
 

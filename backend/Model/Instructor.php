@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../Service/NotificationService.php';
+require_once __DIR__ . '/../Service/InAppNotificationObserver.php';
+require_once __DIR__ . '/../Service/EmailNotificationObserver.php';
 
 class Instructor
 {
@@ -74,8 +76,9 @@ class Instructor
       $courseName = $infoResult['course_name'];
 
       if($newStatus === 'Resolved' || $newStatus === 'Rejected'){
-        NotificationService::send(
-          $this->conn,
+        $service = NotificationService::create($this->conn);
+
+        $service->send(
           "Your grade appeal for $courseName has been $newStatus.",
           $studentId,
           'appeal',
@@ -83,16 +86,19 @@ class Instructor
           true  
         );
       }
-      else if($newStatus === 'Under Review') {
-        NotificationService::send(
-          $this->conn,
-          "Your grade appeal for $courseName is now under review by the instructor.",
-          $studentId,
-          'appeal',
-          $instructorId,
-          true  
-        );
-      }
+      // else if($newStatus === 'Under Review') {
+      //   $service = new NotificationService();
+      //   $service->attach(new InAppNotificationObserver($this->conn));
+      //   $service->attach(new EmailNotificationObserver($this->conn));
+
+      //   $service->send(
+      //     "Your grade appeal for $courseName is now under review by the instructor.",
+      //     $studentId,
+      //     'appeal',
+      //     $instructorId,
+      //     true  
+      //   );
+      // }
     }
 
     return true;

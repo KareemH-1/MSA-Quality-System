@@ -2,47 +2,53 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../Model/Notification.php';
+require_once __DIR__ . '/NotificationObserver.php';
+require_once __DIR__ . '/InAppNotificationObserver.php';
+require_once __DIR__ . '/EmailNotificationObserver.php';
 
 class NotificationService
 {
-  public static function send(
-    mysqli $db,
-    string $title,
-    int $receiverId,
-    string  $type = 'system',  
-    ?int $senderId = null,
-    bool $sendEmail = false
-  ): bool {
-    $model = new Notification($db);
-    $inserted = $model->insert($title, $receiverId, $type, $senderId, $sendEmail);
+  private array $observers = [];
 
-    if ($inserted && $sendEmail) {
-        $email = $model->getStudentEmail($receiverId);
-        if ($email !== '') {
-            self::mail($email, $title);
-        }
-    }
-
-    return $inserted;
+  public function attach(NotificationObserver $observer): void
+  {
+    $this->observers[] = $observer;
   }
 
-  public static function appealSubmitted(mysqli $db, int $studentId, string $courseName): void
+  public function notify(string $event, array $data): void
   {
-    self::send(
-        $db,
-        "Your appeal for {$courseName} has been submitted successfully.",
-        $studentId,
-        'appeal'
-    );
-  }  
+    foreach ($this->observers as $observer) {
+      $observer->update($event, $data);
+    }
+  }
 
-  public static function appealSessionOpened(
-    mysqli $db,
-    string $sessionType, 
-    bool $sendEmail = true
-    ): void {
-    $sql  = "SELECT DISTINCT student_id FROM course_students";
+  public function send(
+    string $title,
+    int $receiverId,
+    ?string $senderType = 'system',
+    ?int $senderId = null,
+    bool $notifyByEmail = false
+  ): void {
+    $this->notify('new_notification', [
+      'title' => $title,
+      'receiver_id' => $receiverId,
+      'sender_type' => $senderType,
+      'sender_id' => $senderId,
+      'notify_by_email' => $notifyByEmail
+    ]);
+  }
+
+  public static function create(mysqli $db): self
+  {
+    $service = new self();
+    $service->attach(new InAppNotificationObserver($db));
+    $service->attach(new EmailNotificationObserver($db));
+    return $service;
+  }
+  
+  public function appealSessionOpened(mysqli $db, string $sessionType, bool $sendEmail = true): void
+  {
+    $sql = "SELECT DISTINCT student_id FROM course_students";
     $stmt = $db->prepare($sql);
     if (!$stmt) return;
 
@@ -50,23 +56,18 @@ class NotificationService
     $students = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
     foreach ($students as $s) {
-        self::send(
-            $db,
-            "{$sessionType} appeal session is now open. Submit your appeals before the deadline.",
-            (int)$s['student_id'],
-            'appeal',
-            null,
-            $sendEmail
-        );
+      $this->send(
+          "{$sessionType} appeal session is now open.",
+          (int)$s['student_id'],
+          'appeal',
+          null,
+          $sendEmail
+      );
     }
   }
 
-  public static function surveyAssigned(
-    mysqli $db,
-    int $courseId,
-    string $surveyTitle,
-    bool $sendEmail = true
-    ): void {
+  public function surveyAssigned(mysqli $db, int $courseId, string $surveyTitle, bool $sendEmail = true): void
+  {
     $sql = "SELECT student_id FROM course_students WHERE course_id = ?";
     $stmt = $db->prepare($sql);
     if (!$stmt) return;
@@ -76,9 +77,8 @@ class NotificationService
     $students = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
     foreach ($students as $s) {
-      self::send(
-          $db,
-          "A new survey is available: {$surveyTitle}. Please complete it before the deadline.",
+      $this->send(
+          "A new survey is available: {$surveyTitle}.",
           (int)$s['student_id'],
           'survey',
           null,
@@ -87,30 +87,15 @@ class NotificationService
     }
   }
 
-  private static function mail(string $to, string $subject): void
+  public function appealSubmitted(int $studentId, string $courseName): void
   {
-    $from = 'noreply@msa-qa.edu';   
-    
-    $headers = implode("\r\n", [
-        "From: MSA Quality Assurance <{$from}>",
-        "Reply-To: {$from}",
-        "Content-Type: text/html; charset=UTF-8",
-        "MIME-Version: 1.0",
-    ]);
-
-    $body = "
-        <div style='font-family:sans-serif;max-width:600px;margin:auto'>
-          <h2 style='color:#1e3a5f'>MSA Quality Assurance</h2>
-          <p>{$subject}</p>
-          <hr>
-          <p style='color:#888;font-size:12px'>
-            Log in to your portal to view details.
-            This is an automated message — please do not reply.
-          </p>
-        </div>
-    ";
-
-    @mail($to, $subject, $body, $headers);
+    $this->send(
+        "Your grade appeal for {$courseName} has been submitted successfully.",
+        $studentId,
+        'appeal',
+        null,
+        false
+    );
   }
 }
 
