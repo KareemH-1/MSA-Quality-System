@@ -18,6 +18,7 @@ class ModuleLeaderAppeal
   {
     $sql = "SELECT
             ga.appeal_id,
+            ga.course_id,
             ga.original_grade,
             ga.new_grade,
             ga.reason,
