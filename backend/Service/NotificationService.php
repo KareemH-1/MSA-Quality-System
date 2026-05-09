@@ -37,23 +37,6 @@ class NotificationService
     );
   }  
 
-  public static function appealResolved(
-      mysqli $db,
-      int $studentId,
-      string $courseName,
-      string $newStatus,   
-      bool $sendEmail = true
-  ): void {
-      self::send(
-          $db,
-          "Your appeal for {$courseName} has been {$newStatus}.",
-          $studentId,
-          'appeal',
-          null,
-          $sendEmail
-      );
-  }
-
   public static function appealSessionOpened(
     mysqli $db,
     string $sessionType, 
@@ -129,7 +112,6 @@ class NotificationService
 
     @mail($to, $subject, $body, $headers);
   }
-
 }
 
 ?>

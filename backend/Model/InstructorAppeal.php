@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../Service/NotificationService.php';
+
 class InstructorAppeal
 {
   private mysqli $conn;
@@ -54,7 +56,45 @@ class InstructorAppeal
     if (!$stmt) return false;
 
     $stmt->bind_param('sssii', $newStatus, $newGrade, $note, $appealId, $instructorId);
-    error_log("DEBUG: status='{$newStatus}' grade='{$newGrade}' note='{$note}' appeal={$appealId} instructor={$instructorId}");
-    return $stmt->execute();
+    $stmt->execute();
+    if($stmt->affected_rows === 0) {
+      return false;
+    }
+
+    $infoSql = "SELECT ga.student_id, c.name AS course_name FROM grade_appeals ga 
+                    JOIN courses c ON ga.course_id = c.course_id
+                    WHERE ga.appeal_id = ?";
+    $infoStmt = $this->conn->prepare($infoSql);
+    $infoStmt->bind_param("i", $appealId);
+    $infoStmt->execute();
+    $infoResult = $infoStmt->get_result()->fetch_assoc();
+
+    if($infoResult) {
+      $studentId = $infoResult['student_id'];
+      $courseName = $infoResult['course_name'];
+
+      if($newStatus === 'Resolved' || $newStatus === 'Rejected'){
+        NotificationService::send(
+          $this->conn,
+          "Your grade appeal for $courseName has been $newStatus.",
+          $studentId,
+          'appeal',
+          $instructorId,
+          true  
+        );
+      }
+      else if($newStatus === 'Under Review') {
+        NotificationService::send(
+          $this->conn,
+          "Your grade appeal for $courseName is now under review by the instructor.",
+          $studentId,
+          'appeal',
+          $instructorId,
+          true  
+        );
+      }
+    }
+
+    return true;
   }
 }

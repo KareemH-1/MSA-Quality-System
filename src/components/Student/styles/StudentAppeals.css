@@ -268,18 +268,23 @@
 }
 
 .status.pending {
-  background-color: var(--tint-color);
-  color: var(--tertiary-color);
+  background-color: var(--info-light);
+  color: var(--info-text);
+}
+
+.status.under{
+  background: var(--warning-light);
+  color: var(--warning-text);
 }
 
 .status.resolved {
-  background: var(--success-color);
-  color: var(--success-color);
+  background: var(--success-light);
+  color: var(--success-text);
 }
 
 .status.rejected {
-  background: var(--error-color);
-  color: var(--accent-color);
+  background: var(--error-light);
+  color: var(--error-text);
 }
 
 .appeal-card .grade {
@@ -530,17 +535,17 @@
   font-weight: 600;
   padding: 0.4rem 0.75rem;
   border-radius: 6px;
-  margin-right: auto; /* pushes it left, buttons stay right */
+  margin-right: auto;
 }
 
 .modal-status.success {
-  background: rgba(8, 243, 220, 0.15);
-  color: var(--success-color);
+  background: var(--success-light);
+  color: var(--success-text);
 }
 
 .modal-status.error {
-  background: rgba(255, 218, 214, 0.8);
-  color: var(--accent-color);
+  background: var(--error-light);
+  color: var(--error-text);
 }
 
 @media (max-width: 640px) {
