@@ -26,7 +26,7 @@ class EmailNotificationObserver implements NotificationObserver
         return; 
     }
 
-    $email = $this->notificationModel->getStudentEmail($data['receiver_id']);
+    $email = $this->notificationModel->getEmail($data['receiver_id']);
     if($email === '') return;
 
     $this->sendMail($email, $data['title']);

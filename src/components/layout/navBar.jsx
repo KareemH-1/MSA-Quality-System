@@ -16,7 +16,10 @@ const NavBar = ({ components = [] }) => {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const { user } = useAuth();
-  const isStudent = normalizeRole(user?.role) === ROLES.STUDENT;
+  const normalizedRole = normalizeRole(user?.role);
+  const isStudent = normalizedRole === ROLES.STUDENT;
+  const isInstructor = normalizedRole === ROLES.INSTRUCTOR;
+  const notificationsEnabled = isStudent || isInstructor;
 
   const {
     notifications,
@@ -25,7 +28,7 @@ const NavBar = ({ components = [] }) => {
     fetchNotifications,
     markAsRead,
     markAllAsRead,
-  } = useNotifications(isStudent);
+  } = useNotifications(notificationsEnabled);
 
   useEffect(() => {
     const handler = (e) => {
@@ -38,14 +41,16 @@ const NavBar = ({ components = [] }) => {
   }, []);
 
   const handleBellClick = () => {
-    if (!isStudent) return;
+    if (!notificationsEnabled) return;
     if (!dropdownOpen) fetchNotifications();
     setDropdownOpen((prev) => !prev);
   };
 
   const handleGoToAll = () => {
     setDropdownOpen(false);
-    navigate("/student-notifications");
+    navigate(
+      isInstructor ? "/instructor-notifications" : "/student-notifications",
+    );
   };
 
   const formatTime = (sentAt) => {
@@ -113,7 +118,7 @@ const NavBar = ({ components = [] }) => {
               onClick={handleBellClick}
             >
               <Bell />
-              {isStudent && unreadCount > 0 && (
+              {notificationsEnabled && unreadCount > 0 && (
                 <motion.span
                   className="bell-badge"
                   initial={{ scale: 0 }}
@@ -125,7 +130,7 @@ const NavBar = ({ components = [] }) => {
               )}
             </button>
             <AnimatePresence>
-              {dropdownOpen && isStudent && (
+              {dropdownOpen && notificationsEnabled && (
                 <motion.div
                   className="notif-dropdown"
                   initial={{ opacity: 0, y: -8, scale: 0.97 }}

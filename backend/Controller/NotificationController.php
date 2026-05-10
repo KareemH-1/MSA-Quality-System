@@ -23,69 +23,55 @@ class NotificationController
     }
   }
 
-
-  private function requireStudent(): ?array
-  {
+private function requireAuth(): ?array
+{
     $this->startSession();
 
     if (empty($_SESSION['user_id']) || empty($_SESSION['role'])) {
         return [
             'statusCode' => 401,
-            'body' => [
-                'status' => 'error',
-                'message' => 'Not authenticated',
-            ],
+            'body' => ['status' => 'error', 'message' => 'Not authenticated'],
         ];
     }
 
-    if ($_SESSION['role'] !== 'Student') {
-        return [
-            'statusCode' => 403,
-            'body' => [
-                'status' => 'error',
-                'message' => 'Forbidden',
-            ],
-        ];
-    }
+    return null; 
+}
 
-    return null;
-  }
-
-  private function getStudentId(): int
+  private function getUserId(): int
   {
     return (int)$_SESSION['user_id'];
   }
 
   public function getNotifications(): array
   {
-    if($err = $this->requireStudent()) return $err;
+    if($err = $this->requireAuth()) return $err;
 
     return [
       'statusCode' => 200,
       'body' => [
         'status' => 'success',
-        'notifications' => $this->notificationModel->getStudentNotifications($this->getStudentId()),
+        'notifications' => $this->notificationModel->getNotifications($this->getUserId()),
       ],
     ];
   }
 
   public function getUnreadCount(): array
   {
-    if($err = $this->requireStudent()) return $err;
+    if($err = $this->requireAuth()) return $err;
 
     return [
       'statusCode' => 200,
       'body' => [
         'status' => 'success',
-        'unreadCount' => $this->notificationModel->getUnreadCount($this->getStudentId()),
+        'unreadCount' => $this->notificationModel->getUnreadCount($this->getUserId()),
       ],
     ];
   }
 
   public function markAsRead(int $notificationId): array
   {
-    if ($err = $this->requireStudent()) return $err;
-    $ok = $this->notificationModel->markAsRead($notificationId, $this->getStudentId());
+    if ($err = $this->requireAuth()) return $err;
+    $ok = $this->notificationModel->markAsRead($notificationId, $this->getUserId());
 
     return [
         'statusCode' => $ok ? 200 : 500,
@@ -95,8 +81,8 @@ class NotificationController
 
   public function markAllAsRead(): array
   {
-    if ($err = $this->requireStudent()) return $err;
-    $ok = $this->notificationModel->markAllAsRead($this->getStudentId());
+    if ($err = $this->requireAuth()) return $err;
+    $ok = $this->notificationModel->markAllAsRead($this->getUserId());
 
     return [
         'statusCode' => $ok ? 200 : 500,

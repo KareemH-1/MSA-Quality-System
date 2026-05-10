@@ -10,6 +10,7 @@ import StudentServices from "../pages/Student/StudentServices";
 import StudentNotifications from "../pages/Student/StudentNotifications";
 import TakeSurvey from "../pages/Student/TakeSurvey";
 import InstructorServices from "../pages/Instructor/InstructorServices";
+import InstructorNotifications from "../pages/Instructor/InstructorNotifications";
 import ModuleLeaderServices from "../pages/Module_Leader/ModuleLeaderServices";
 import { Bell } from "lucide-react";
 import { getQaDashboardNavbarComponents } from "./QaDashboardNavbarComponents";
@@ -156,6 +157,15 @@ export const PAGE_CONFIG = {
     defaultNavItem: "Appeals",
     getNavbarComponents: getStudentServicesNavbarComponents,
     roles: [ROLES.MODULE_LEADER],
+  },
+  instructorNotifications: {
+    path: "/instructor-notifications",
+    component: InstructorNotifications,
+    showSidebar: true,
+    sidebarLabel: "Notifications",
+    sidebarIcon: Bell,
+    showNavbar: false,
+    roles: [ROLES.INSTRUCTOR],
   },
 };
 

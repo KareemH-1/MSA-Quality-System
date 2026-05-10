@@ -1,0 +1,278 @@
+.instructor-notifications-page {
+  display: grid;
+  gap: 2rem;
+  padding: 3rem 2rem 2rem;
+  margin-bottom: 2rem;
+}
+
+.inotif-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.inotif-head h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-family: var(--font-main);
+  font-weight: 700;
+  color: var(--primary-color);
+  letter-spacing: -0.02em;
+}
+
+.inotif-head p {
+  margin: 0.5rem 0 0;
+  font-size: 1rem;
+  color: var(--text-color);
+  max-width: 520px;
+  line-height: 1.6;
+}
+
+.inotif-mark-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: var(--primary-color);
+  color: var(--neutral-color);
+  border: 1.5px solid rgba(0, 33, 71, 0.15);
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--anim-fast);
+}
+
+.inotif-mark-all-btn:hover {
+  background: var(--surface-high);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+}
+
+.inotif-filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.inotif-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 20px;
+  border: 1.5px solid rgba(0, 33, 71, 0.15);
+  background: var(--neutral-color);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: var(--anim-fast);
+}
+
+.inotif-filter-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.inotif-filter-btn.active {
+  background: var(--primary-color);
+  color: var(--neutral-color);
+  border-color: var(--primary-color);
+}
+
+.inotif-filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 20px;
+  background: var(--neutral-color);
+  color: var(--primary-color);
+}
+
+.inotif-filter-btn.active .inotif-filter-count {
+  background: rgba(255, 255, 255, 0.25);
+  color: var(--neutral-color);
+}
+
+.inotif-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.inotif-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 33, 71, 0.1);
+  background: var(--neutral-color);
+  cursor: pointer;
+  transition: var(--anim-fast);
+  box-shadow: var(--shadow-soft);
+  position: relative;
+}
+
+.inotif-card:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 33, 71, 0.1);
+}
+
+.inotif-card--unread {
+  background: var(--surface-high, #f8faff);
+  border-color: rgba(0, 33, 71, 0.2);
+}
+
+.inotif-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.inotif-card-body {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.inotif-card-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  line-height: 1.4;
+}
+
+.inotif-card--unread .inotif-card-title {
+  font-weight: 700;
+}
+
+.inotif-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.inotif-type-badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.inotif-card-time {
+  font-size: 0.8rem;
+  color: var(--foundation-color, #888);
+}
+
+.inotif-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.inotif-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--primary-color);
+  background: transparent;
+  color: var(--primary-color);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--anim-fast);
+  white-space: nowrap;
+}
+
+.inotif-action-btn:hover {
+  background: var(--primary-color);
+  color: var(--neutral-color);
+}
+
+.inotif-card-unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.inotif-empty-state,
+.inotif-loading-state {
+  padding: 3rem 2rem;
+  text-align: center;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 33, 71, 0.1);
+  background: var(--surface-high);
+  display: grid;
+  gap: 0.75rem;
+  place-items: center;
+  color: var(--text-color);
+}
+
+.inotif-empty-state svg {
+  color: rgba(0, 33, 71, 0.25);
+}
+
+.inotif-empty-state h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+.inotif-empty-state p,
+.inotif-loading-state p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+@media (max-width: 640px) {
+  .instructor-notifications-page {
+    gap: 1.5rem;
+    padding: 1.75rem;
+  }
+
+  .inotif-head {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .inotif-card {
+    padding: 0.85rem 1rem;
+    align-items: flex-start;
+  }
+
+  .inotif-card-actions {
+    align-self: flex-start;
+  }
+
+  .inotif-action-btn {
+    padding: 0.35rem 0.75rem;
+  }
+}

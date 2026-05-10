@@ -11,7 +11,7 @@ class Notification
     $this->conn = $db;
   }
 
-  public function getStudentNotifications(int $studentId): array
+  public function getNotifications(int $userId): array
   {
     $sql = "
         SELECT notification_id, title, sender_type, is_read, notify_by_email, sent_at
@@ -24,40 +24,40 @@ class Notification
     $stmt = $this->conn->prepare($sql);
     if (!$stmt) return [];
 
-    $stmt->bind_param("i", $studentId);
+    $stmt->bind_param("i", $userId);
     $stmt->execute();
     return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
   }
 
-  public function getUnreadCount(int $studentId): int
+  public function getUnreadCount(int $userId): int
   {
     $sql = "SELECT COUNT(*) AS cnt FROM notifications WHERE receiver_id = ? AND is_read = 0";
 
     $stmt = $this->conn->prepare($sql);
     if (!$stmt) return 0;
 
-    $stmt->bind_param("i", $studentId);
+    $stmt->bind_param("i", $userId);
     $stmt->execute();
     return (int)$stmt->get_result()->fetch_assoc()['cnt'];
   }
 
-  public function markAsRead(int $notificationId, int $studentId): bool
+  public function markAsRead(int $notificationId, int $userId): bool
   {
     $sql = "UPDATE notifications SET is_read = 1 WHERE notification_id = ? AND receiver_id = ?";
     $stmt = $this->conn->prepare($sql);
     if (!$stmt) return false;
 
-    $stmt->bind_param('ii', $notificationId, $studentId);
+    $stmt->bind_param('ii', $notificationId, $userId);
     return $stmt->execute();
   }
 
-  public function markAllAsRead(int $studentId): bool
+  public function markAllAsRead(int $userId): bool
   {
     $sql = "UPDATE notifications SET is_read = 1 WHERE receiver_id = ? AND is_read = 0";
     $stmt = $this->conn->prepare($sql);
     if (!$stmt) return false;
 
-    $stmt->bind_param('i', $studentId);
+    $stmt->bind_param('i', $userId);
     return $stmt->execute();
   }
 
@@ -81,13 +81,13 @@ class Notification
     return $stmt->execute();
   }
 
-  public function getStudentEmail(int $studentId): string
+  public function getEmail(int $userId): string
   {
     $sql = "SELECT email FROM users WHERE user_id = ? LIMIT 1";
     $stmt = $this->conn->prepare($sql);
     if (!$stmt) return '';
     
-    $stmt->bind_param('i', $studentId);
+    $stmt->bind_param('i', $userId);
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
     return $row ? (string)$row['email'] : '';
