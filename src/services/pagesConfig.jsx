@@ -3,7 +3,6 @@ import QaDashboard from "../pages/QA_Admin/QaDashboard";
 import UserManagement from "../pages/Admin/UserManagement";
 import Faculties from "../pages/Admin/Faculties";
 import SystemLogs from "../pages/Admin/SystemLogs";
-import ManageCourses from "../pages/Admin/ManageCourses";
 import Login from "../pages/Login";
 import NotFound from "../pages/NotFound";
 import StudentDashboard from "../pages/Student/StudentDashboard";
@@ -15,8 +14,6 @@ import InstructorNotifications from "../pages/Instructor/InstructorNotifications
 import ModuleLeaderServices from "../pages/Module_Leader/ModuleLeaderServices";
 import { Bell } from "lucide-react";
 import { getQaDashboardNavbarComponents } from "./QaDashboardNavbarComponents";
-import { getAdminFacultyNavbarComponents, getAdminManageUserNavbarComponents, getAdminCoursesNavbarComponents } from "./AdminNavbarComponents";
-import { getStudentNavbarComponents } from "./StudentNavbarComponents";
 import {
   getAdminFacultyNavbarComponents,
   getAdminManageUserNavbarComponents,
@@ -27,7 +24,14 @@ import {
 } from "./StudentNavbarComponents";
 
 import { ROLES } from "../constants/roles";
-import { Settings, LayoutDashboard, UserRound, Activity, Building2, LibraryBig } from "lucide-react";
+import {
+  Settings,
+  LayoutDashboard,
+  UserRound,
+  Activity,
+  Building2,
+  Home,
+} from "lucide-react";
 import Contact from "../pages/Contact";
 import { normalizeRole } from "./roleUtils";
 
@@ -79,18 +83,6 @@ export const PAGE_CONFIG = {
     showNavbar: true,
     defaultNavItem: "Faculties",
     getNavbarComponents: getAdminFacultyNavbarComponents,
-    roles: [ROLES.ADMIN],
-  },
-  Courses: {
-    path: "/courses",
-    component: ManageCourses,
-    showSidebar: true,
-    sidebarLabel: "Manage Courses",
-    sidebarIcon: LibraryBig,
-    sidebarIconFill: false,
-    showNavbar: true,
-    defaultNavItem: "Courses",
-    getNavbarComponents: getAdminCoursesNavbarComponents,
     roles: [ROLES.ADMIN],
   },
   Logs: {
