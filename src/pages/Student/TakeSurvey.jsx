@@ -50,7 +50,7 @@ export default function TakeSurvey() {
     const loadQuestions = async () => {
       try {
         const res = await api.get(
-          `/View/StudentSurveyView.php?action=survey-questions&surveyId=${surveyId}&courseId=${courseId}`,
+          `/View/StudentView.php?action=survey-questions&surveyId=${surveyId}&courseId=${courseId}`,
         );
         setSections(res.data?.sections ?? []);
       } catch (err) {

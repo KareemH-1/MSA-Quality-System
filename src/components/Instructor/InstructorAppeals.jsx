@@ -4,14 +4,8 @@ import { X } from "lucide-react";
 import api from "../../api/axios";
 import "./styles/InstructorAppeals.css";
 
-const STATUS_FILTERS = [
-  "All",
-  "Pending",
-  "Under Review",
-  "Resolved",
-  "Rejected",
-];
-const ALLOWED_STATUSES = ["Under Review", "Resolved", "Rejected"];
+const STATUS_FILTERS = ["All", "Under Review", "Resolved", "Rejected"];
+const ALLOWED_STATUSES = ["Resolved", "Rejected"];
 const GRADE_OPTIONS = ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"];
 
 function ReviewModal({ appeal, onClose, onSuccess }) {
@@ -269,8 +263,7 @@ export default function InstructorAppeals() {
                 <span className="detail-label">Reason</span>
                 <span className="reason-preview">{appeal.reason}</span>
               </div>
-              {(appeal.status === "Pending" ||
-                appeal.status === "Under Review") && (
+              {appeal.status === "Under Review" && (
                 <button
                   className="review-btn"
                   onClick={() => setSelectedAppeal(appeal)}
