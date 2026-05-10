@@ -7,9 +7,24 @@ import ManageCourses from "../pages/Admin/ManageCourses";
 import Login from "../pages/Login";
 import NotFound from "../pages/NotFound";
 import StudentDashboard from "../pages/Student/StudentDashboard";
+import StudentServices from "../pages/Student/StudentServices";
+import StudentNotifications from "../pages/Student/StudentNotifications";
+import TakeSurvey from "../pages/Student/TakeSurvey";
+import InstructorServices from "../pages/Instructor/InstructorServices";
+import InstructorNotifications from "../pages/Instructor/InstructorNotifications";
+import ModuleLeaderServices from "../pages/Module_Leader/ModuleLeaderServices";
+import { Bell } from "lucide-react";
 import { getQaDashboardNavbarComponents } from "./QaDashboardNavbarComponents";
 import { getAdminFacultyNavbarComponents, getAdminManageUserNavbarComponents, getAdminCoursesNavbarComponents } from "./AdminNavbarComponents";
 import { getStudentNavbarComponents } from "./StudentNavbarComponents";
+import {
+  getAdminFacultyNavbarComponents,
+  getAdminManageUserNavbarComponents,
+} from "./AdminNavbarComponents";
+import {
+  getStudentNavbarComponents,
+  getStudentServicesNavbarComponents,
+} from "./StudentNavbarComponents";
 
 import { ROLES } from "../constants/roles";
 import { Settings, LayoutDashboard, UserRound, Activity, Building2, LibraryBig } from "lucide-react";
@@ -88,16 +103,77 @@ export const PAGE_CONFIG = {
     roles: [ROLES.ADMIN],
   },
 
-  studentDashboard: {
-    path: "/student-dashboard",
+  studentHome: {
+    path: "/student-home",
     component: StudentDashboard,
     showSidebar: true,
-    sidebarLabel: "Student Dashboard",
-    sidebarIcon: LayoutDashboard,
-    showNavbar: true,
+    sidebarLabel: "Home",
+    sidebarIcon: Home,
+    showNavbar: false,
     defaultNavItem: "Home",
     getNavbarComponents: getStudentNavbarComponents,
     roles: [ROLES.STUDENT],
+  },
+
+  studentServices: {
+    path: "/student-services",
+    component: StudentServices,
+    showSidebar: true,
+    sidebarLabel: "Services",
+    sidebarIcon: Activity,
+    showNavbar: true,
+    defaultNavItem: "Appeals",
+    getNavbarComponents: getStudentServicesNavbarComponents,
+    roles: [ROLES.STUDENT],
+  },
+  takeSurvey: {
+    path: "/student-services/survey/:surveyId/:courseId",
+    component: TakeSurvey,
+    showSidebar: false,
+    showNavbar: false,
+    roles: [ROLES.STUDENT],
+  },
+
+  studentNotifications: {
+    path: "/student-notifications",
+    component: StudentNotifications,
+    showSidebar: true,
+    sidebarLabel: "Notifications",
+    sidebarIcon: Bell,
+    showNavbar: false,
+    roles: [ROLES.STUDENT],
+  },
+
+  instructorServices: {
+    path: "/instructor-services",
+    component: InstructorServices,
+    showSidebar: true,
+    sidebarLabel: "Services",
+    sidebarIcon: Activity,
+    showNavbar: true,
+    defaultNavItem: "Appeals",
+    getNavbarComponents: getStudentServicesNavbarComponents,
+    roles: [ROLES.INSTRUCTOR],
+  },
+  moduleLeaderServices: {
+    path: "/module-leader-services",
+    component: ModuleLeaderServices,
+    showSidebar: true,
+    sidebarLabel: "Services",
+    sidebarIcon: Activity,
+    showNavbar: true,
+    defaultNavItem: "Appeals",
+    getNavbarComponents: getStudentServicesNavbarComponents,
+    roles: [ROLES.MODULE_LEADER],
+  },
+  instructorNotifications: {
+    path: "/instructor-notifications",
+    component: InstructorNotifications,
+    showSidebar: true,
+    sidebarLabel: "Notifications",
+    sidebarIcon: Bell,
+    showNavbar: false,
+    roles: [ROLES.INSTRUCTOR],
   },
 };
 
@@ -109,7 +185,9 @@ export const NOT_FOUND_PAGE = {
 export const ROLE_DEFAULT_PAGES = {
   [ROLES.QA]: "/dashboard",
   [ROLES.ADMIN]: "/user-management",
-  [ROLES.STUDENT]: "/student-dashboard",
+  [ROLES.STUDENT]: "/student-home",
+  [ROLES.INSTRUCTOR]: "/instructor-services",
+  [ROLES.MODULE_LEADER]: "/module-leader-services",
 };
 
 export const getDefaultPageForRole = (role) => {

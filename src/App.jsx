@@ -1,13 +1,19 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight} from "lucide-react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  matchPath,
+} from "react-router-dom";
 import SideBar from "./components/layout/sideBar";
 import NavBar from "./components/layout/navBar";
 import { NOT_FOUND_PAGE, PAGE_CONFIG } from "./services/pagesConfig";
 import Footer from "./components/Footer";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { useAuth } from './services/AuthContext';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useAuth } from "./services/AuthContext";
 import Loader from "./components/Loader";
 import { normalizeRole } from "./services/roleUtils";
 import { getDefaultPageForRole } from "./services/pagesConfig";
@@ -31,20 +37,24 @@ const getSideBarStateLocalStorage = () => {
     return true;
   }
   return JSON.parse(storedState);
-}
+};
 const setSideBarStateLocalStorage = (state) => {
   if (state === null) {
     localStorage.removeItem("isSidebarOpen");
   }
   localStorage.setItem("isSidebarOpen", JSON.stringify(state));
-}
+};
 function App() {
   const { pathname } = useLocation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(getSideBarStateLocalStorage());
+  const [isSidebarOpen, setIsSidebarOpen] = useState(
+    getSideBarStateLocalStorage(),
+  );
   const [navSelections, setNavSelections] = useState(buildInitialNavSelections);
   const { user, authReady } = useAuth();
   const currentUserRole = normalizeRole(user?.role);
-  const requestedPage = APP_PAGES.find((page) => page.path === pathname);
+  const requestedPage = APP_PAGES.find((page) =>
+    matchPath(page.path, pathname),
+  );
 
   if (!authReady) {
     return <Loader />;
@@ -61,13 +71,15 @@ function App() {
   }
 
   const accessiblePages = APP_PAGES.filter(
-    (page) => !page.roles || page.roles.includes(currentUserRole)
+    (page) => !page.roles || page.roles.includes(currentUserRole),
   );
   const sidebarPages = accessiblePages.filter(
-    (page) => page.showSidebar && page.showInSidebar !== false
+    (page) => page.showSidebar && page.showInSidebar !== false,
   );
 
-  const activePage = accessiblePages.find((page) => page.path === pathname);
+  const activePage = accessiblePages.find((page) =>
+    matchPath(page.path, pathname),
+  );
   const shouldShowSidebar = Boolean(activePage?.showSidebar);
 
   function toggleSidebar() {
@@ -91,7 +103,11 @@ function App() {
             className={`sidebar-toggle-btn ${isSidebarOpen ? "open" : ""}`}
             onClick={toggleSidebar}
           >
-            {isSidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+            {isSidebarOpen ? (
+              <ChevronLeft size={16} />
+            ) : (
+              <ChevronRight size={16} />
+            )}
           </button>
           <SideBar isOpen={isSidebarOpen} pages={sidebarPages} />
         </>
@@ -122,8 +138,16 @@ function App() {
                   element={
                     <div className={page.wrapperClassName}>
                       <NavBar components={navbarComponents} />
-                      <main className={page.contentClassName} style={{marginBottom:"80px"}}>
-                        <PageComponent currentNavItem={currentItem} />
+                      <main
+                        className={page.contentClassName}
+                        style={{ marginBottom: "80px" }}
+                      >
+                        <PageComponent
+                          currentNavItem={currentItem}
+                          onTabChange={(item) =>
+                            setCurrentItemForPage(page.path, item)
+                          }
+                        />
                       </main>
                     </div>
                   }

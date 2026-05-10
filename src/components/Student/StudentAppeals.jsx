@@ -8,6 +8,7 @@ export default function StudentAppeals() {
   const [sessions, setSessions] = useState([]);
   const [appealCounts, setAppealCounts] = useState([]);
   const [appealRows, setAppealRows] = useState([]);
+  const [countdown, setCountdown] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
 
@@ -30,13 +31,26 @@ export default function StudentAppeals() {
     return s || e;
   };
 
+  const getTimeRemaining = (startDate, endDate) => {
+    const now = new Date();
+    if (new Date(startDate) > now) return "upcoming";
+    const total = new Date(endDate) - now;
+    if (total <= 0) return null;
+    return {
+      days: Math.floor(total / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((total / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((total / (1000 * 60)) % 60),
+      seconds: Math.floor((total / 1000) % 60),
+    };
+  };
+
   const loadAll = async () => {
     setLoading(true);
     try {
       const [sessionsRes, appealsRes, appealRowsRes] = await Promise.all([
-        api.get("/View/StudentAppealView.php?action=sessions"),
-        api.get("/View/StudentAppealView.php?action=my-appeals"),
-        api.get("/View/StudentAppealView.php?action=my-appeal-rows"),
+        api.get("/View/StudentView.php?action=sessions"),
+        api.get("/View/StudentView.php?action=my-appeals"),
+        api.get("/View/StudentView.php?action=my-appeal-rows"),
       ]);
       setSessions(sessionsRes.data?.sessions ?? []);
       setAppealCounts(appealsRes.data?.appeals ?? []);
@@ -52,18 +66,77 @@ export default function StudentAppeals() {
     loadAll();
   }, []);
 
+  useEffect(() => {
+    if (sessions.length === 0) return;
+
+    const tick = () => {
+      const updated = {};
+      sessions.forEach((s) => {
+        updated[s.session_id] = getTimeRemaining(s.start_date, s.end_date);
+      });
+      setCountdown(updated);
+
+      const allDone = Object.values(updated).every((v) => v === null);
+      if (allDone) clearInterval(id);
+    };
+
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [sessions]);
+
   const handleAppealSuccess = async () => {
     const [updatedAppeals, updatedRows] = await Promise.all([
-      api.get("/View/StudentAppealView.php?action=my-appeals"),
-      api.get("/View/StudentAppealView.php?action=my-appeal-rows"),
+      api.get("/View/StudentView.php?action=my-appeals"),
+      api.get("/View/StudentView.php?action=my-appeal-rows"),
     ]);
     setAppealCounts(updatedAppeals.data?.appeals ?? []);
     setAppealRows(updatedRows.data?.appeals ?? []);
   };
 
+  const openSession =
+    sessions
+      .filter(
+        (s) =>
+          countdown[s.session_id] && countdown[s.session_id] !== "upcoming",
+      )
+      .sort((a, b) => new Date(a.end_date) - new Date(b.end_date))[0] ?? null;
+
+  const upcomingSession =
+    sessions
+      .filter((s) => countdown[s.session_id] === "upcoming")
+      .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))[0] ??
+    null;
+
+  const activeCd = openSession ? countdown[openSession.session_id] : null;
+
+  const CountdownDigits = ({ cd }) => (
+    <div className="countdown-digits">
+      <div className="countdown-unit">
+        <span>{String(cd.days).padStart(2, "0")}</span>
+        <small>Days</small>
+      </div>
+      <span className="countdown-sep">:</span>
+      <div className="countdown-unit">
+        <span>{String(cd.hours).padStart(2, "0")}</span>
+        <small>Hrs</small>
+      </div>
+      <span className="countdown-sep">:</span>
+      <div className="countdown-unit">
+        <span>{String(cd.minutes).padStart(2, "0")}</span>
+        <small>Min</small>
+      </div>
+      <span className="countdown-sep">:</span>
+      <div className="countdown-unit">
+        <span>{String(cd.seconds).padStart(2, "0")}</span>
+        <small>Sec</small>
+      </div>
+    </div>
+  );
+
   return (
     <div className="appeals-page">
-      <div className="header">
+      <div className="head">
         <div>
           <h1>Grade Appeals</h1>
           <p>
@@ -71,9 +144,6 @@ export default function StudentAppeals() {
             within 5-7 business days.
           </p>
         </div>
-        <button type="button" onClick={() => setIsModalOpen(true)}>
-          New Appeal
-        </button>
       </div>
 
       {loading ? (
@@ -82,6 +152,38 @@ export default function StudentAppeals() {
         <>
           <div className="active-appeals">
             <h2>Active Appeals Sessions</h2>
+
+            {openSession && activeCd && (
+              <div className="appeals-banner">
+                <div className="banner-left">
+                  <span className="banner-urgent">URGENT: APPEALS ACTIVE</span>
+                  <h3>Grade Appeals Window is Now Open</h3>
+                  <p>
+                    Review your current semester results and submit appeals
+                    before the institutional deadline.
+                  </p>
+                </div>
+                <div className="banner-countdown">
+                  <span className="countdown-label">Deadline Countdown</span>
+                  <CountdownDigits cd={activeCd} />
+                </div>
+              </div>
+            )}
+
+            {!openSession && upcomingSession && (
+              <div className="appeals-banner upcoming">
+                <div className="banner-left">
+                  <span className="banner-urgent">UPCOMING</span>
+                  <h3>Next Appeal Window Opens Soon</h3>
+                  <p>
+                    The next appeals session opens on{" "}
+                    {formatShortDate(upcomingSession.start_date)}. You will be
+                    able to submit your appeals then.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="appeal-sessions-grid">
               {(appealCounts?.length
                 ? appealCounts
@@ -93,7 +195,6 @@ export default function StudentAppeals() {
                   session?.max_appeals_per_student ??
                   1;
                 const used = item.appeal_count;
-
                 return (
                   <div className="appeal-session-box" key={session.session_id}>
                     <h3>
@@ -122,7 +223,6 @@ export default function StudentAppeals() {
                   </div>
                 );
               })}
-
               <div className="appeal-policy-box">
                 <h3>Appeal Policy</h3>
                 <p>
@@ -190,7 +290,6 @@ export default function StudentAppeals() {
                           ? ` - ${formatShortDate(a.resolved_at)}`
                           : ""}
                       </p>
-                      <p>Status: {a.status}</p>
                     </div>
                   </div>
                 </div>

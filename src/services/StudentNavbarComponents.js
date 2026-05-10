@@ -4,6 +4,12 @@ export const getStudentNavbarComponents = (currentItem, setCurrentItem) => [
     active: currentItem === "Home",
     onClick: () => setCurrentItem("Home"),
   },
+];
+
+export const getStudentServicesNavbarComponents = (
+  currentItem,
+  setCurrentItem,
+) => [
   {
     name: "Appeals",
     active: currentItem === "Appeals",
