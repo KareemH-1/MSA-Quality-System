@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 import QaDashboard from "../pages/QA_Admin/QaDashboard";
+import AppealSessions from "../pages/QA_Admin/AppealSessions";
+import SurveyManagement from "../pages/QA_Admin/SurveyManagement";
 import UserManagement from "../pages/Admin/UserManagement";
 import Faculties from "../pages/Admin/Faculties";
 import ManageCourses from "../pages/Admin/ManageCourses";
@@ -13,7 +15,7 @@ import TakeSurvey from "../pages/Student/TakeSurvey";
 import InstructorServices from "../pages/Instructor/InstructorServices";
 import InstructorNotifications from "../pages/Instructor/InstructorNotifications";
 import ModuleLeaderServices from "../pages/Module_Leader/ModuleLeaderServices";
-import { Bell , LibraryBig} from "lucide-react";
+import { Bell , Form, Gavel, LibraryBig} from "lucide-react";
 import { getQaDashboardNavbarComponents } from "./QaDashboardNavbarComponents";
 import {
   getAdminFacultyNavbarComponents,
@@ -53,6 +55,25 @@ export const PAGE_CONFIG = {
     defaultNavItem: "Overview",
     getNavbarComponents: getQaDashboardNavbarComponents,
     roles: [ROLES.QA],
+  },
+
+  AppealSessions:{
+    path: "/appeal-sessions",
+    component: AppealSessions,
+    showSidebar: true,
+    sidebarLabel: "Appeal Sessions",
+    sidebarIcon: Gavel,
+    showNavbar: true,
+    roles: [ROLES.QA],
+  },
+  SurveyManagement:{
+    path: "/survey-management",
+     component: SurveyManagement,
+     showSidebar: true,
+     sidebarLabel: "Survey Management",
+     sidebarIcon: Form ,
+     showNavbar: true,
+     roles: [ROLES.QA],
   },
 
   contact: {
