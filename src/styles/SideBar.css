@@ -52,7 +52,7 @@
   padding: 20px 0px 18px;
   transform: translateX(-100%);
   transition: transform var(--anim-standard);
-  z-index: 55;
+  z-index: 50000;
 }
 
 .sidebar.sidebar-open {

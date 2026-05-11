@@ -45,7 +45,14 @@ class NotificationService
     $service->attach(new EmailNotificationObserver($db));
     return $service;
   }
-  
+   
+  public static function createWithoutEmail(mysqli $db): self
+  {
+    $service = new self();
+    $service->attach(new InAppNotificationObserver($db));
+    return $service;
+  }
+
   public function appealSessionOpened(mysqli $db, string $sessionType, bool $sendEmail = true): void
   {
     $sql = "SELECT DISTINCT student_id FROM course_students";
