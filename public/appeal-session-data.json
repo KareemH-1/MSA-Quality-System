@@ -1,0 +1,35 @@
+{
+  "courses": [
+    { "id": "CS402", "code": "CS402", "name": "Advanced Algorithms", "faculty": "Engineering" },
+    { "id": "ENG101", "code": "ENG101", "name": "Professional Writing", "faculty": "Arts" },
+    { "id": "MATH205", "code": "MATH205", "name": "Linear Algebra", "faculty": "Science" },
+    { "id": "PHY301", "code": "PHY301", "name": "Quantum Mechanics", "faculty": "Science" },
+    { "id": "BIO210", "code": "BIO210", "name": "Cell Biology", "faculty": "Science" },
+    { "id": "CS301", "code": "CS301", "name": "Operating Systems", "faculty": "Engineering" },
+    { "id": "CHEM110", "code": "CHEM110", "name": "Organic Chemistry", "faculty": "Science" },
+    { "id": "ARCH201", "code": "ARCH201", "name": "Structural Design", "faculty": "Architecture" },
+    { "id": "BUS301", "code": "BUS301", "name": "Corporate Finance", "faculty": "Business" },
+    { "id": "LAW401", "code": "LAW401", "name": "Constitutional Law", "faculty": "Law" },
+    { "id": "MED201", "code": "MED201", "name": "Human Anatomy", "faculty": "Medicine" },
+    { "id": "CS501", "code": "CS501", "name": "Machine Learning", "faculty": "Engineering" }
+  ],
+  "faculties": [
+    { "id": "ENG", "name": "Engineering" },
+    { "id": "SCI", "name": "Science" },
+    { "id": "ART", "name": "Arts" },
+    { "id": "ARCH", "name": "Architecture" },
+    { "id": "BUS", "name": "Business" },
+    { "id": "LAW", "name": "Law" },
+    { "id": "MED", "name": "Medicine" }
+  ],
+  "stats": {
+    "hasActiveSession": true,
+    "sessionType": "Midterm",
+    "total": 1284,
+    "accepted": 943,
+    "pending": 341,
+    "vsLastSemesterPct": 12.5,
+    "lastMidtermTotal": 6600,
+    "lastFinalTotal": 11243
+  }
+}
