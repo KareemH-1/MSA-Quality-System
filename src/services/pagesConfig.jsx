@@ -87,18 +87,6 @@ export const PAGE_CONFIG = {
     getNavbarComponents: getAdminFacultyNavbarComponents,
     roles: [ROLES.ADMIN],
   },
-  Courses: {
-    path: "/courses",
-    component: ManageCourses,
-    showSidebar: true,
-    sidebarLabel: "Manage Courses",
-    sidebarIcon: LibraryBig,
-    sidebarIconFill: false,
-    showNavbar: true,
-    defaultNavItem: "Courses",
-    getNavbarComponents: getAdminCoursesNavbarComponents,
-    roles: [ROLES.ADMIN],
-  },
   Logs: {
     path: "/logs",
     component: SystemLogs,
