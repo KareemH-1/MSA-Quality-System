@@ -10,6 +10,8 @@ import {
   thisSemestervsLastAppeals,
 } from "../../services/Helpers/QaOverviewHelpers";
 import OverviewCharts from "./OverviewCharts";
+import api from "../../api/axios";
+
 const Overview = () => {
   const [overviewData, setOverviewData] = useState(null);
   const [overviewChartsData, setOverviewChartsData] = useState(null);
@@ -29,13 +31,13 @@ const Overview = () => {
     const fetchOverviewData = async () => {
       startLoading();
       try {
-        const response = await fetch("/mockOverviewData.json");
-        if (!response.ok) {
-          throw new Error(`Failed to load overview data: ${response.status}`);
+        const response = await api.get('/View/QAView.php', { params: { action: 'overview' } });
+        const data = response.data?.data;
+        if (data) {
+          setOverviewData(data);
+        } else {
+          throw new Error('Invalid overview data format');
         }
-
-        const data = await response.json();
-        setOverviewData(data);
       } catch (fetchError) {
         setErrors((previous) => [
           ...previous,
@@ -139,22 +141,27 @@ const Overview = () => {
               },
             ];
 
+            // Safely access nested overview data — fields may be missing
+            const semester = overviewData?.semester || {};
+            const semesterCurrent = semester?.current || 'N/A';
+
+            const appealsObj = overviewData?.appeals || { midterm: {}, final: {} };
+            const prevSemData = overviewData?.previousSemesterData || { appeals: { midterm: {}, final: {} } };
+
             const semesterAppealDelta = thisSemestervsLastAppeals(
-              overviewData.appeals,
-              overviewData.previousSemesterData,
+              appealsObj,
+              prevSemData,
             );
+
             const hasPreviousSemesterAppeals =
-              Number.isFinite(
-                Number(overviewData?.previousSemesterData?.appeals?.midterm?.total),
-              ) ||
-              Number.isFinite(
-                Number(overviewData?.previousSemesterData?.appeals?.final?.total),
-              );
-            const midtermStatus = getAppealStatus(overviewData.appeals.midterm);
-            const finalStatus = getAppealStatus(overviewData.appeals.final);
+              Number.isFinite(Number(prevSemData?.appeals?.midterm?.total)) ||
+              Number.isFinite(Number(prevSemData?.appeals?.final?.total));
+
+            const midtermStatus = getAppealStatus(appealsObj.midterm || {});
+            const finalStatus = getAppealStatus(appealsObj.final || {});
             const totalAppealsCurrent =
-              getAppealRate(overviewData.appeals.midterm) +
-              getAppealRate(overviewData.appeals.final);
+              getAppealRate(appealsObj.midterm || {}) +
+              getAppealRate(appealsObj.final || {});
 
             const totalAppealsLastSemester =
               (Number(
@@ -207,7 +214,7 @@ const Overview = () => {
                   <div className="semester">
                     <h1 className="semester-title">Current Semester</h1>
                     <p className="semester-name">
-                      {overviewData.semester.current}
+                      {semesterCurrent}
                     </p>
                   </div>
 
@@ -242,7 +249,7 @@ const Overview = () => {
                   <div className="survey-status">
                     <h1 className="survey-status-title">Survey Status</h1>
                     <p className="survey-status-description">
-                      {overviewData.survey.isOpen ? "Open" : "Closed"}
+                      {overviewData?.survey?.isOpen ? "Open" : "Closed"}
                     </p>
                   </div>
                 </div>
