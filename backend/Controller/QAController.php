@@ -267,6 +267,234 @@ class QAController
       ];
     }
   }
+
+  public function getAllSurveys(): array
+  {
+    if ($err = $this->requireQA()) {
+      return $err;
+    }
+
+    try {
+      $surveys = $this->qaModel->getAllSurveys();
+
+      return [
+        'statusCode' => 200,
+        'body' => [
+          'status' => 'success',
+          'surveys' => $surveys,
+          'count' => count($surveys),
+        ],
+      ];
+    } catch (Exception $e) {
+      return [
+        'statusCode' => 500,
+        'body' => [
+          'status' => 'error',
+          'message' => 'Server error',
+        ],
+      ];
+    }
+  }
+
+  public function getSurveyById(array $data): array
+  {
+    if ($err = $this->requireQA()) {
+      return $err;
+    }
+
+    $surveyId = isset($data['survey_id']) ? (int)$data['survey_id'] : 0;
+    if ($surveyId <= 0) {
+      return [
+        'statusCode' => 400,
+        'body' => [
+          'status' => 'error',
+          'message' => 'survey_id is required',
+        ],
+      ];
+    }
+
+    try {
+      $survey = $this->qaModel->getSurveyById($surveyId);
+
+      if (!$survey) {
+        return [
+          'statusCode' => 404,
+          'body' => [
+            'status' => 'error',
+            'message' => 'Survey not found',
+          ],
+        ];
+      }
+
+      return [
+        'statusCode' => 200,
+        'body' => [
+          'status' => 'success',
+          'survey' => $survey,
+        ],
+      ];
+    } catch (Exception $e) {
+      return [
+        'statusCode' => 500,
+        'body' => [
+          'status' => 'error',
+          'message' => 'Server error',
+        ],
+      ];
+    }
+  }
+
+  public function createSurvey(array $data): array
+  {
+    if ($err = $this->requireQA()) {
+      return $err;
+    }
+
+    $createdBy = (int)$_SESSION['user_id'];
+
+    if (empty($data['title']) || empty($data['start_at']) || empty($data['end_at'])) {
+      return [
+        'statusCode' => 400,
+        'body' => [
+          'status' => 'error',
+          'message' => 'title, start_at and end_at are required',
+        ],
+      ];
+    }
+
+    try {
+      $surveyId = $this->qaModel->createSurvey($data, $createdBy);
+
+      if (!$surveyId) {
+        return [
+          'statusCode' => 500,
+          'body' => [
+            'status' => 'error',
+            'message' => 'Failed to create survey',
+          ],
+        ];
+      }
+
+      return [
+        'statusCode' => 201,
+        'body' => [
+          'status' => 'success',
+          'message' => 'Survey created successfully',
+          'survey_id' => $surveyId,
+        ],
+      ];
+    } catch (Exception $e) {
+      return [
+        'statusCode' => 500,
+        'body' => [
+          'status' => 'error',
+          'message' => 'Server error',
+        ],
+      ];
+    }
+  }
+
+  public function updateSurvey(array $data): array
+  {
+    if ($err = $this->requireQA()) {
+      return $err;
+    }
+
+    $surveyId = isset($data['survey_id']) ? (int)$data['survey_id'] : 0;
+
+    if (
+      $surveyId <= 0 ||
+      empty($data['title']) ||
+      empty($data['start_at']) ||
+      empty($data['end_at'])
+    ) {
+      return [
+        'statusCode' => 400,
+        'body' => [
+          'status' => 'error',
+          'message' => 'survey_id, title, start_at and end_at are required',
+        ],
+      ];
+    }
+
+    try {
+      $success = $this->qaModel->updateSurvey($surveyId, $data);
+
+      if (!$success) {
+        return [
+          'statusCode' => 500,
+          'body' => [
+            'status' => 'error',
+            'message' => 'Failed to update survey',
+          ],
+        ];
+      }
+
+      return [
+        'statusCode' => 200,
+        'body' => [
+          'status' => 'success',
+          'message' => 'Survey updated successfully',
+        ],
+      ];
+    } catch (Exception $e) {
+      return [
+        'statusCode' => 500,
+        'body' => [
+          'status' => 'error',
+          'message' => 'Server error',
+        ],
+      ];
+    }
+  }
+
+  public function deleteSurvey(array $data): array
+  {
+    if ($err = $this->requireQA()) {
+      return $err;
+    }
+
+    $surveyId = isset($data['survey_id']) ? (int)$data['survey_id'] : 0;
+    if ($surveyId <= 0) {
+      return [
+        'statusCode' => 400,
+        'body' => [
+          'status' => 'error',
+          'message' => 'survey_id is required',
+        ],
+      ];
+    }
+
+    try {
+      $success = $this->qaModel->deleteSurvey($surveyId);
+
+      if (!$success) {
+        return [
+          'statusCode' => 500,
+          'body' => [
+            'status' => 'error',
+            'message' => 'Failed to delete survey',
+          ],
+        ];
+      }
+
+      return [
+        'statusCode' => 200,
+        'body' => [
+          'status' => 'success',
+          'message' => 'Survey deleted successfully',
+        ],
+      ];
+    } catch (Exception $e) {
+      return [
+        'statusCode' => 500,
+        'body' => [
+          'status' => 'error',
+          'message' => 'Server error',
+        ],
+      ];
+    }
+  }
 }
 
 ?>

@@ -682,6 +682,451 @@ class QA
 
     return $data;
   }
+
+  public function getAllSurveys(): array
+  {
+    $sql = "SELECT
+              s.survey_id,
+              s.title,
+              s.description,
+              s.status,
+              s.qr_code,
+              s.start_at,
+              s.end_at,
+              s.created_by,
+              s.updated_at,
+              (
+                SELECT COUNT(*)
+                FROM survey_questions sq
+                WHERE sq.survey_id = s.survey_id
+              ) AS questions_count,
+              (
+                SELECT COUNT(*)
+                FROM survey_responses sr
+                WHERE sr.survey_id = s.survey_id
+              ) AS responses_count
+
+            FROM surveys s
+            WHERE s.is_deleted = 0
+            ORDER BY s.survey_id DESC
+    ";
+
+    $stmt = $this->conn->prepare($sql);
+    if(!$stmt) return [];
+
+    $stmt->execute();
+    return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+  }
+
+  public function getSurveyById(int $surveyId): ?array 
+  {
+    $sql = "SELECT
+              survey_id,
+              title,
+              description,
+              status,
+              qr_code,
+              start_at,
+              end_at,
+              created_by,
+              updated_at
+            FROM surveys
+            WHERE survey_id = ?
+              AND is_deleted = 0
+            LIMIT 1;
+    ";
+
+    $stmt = $this->conn->prepare($sql);
+    if(!$stmt) return null;
+
+    $stmt->bind_param("i", $surveyId);
+    $stmt->execute();
+    $survey = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    if(!$survey) return null;
+
+    $questionsSql = "SELECT
+                      question_id,
+                      survey_id,
+                      section,
+                      question_text,
+                      options,
+                      is_required,
+                      display_order,
+                      question_type
+                    FROM survey_questions
+                    WHERE survey_id = ? 
+                    ORDER BY display_order ASC, question_id ASC
+    ";
+
+    $questionsStmt = $this->conn->prepare($questionsSql);
+    $questions = [];
+
+    if($questionsStmt){
+      $questionsStmt->bind_param("i", $surveyId);
+      $questionsStmt->execute();
+      $questions = $questionsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+      $questionsStmt->close();
+    }
+
+    $assignments = $this->getSurveyAssignments($surveyId);
+    $survey['questions'] = $questions;
+    $survey['assignments'] = $assignments;
+
+    return $survey;
+  }
+
+  public function getSurveyAssignments(int $surveyId): array
+  {
+    $data = [
+      'courses' => [],
+      'faculties' => []
+    ];
+
+    $courseSql = "SELECT c.course_id AS id, c.code, c.name
+                  FROM course_surveys cs
+                  JOIN courses c ON cs.course_id = c.course_id
+                  WHERE cs.survey_id = ?
+                  ORDER BY c.code
+    ";
+
+    $courseStmt = $this->conn->prepare($courseSql);
+
+    if($courseStmt){
+      $courseStmt->bind_param("i", $surveyId);
+      $courseStmt->execute();
+      $data['courses'] = $courseStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+      $courseStmt->close();
+    }
+
+    $facultySql = "SELECT f.faculty_id AS id, f.name
+                  FROM faculty_surveys fs
+                  JOIN faculties f ON fs.faculty_id = f.faculty_id
+                  WHERE fs.survey_id = ?
+                  ORDER BY f.name
+    ";
+
+    $facultyStmt = $this->conn->prepare($facultySql);
+    if($facultyStmt){
+      $facultyStmt->bind_param("i", $surveyId);
+      $facultyStmt->execute();
+      $data['faculties'] = $facultyStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+      $facultyStmt->close();
+    }
+
+    return $data;
+  }
+
+  public function createSurvey(array $data, int $createdBy): ?int
+  {
+    $title = trim((string)($data['title'] ?? ''));
+    $description = isset($data['description']) ? trim((string)$data['description']) : null;
+    $status = trim((string)($data['status'] ?? 'draft'));
+    $startAt = trim((string)($data['start_at'] ?? ''));
+    $endAt = trim((string)($data['end_at'] ?? ''));
+    $questions = isset($data['questions']) && is_array($data['questions']) ? $data['questions'] : [];
+    $courseIds = isset($data['course_ids']) && is_array($data['course_ids']) ? $data['course_ids'] : [];
+    $facultyIds = isset($data['faculty_ids']) && is_array($data['faculty_ids']) ? $data['faculty_ids'] : [];
+
+    if($title === "" || $startAt === "" || $endAt === "") return null;
+
+    $this->conn->begin_transaction();
+
+    try {
+      $sql = "INSERT INTO surveys (title, description, status, start_at, end_at, created_by, updated_at, is_deleted)
+              VALUES (?, ?, ?, ?, ?, ?, NOW(), 0)
+      ";
+
+      $stmt = $this->conn->prepare($sql);
+      if(!$stmt) {
+        $this->conn->rollback();
+        return null;
+      }
+
+      $stmt->bind_param("sssssi", $title, $description, $status, $startAt, $endAt, $createdBy);
+      if(!$stmt->execute()){
+        $stmt->close();
+        $this->conn->rollback();
+        return null;
+      }
+
+      $surveyId = (int)$this->conn->insert_id;
+      $stmt->close();
+
+      if(!empty($questions)){
+        $qSql = "INSERT INTO survey_questions
+          (survey_id, section, question_text, options, is_required, display_order, question_type)
+          VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        $qStmt = $this->conn->prepare($qSql);
+        if(!$qStmt){
+          $this->conn->rollback();
+          return null;
+        }
+
+        foreach ($questions as $index => $question) {
+          $section = trim((string)($question['section'] ?? 'General'));
+          $questionText = trim((string)($question['question_text'] ?? ''));
+          $options = isset($question['options']) ? (string)$question['options'] : null;
+          $isRequired = !empty($question['is_required']) ? 1 : 0;
+          $displayOrder = isset($question['display_order']) ? (int)$question['display_order'] : ($index + 1);
+          $questionType = trim((string)($question['question_type'] ?? 'text'));
+
+          if($questionText === "") continue;
+
+          $qStmt->bind_param(
+            "isssiis",
+            $surveyId,
+            $section,
+            $questionText,
+            $options,
+            $isRequired,
+            $displayOrder,
+            $questionType
+          );
+
+          if(!$qStmt->execute()) {
+            $qStmt->close();
+            $this->conn->rollback();
+            return null;
+          }
+        }
+        $qStmt->close();
+      }
+      $this->assignSurveyToCoursesAndFaculties($surveyId, $courseIds, $facultyIds);
+
+      $this->conn->commit();
+      return $surveyId;
+    } catch (Exception $e){
+      $this->conn->rollback();
+      return null;
+    }
+  }
+
+  public function assignSurveyToCoursesAndFaculties(int $surveyId, array $courseIds, array $facultyIds): bool
+  {
+    $deleteCourseSql = "DELETE FROM course_surveys WHERE survey_id = ?";
+    $deleteCourseStmt = $this->conn->prepare($deleteCourseSql);
+    if($deleteCourseStmt){
+      $deleteCourseStmt->bind_param("i", $surveyId);
+      $deleteCourseStmt->execute();
+      $deleteCourseStmt->close();
+    }
+
+    $deleteFacultySql = "DELETE FROM faculty_surveys WHERE survey_id = ?";
+    $deleteFacultyStmt = $this->conn->prepare($deleteFacultySql);
+    if ($deleteFacultyStmt) {
+      $deleteFacultyStmt->bind_param("i", $surveyId);
+      $deleteFacultyStmt->execute();
+      $deleteFacultyStmt->close();
+    }
+
+    if(!empty($courseIds)) {
+      $insertCourseSql = "INSERT INTO course_surveys (survey_id, course_id) VALUES (?, ?)";
+      $insertCourseStmt = $this->conn->prepare($insertCourseSql);
+      if($insertCourseStmt){
+        foreach($courseIds as $courseId){
+          $courseId = (int)$courseId;
+          if($courseId <= 0) continue;
+
+          $insertCourseStmt->bind_param("ii", $surveyId, $courseId);
+          $insertCourseStmt->execute();
+        }
+        $insertCourseStmt->close();
+      }
+    }
+
+    if (!empty($facultyIds)) {
+      $insertFacultySql = "INSERT INTO faculty_surveys (survey_id, faculty_id) VALUES (?, ?)";
+      $insertFacultyStmt = $this->conn->prepare($insertFacultySql);
+
+      if ($insertFacultyStmt) {
+        foreach ($facultyIds as $facultyId) {
+          $facultyId = (int)$facultyId;
+          if ($facultyId <= 0) continue;
+
+          $insertFacultyStmt->bind_param("ii", $surveyId, $facultyId);
+          $insertFacultyStmt->execute();
+        }
+        $insertFacultyStmt->close();
+      }
+    }
+
+    return true;
+  }
+
+  public function updateSurvey(int $surveyId, array $data): bool 
+  {
+    $title = trim((string)($data['title'] ?? ''));
+    $description = isset($data['description']) ? trim((string)$data['description']) : null;
+    $status = trim((string)($data['status'] ?? 'draft'));
+    $startAt = trim((string)($data['start_at'] ?? ''));
+    $endAt = trim((string)($data['end_at'] ?? ''));
+    $questions = isset($data['questions']) && is_array($data['questions']) ? $data['questions'] : [];
+    $courseIds = isset($data['course_ids']) && is_array($data['course_ids']) ? $data['course_ids'] : [];
+    $facultyIds = isset($data['faculty_ids']) && is_array($data['faculty_ids']) ? $data['faculty_ids'] : [];
+
+    if ($surveyId <= 0 || $title === '' || $startAt === '' || $endAt === '') return false;
+
+    $this->conn->begin_transaction();
+
+    try {
+      $sql = "UPDATE surveys
+              SET title = ?, description = ?, status = ?, start_at = ?, end_at = ?, updated_at = NOW()
+              WHERE survey_id = ? AND is_deleted = 0";
+
+      $stmt = $this->conn->prepare($sql);
+      if(!$stmt) {
+        $this->conn->rollback();
+        return false;
+      }
+
+      $stmt->bind_param("sssssi", $title, $description, $status, $startAt, $endAt, $surveyId);
+      if(!$stmt->execute()) {
+        $stmt->close();
+        $this->conn->rollback();
+        return false;
+      }
+      $stmt->close();
+
+      $deleteQuestionsSql = "DELETE FROM survey_questions WHERE survey_id = ?";
+      $deleteQuestionsStmt = $this->conn->prepare($deleteQuestionsSql);
+      if ($deleteQuestionsStmt) {
+        $deleteQuestionsStmt->bind_param("i", $surveyId);
+        $deleteQuestionsStmt->execute();
+        $deleteQuestionsStmt->close();
+      }
+
+      if(!empty($questions)) {
+        $qSql = "INSERT INTO survey_questions
+                  (survey_id, section, question_text, options, is_required, display_order, question_type)
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        $qStmt = $this->conn->prepare($qSql);
+        if (!$qStmt) {
+          $this->conn->rollback();
+          return false;
+        }
+
+        foreach ($questions as $index => $question) {
+          $section = trim((string)($question['section'] ?? 'General'));
+          $questionText = trim((string)($question['question_text'] ?? ''));
+          $options = isset($question['options']) ? (string)$question['options'] : null;
+          $isRequired = !empty($question['is_required']) ? 1 : 0;
+          $displayOrder = isset($question['display_order']) ? (int)$question['display_order'] : ($index + 1);
+          $questionType = trim((string)($question['question_type'] ?? 'text'));
+
+          if ($questionText === '') continue;
+
+          $qStmt->bind_param(
+            "isssiis",
+            $surveyId,
+            $section,
+            $questionText,
+            $options,
+            $isRequired,
+            $displayOrder,
+            $questionType
+          );
+
+          if (!$qStmt->execute()) {
+            $qStmt->close();
+            $this->conn->rollback();
+            return false;
+          }
+        }
+        $qStmt->close();
+      }
+
+      $this->assignSurveyToCoursesAndFaculties($surveyId, $courseIds, $facultyIds); 
+
+      $this->conn->commit();
+      return true;
+
+    } catch(Exception $e) {
+      $this->conn->rollback();
+      return false;
+    }
+  }
+
+  public function deleteSurvey(int $surveyId): bool 
+  {
+    if($surveyId <= 0) return false;
+
+    $checkSql = "SELECT COUNT(*) AS cnt FROM survey_responses WHERE survey_id = ?";
+    $checkStmt = $this->conn->prepare($checkSql);
+    if (!$checkStmt) return false;
+
+    $checkStmt->bind_param("i", $surveyId);
+    $checkStmt->execute();
+    $result = $checkStmt->get_result()->fetch_assoc();
+    $checkStmt->close();
+
+    $hasResponses = ((int)($result['cnt'] ?? 0) > 0);
+
+    if ($hasResponses) {
+      $sql = "UPDATE surveys SET is_deleted = 1, status = 'archived', updated_at = NOW() WHERE survey_id = ?";
+      $stmt = $this->conn->prepare($sql);
+      if (!$stmt) return false;
+
+      $stmt->bind_param("i", $surveyId);
+      $ok = $stmt->execute();
+      $stmt->close();
+
+      return $ok;
+    }
+
+    $this->conn->begin_transaction();
+
+    try {
+      $deleteCourseSql = "DELETE FROM course_surveys WHERE survey_id = ?";
+      $deleteCourseStmt = $this->conn->prepare($deleteCourseSql);
+      if ($deleteCourseStmt) {
+        $deleteCourseStmt->bind_param("i", $surveyId);
+        $deleteCourseStmt->execute();
+        $deleteCourseStmt->close();
+      }
+
+      $deleteFacultySql = "DELETE FROM faculty_surveys WHERE survey_id = ?";
+      $deleteFacultyStmt = $this->conn->prepare($deleteFacultySql);
+      if ($deleteFacultyStmt) {
+        $deleteFacultyStmt->bind_param("i", $surveyId);
+        $deleteFacultyStmt->execute();
+        $deleteFacultyStmt->close();
+      }
+
+      $deleteQuestionsSql = "DELETE FROM survey_questions WHERE survey_id = ?";
+      $deleteQuestionsStmt = $this->conn->prepare($deleteQuestionsSql);
+      if ($deleteQuestionsStmt) {
+        $deleteQuestionsStmt->bind_param("i", $surveyId);
+        $deleteQuestionsStmt->execute();
+        $deleteQuestionsStmt->close();
+      }
+
+      $deleteSurveySql = "DELETE FROM surveys WHERE survey_id = ?";
+      $deleteSurveyStmt = $this->conn->prepare($deleteSurveySql);
+      if (!$deleteSurveyStmt) {
+        $this->conn->rollback();
+        return false;
+      }
+
+      $deleteSurveyStmt->bind_param("i", $surveyId);
+      $ok = $deleteSurveyStmt->execute();
+      $deleteSurveyStmt->close();
+
+      if(!$ok) {
+        $this->conn->rollback();
+        return false;
+      }
+
+      $this->conn->commit();
+      return true;
+    } catch(Exception $e) {
+      $this->conn->rollback();
+      return false;
+    }
+  }
 }
 
 ?>

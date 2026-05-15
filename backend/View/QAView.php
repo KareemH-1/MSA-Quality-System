@@ -68,6 +68,74 @@ class QAView extends JsonView
         break;
       }
 
+      case 'surveys': {
+        if (strtoupper($method) !== 'GET') {
+          $result = [
+            'statusCode' => 405,
+            'body' => ['status' => 'error', 'message' => 'Method not allowed'],
+          ];
+          break;
+        }
+
+        $result = $this->controller->getAllSurveys();
+        break;
+      }
+
+      case 'survey': {
+        if (strtoupper($method) !== 'GET') {
+          $result = [
+            'statusCode' => 405,
+            'body' => ['status' => 'error', 'message' => 'Method not allowed'],
+          ];
+          break;
+        }
+
+        $result = $this->controller->getSurveyById($_GET);
+        break;
+      }
+
+      case 'create-survey': {
+        if (strtoupper($method) !== 'POST') {
+          $result = [
+            'statusCode' => 405,
+            'body' => ['status' => 'error', 'message' => 'Method not allowed'],
+          ];
+          break;
+        }
+
+        $data = $this->readJsonBody();
+        $result = $this->controller->createSurvey($data);
+        break;
+      }
+
+      case 'update-survey': {
+        if (strtoupper($method) !== 'PUT' && strtoupper($method) !== 'POST') {
+          $result = [
+            'statusCode' => 405,
+            'body' => ['status' => 'error', 'message' => 'Method not allowed'],
+          ];
+          break;
+        }
+
+        $data = $this->readJsonBody();
+        $result = $this->controller->updateSurvey($data);
+        break;
+      }
+
+      case 'delete-survey': {
+        if (strtoupper($method) !== 'DELETE' && strtoupper($method) !== 'POST') {
+          $result = [
+            'statusCode' => 405,
+            'body' => ['status' => 'error', 'message' => 'Method not allowed'],
+          ];
+          break;
+        }
+
+        $data = $this->readJsonBody();
+        $result = $this->controller->deleteSurvey($data);
+        break;
+      }
+
       default: {
         $result = [
           'statusCode' => 400,

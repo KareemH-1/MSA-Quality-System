@@ -116,3 +116,46 @@ ALTER TABLE grade_appeals
 ADD COLUMN assigned_by INT NULL AFTER assigned_instructor_id,
 ADD COLUMN assigned_at TIMESTAMP NULL AFTER assigned_by,
 ADD FOREIGN KEY (assigned_by) REFERENCES users(user_id);
+
+
+--------------------------------------------- NEW ---------------------------------------------
+
+ALTER TABLE surveys
+  ADD COLUMN status ENUM('draft', 'published', 'closed', 'archived') NOT NULL DEFAULT 'draft' AFTER title,
+  ADD COLUMN description TEXT NULL AFTER title,
+  ADD COLUMN updated_at DATETIME NULL DEFAULT NULL AFTER end_at,
+  ADD COLUMN is_deleted TINYINT(1) NOT NULL DEFAULT 0 AFTER updated_at;
+
+UPDATE surveys
+SET status = 'published'
+WHERE status IS NOT NULL OR survey_id > 0;
+
+CREATE TABLE IF NOT EXISTS faculty_surveys (
+  survey_id INT NOT NULL,
+  faculty_id INT NOT NULL,
+  PRIMARY KEY (survey_id, faculty_id),
+  CONSTRAINT fk_faculty_surveys_survey
+    FOREIGN KEY (survey_id) REFERENCES surveys(survey_id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_faculty_surveys_faculty
+    FOREIGN KEY (faculty_id) REFERENCES faculties(faculty_id)
+    ON DELETE CASCADE
+);
+
+CREATE INDEX idx_surveys_status ON surveys(status);
+CREATE INDEX idx_surveys_created_by ON surveys(created_by);
+CREATE INDEX idx_surveys_dates ON surveys(start_at, end_at);
+
+CREATE INDEX idx_survey_questions_survey ON survey_questions(survey_id);
+CREATE INDEX idx_survey_questions_order ON survey_questions(survey_id, display_order);
+
+CREATE INDEX idx_survey_responses_survey ON survey_responses(survey_id);
+CREATE INDEX idx_survey_responses_course ON survey_responses(course_id);
+CREATE INDEX idx_survey_responses_student ON survey_responses(student_id);
+
+CREATE INDEX idx_answers_response ON answers(response_id);
+CREATE INDEX idx_answers_question ON answers(question_id);
+
+CREATE INDEX idx_course_surveys_course ON course_surveys(course_id);
+
+CREATE INDEX idx_faculty_surveys_faculty ON faculty_surveys(faculty_id);
