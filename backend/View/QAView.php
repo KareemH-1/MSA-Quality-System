@@ -142,7 +142,19 @@ class QAView extends JsonView
           'body' => [
             'status' => 'error',
             'message' => 'Unknown action',
-            'allowed' => ['dashboard', 'capacity', 'appeals', 'session-appeals', 'import', 'overview'],
+            'allowed' => [
+              'dashboard',
+              'capacity',
+              'appeals',
+              'session-appeals',
+              'import',
+              'overview',
+              'surveys',
+              'survey',
+              'create-survey',
+              'update-survey',
+              'delete-survey'
+            ],
           ],
         ];
         break;

@@ -781,19 +781,18 @@ class QA
   {
     $data = [
       'courses' => [],
-      'faculties' => []
+      'faculties' => [],
+      'effective_courses' => []
     ];
 
-    $courseSql = "SELECT c.course_id AS id, c.code, c.name
+    $courseSql = "SELECT c.course_id AS id, c.code, c.name, c.faculty_id
                   FROM course_surveys cs
                   JOIN courses c ON cs.course_id = c.course_id
                   WHERE cs.survey_id = ?
-                  ORDER BY c.code
-    ";
+                  ORDER BY c.code";
 
     $courseStmt = $this->conn->prepare($courseSql);
-
-    if($courseStmt){
+    if ($courseStmt) {
       $courseStmt->bind_param("i", $surveyId);
       $courseStmt->execute();
       $data['courses'] = $courseStmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -804,15 +803,37 @@ class QA
                   FROM faculty_surveys fs
                   JOIN faculties f ON fs.faculty_id = f.faculty_id
                   WHERE fs.survey_id = ?
-                  ORDER BY f.name
-    ";
+                  ORDER BY f.name";
 
     $facultyStmt = $this->conn->prepare($facultySql);
-    if($facultyStmt){
+    if ($facultyStmt) {
       $facultyStmt->bind_param("i", $surveyId);
       $facultyStmt->execute();
       $data['faculties'] = $facultyStmt->get_result()->fetch_all(MYSQLI_ASSOC);
       $facultyStmt->close();
+    }
+
+    $effectiveSql = "SELECT DISTINCT c.course_id AS id, c.code, c.name, c.faculty_id, f.name AS faculty_name
+                    FROM courses c
+                    JOIN faculties f ON c.faculty_id = f.faculty_id
+                    WHERE c.course_id IN (
+                      SELECT cs.course_id
+                      FROM course_surveys cs
+                      WHERE cs.survey_id = ?
+                    )
+                    OR c.faculty_id IN (
+                      SELECT fs.faculty_id
+                      FROM faculty_surveys fs
+                      WHERE fs.survey_id = ?
+                    )
+                    ORDER BY c.code";
+
+    $effectiveStmt = $this->conn->prepare($effectiveSql);
+    if ($effectiveStmt) {
+      $effectiveStmt->bind_param("ii", $surveyId, $surveyId);
+      $effectiveStmt->execute();
+      $data['effective_courses'] = $effectiveStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+      $effectiveStmt->close();
     }
 
     return $data;
