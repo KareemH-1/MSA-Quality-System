@@ -44,6 +44,11 @@ class ManageUsersView extends JsonView
             $result = ['status' => 'error', 'message' => 'Method not allowed'];
         }
 
+        if (is_array($result) && isset($result['statusCode'], $result['body'])) {
+            $statusCode = (int)$result['statusCode'];
+            $result = $result['body'];
+        }
+
 
         if (!is_array($result)) {
             $result = ['result' => $result];

@@ -102,7 +102,7 @@ const ManageUsers = ({
   const handleDelete = (user) => {
     // Prevent self-deletion
     if (user.role === 'Admin') {
-      alert('Admins cannot delete themselves. Please contact another admin.');
+      alert('Admins cannot delete themselves. Please contact system administration.');
       return;
     }
     
