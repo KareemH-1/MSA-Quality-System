@@ -929,7 +929,7 @@ class QA
   {
     $deleteCourseSql = "DELETE FROM course_surveys WHERE survey_id = ?";
     $deleteCourseStmt = $this->conn->prepare($deleteCourseSql);
-    if($deleteCourseStmt){
+    if ($deleteCourseStmt) {
       $deleteCourseStmt->bind_param("i", $surveyId);
       $deleteCourseStmt->execute();
       $deleteCourseStmt->close();
@@ -943,18 +943,12 @@ class QA
       $deleteFacultyStmt->close();
     }
 
-    if(!empty($courseIds)) {
-      $insertCourseSql = "INSERT INTO course_surveys (survey_id, course_id) VALUES (?, ?)";
-      $insertCourseStmt = $this->conn->prepare($insertCourseSql);
-      if($insertCourseStmt){
-        foreach($courseIds as $courseId){
-          $courseId = (int)$courseId;
-          if($courseId <= 0) continue;
+    $allCourseIds = [];
 
-          $insertCourseStmt->bind_param("ii", $surveyId, $courseId);
-          $insertCourseStmt->execute();
-        }
-        $insertCourseStmt->close();
+    foreach ($courseIds as $courseId) {
+      $courseId = (int)$courseId;
+      if ($courseId > 0) {
+        $allCourseIds[$courseId] = true;
       }
     }
 
@@ -962,15 +956,46 @@ class QA
       $insertFacultySql = "INSERT INTO faculty_surveys (survey_id, faculty_id) VALUES (?, ?)";
       $insertFacultyStmt = $this->conn->prepare($insertFacultySql);
 
-      if ($insertFacultyStmt) {
-        foreach ($facultyIds as $facultyId) {
-          $facultyId = (int)$facultyId;
-          if ($facultyId <= 0) continue;
+      $facultyCourseSql = "SELECT course_id FROM courses WHERE faculty_id = ?";
+      $facultyCourseStmt = $this->conn->prepare($facultyCourseSql);
 
+      foreach ($facultyIds as $facultyId) {
+        $facultyId = (int)$facultyId;
+        if ($facultyId <= 0) continue;
+
+        if ($insertFacultyStmt) {
           $insertFacultyStmt->bind_param("ii", $surveyId, $facultyId);
           $insertFacultyStmt->execute();
         }
-        $insertFacultyStmt->close();
+
+        if ($facultyCourseStmt) {
+          $facultyCourseStmt->bind_param("i", $facultyId);
+          $facultyCourseStmt->execute();
+          $result = $facultyCourseStmt->get_result();
+
+          while ($row = $result->fetch_assoc()) {
+            $cid = (int)$row['course_id'];
+            if ($cid > 0) {
+              $allCourseIds[$cid] = true;
+            }
+          }
+        }
+      }
+
+      if ($insertFacultyStmt) $insertFacultyStmt->close();
+      if ($facultyCourseStmt) $facultyCourseStmt->close();
+    }
+
+    if (!empty($allCourseIds)) {
+      $insertCourseSql = "INSERT INTO course_surveys (survey_id, course_id) VALUES (?, ?)";
+      $insertCourseStmt = $this->conn->prepare($insertCourseSql);
+
+      if ($insertCourseStmt) {
+        foreach (array_keys($allCourseIds) as $courseId) {
+          $insertCourseStmt->bind_param("ii", $surveyId, $courseId);
+          $insertCourseStmt->execute();
+        }
+        $insertCourseStmt->close();
       }
     }
 
