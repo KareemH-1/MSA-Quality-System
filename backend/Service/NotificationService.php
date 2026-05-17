@@ -48,6 +48,13 @@ class NotificationService
     return $service;
   }
    
+  public static function sendEmailOnly(mysqli $db): self
+  {
+    $service = new self();
+    $service->attach(new EmailNotificationObserver($db));
+    return $service;
+  }
+
   public static function createWithoutEmail(mysqli $db): self
   {
     $service = new self();

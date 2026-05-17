@@ -12,6 +12,13 @@ class Student
     $this->conn = $db;
   }
 
+  private function loadSurveyStrategyFiles(): void
+  {
+    $base = __DIR__ . '/SurveyStrategies';
+    require_once $base . '/SurveyStrategyInterface.php';
+    require_once $base . '/SurveyStrategyFactory.php';
+  }
+
   public function getActiveAppealSessions(): array
   {
     $sql = "SELECT * FROM appeal_sessions WHERE status='Open' and start_date <= NOW() and end_date >= Now()";
@@ -283,49 +290,33 @@ class Student
 
   public function submitSurvey(int $studentId, int $surveyId, int $courseId, array $answers): bool
   {
+    $this->loadSurveyStrategyFiles();
+
     $this->conn->begin_transaction();
 
     try {
-      $sql = "
-        INSERT INTO survey_responses (student_id, survey_id, course_id, submitted_at)
-        VALUES (?, ?, ?, NOW())
-      ";
+      $sId = (int)$studentId;
+      $svId = (int)$surveyId;
+      $cId = (int)$courseId;
 
-      $stmt = $this->conn->prepare($sql);
-      if (!$stmt) throw new Exception("Prepare failed: response");
-
-      $stmt->bind_param("iii", $studentId, $surveyId, $courseId);
-      $stmt->execute();
+      $sql = "INSERT INTO survey_responses (student_id, survey_id, course_id, submitted_at) VALUES ({$sId}, {$svId}, {$cId}, NOW())";
+      $ok = $this->conn->query($sql);
+      if ($ok === false) throw new Exception("Insert response failed: " . $this->conn->error);
       $responseId = (int)$this->conn->insert_id;
-  
-
-      $sql = "
-        INSERT INTO answers (response_id, question_id, answer_text, likert_score)
-        VALUES (?, ?, ?, ?)
-      ";
-
-      $stmt = $this->conn->prepare($sql);
-      if (!$stmt) throw new Exception("Prepare failed: answers");
 
       foreach ($answers as $answer) {
-        $questionId = (int)$answer['question_id'];
         $type = $answer['question_type'] ?? 'likert';
-        
-        $answerText = $type === 'text'   ? (string)($answer['answer_text'] ?? '') : null;
-        $likertScore = $type === 'likert' ? (int)($answer['answer_text'] ?? 0) : null;
-
-        $stmt->bind_param("iiss", $responseId, $questionId, $answerText, $likertScore);
-        
-        if (!$stmt->execute()) {
-          throw new Exception("Answer insert failed: " . $stmt->error); 
+        $strategy = SurveyStrategyFactory::make($type);
+        $ok = $strategy->saveAnswer($this->conn, $responseId, $answer);
+        if (!$ok) {
+          throw new Exception("Answer insert failed for question: " . (int)($answer['question_id'] ?? 0));
         }
       }
 
       $this->conn->commit();
       return true;
-
     } catch (Exception $e) {
-      error_log("submitSurvey failed: " . $e->getMessage()); 
+      error_log("submitSurvey failed: " . $e->getMessage());
       $this->conn->rollback();
       return false;
     }

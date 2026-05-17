@@ -17,7 +17,33 @@ class AuthView extends JsonView
         $result = $this->controller->login($this->readJsonBody());
         $this->respond($result['statusCode'], $result['body']);
     }
+
+    public function resetPassword()
+    {
+        $result = $this->controller->resetPassword($this->readJsonBody());
+        $this->respond($result['statusCode'], $result['body']);
+    }
+
+    public function forgetPassword()
+    {
+        $result = $this->controller->forgetPassword($this->readJsonBody());
+        $this->respond($result['statusCode'], $result['body']);
+    }
+
+    public function verifyToken()
+    {
+        $result = $this->controller->verifyToken($this->readJsonBody());
+        $this->respond($result['statusCode'], $result['body']);
+    }
 }
 
 $authView = new AuthView();
-$authView->login();
+
+$action = $_GET['action'] ?? null;
+
+match ($action) {
+    'reset-password' => $authView->resetPassword(),
+    'forget-password' => $authView->forgetPassword(),
+    'verify-token' => $authView->verifyToken(),
+    default => $authView->login(),
+};
