@@ -6,3 +6,4 @@ define('SMTP_USERNAME', 'mazen.m.mahmoud0@gmail.com');
 define('SMTP_PASSWORD', 'qxejmjecjzkcpzkh'); 
 define('SMTP_FROM',     'mazen.m.mahmoud0@gmail.com');
 define('SMTP_FROM_NAME', 'MSA Quality Assurance');
+define('APP_URL',       'http://localhost:5173');

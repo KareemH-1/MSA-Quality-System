@@ -1,5 +1,6 @@
 <?php
 require_once 'Database.php';
+require_once __DIR__ . '/../Service/NotificationService.php';
 
 class ManageUsers {
     private $conn;
@@ -54,6 +55,11 @@ class ManageUsers {
         return null;
     }
 
+    public function sendWelcomeNotification(int $userId, string $name): void {
+        $notificationService = NotificationService::create($this->conn);
+        $welcomeMessage = "Your account has been created successfully, {$name}. Please sign in at " . APP_URL . ".";
+        $notificationService->send($welcomeMessage, $userId, 'system', null, true, true);
+    }
     public function createUser($name, $email, $password, $role, $faculty = null, $level = null, $courses = null, $managedCourses = null) {
         $this->conn->begin_transaction();
         try {
@@ -141,6 +147,7 @@ class ManageUsers {
             }
 
             $this->conn->commit();
+            $this->sendWelcomeNotification($newUserId, $name);
             return ['status' => 'success', 'user_id' => $newUserId];
         } catch (Exception $e) {
             $this->conn->rollback();
@@ -149,7 +156,6 @@ class ManageUsers {
     }
 
     public function deleteUser($email) {
-        // Simple delete - prevent empty/null email
         if (!$email || empty(trim($email))) {
             return ['status' => 'error', 'message' => 'Email is required'];
         }
@@ -173,6 +179,31 @@ class ManageUsers {
         } catch (Exception $e) {
             return ['status' => 'error', 'message' => 'Error: ' . $e->getMessage()];
         }
+    }
+
+    public function getUserRoleByEmail($email) {
+        if (!$email || empty(trim($email))) {
+            return null;
+        }
+
+        $sql = "SELECT role FROM users WHERE email = ? LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return null;
+        }
+
+        $stmt->bind_param('s', $email);
+        $stmt->execute();
+        $role = null;
+        $stmt->bind_result($role);
+
+        if ($stmt->fetch()) {
+            $stmt->close();
+            return $role;
+        }
+
+        $stmt->close();
+        return null;
     }
 
     public function updateUser($email, $name, $password) {

@@ -102,11 +102,44 @@ class ManageUsersController
 
     public function deleteUser($userData)
     {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         $email = $userData['email'] ?? null;
         if (!$email) {
             return ['status' => 'error', 'message' => 'Email is required'];
         }
-        return $this->model->deleteUser($email);
+
+        $currentRole = $_SESSION['role'] ?? null;
+        $currentEmail = $_SESSION['email'] ?? null;
+
+        if (!$currentRole || !$currentEmail) {
+            return [
+                'statusCode' => 401,
+                'body' => ['status' => 'error', 'message' => 'Not authenticated'],
+            ];
+        }
+
+        $targetRole = $this->model->getUserRoleByEmail($email);
+        if ($targetRole === null) {
+            return [
+                'statusCode' => 404,
+                'body' => ['status' => 'error', 'message' => 'User not found'],
+            ];
+        }
+
+        if ($currentRole === 'Admin' && $targetRole === 'Admin') {
+            return [
+                'statusCode' => 403,
+                'body' => ['status' => 'error', 'message' => 'Admins cannot delete another admin'],
+            ];
+        }
+
+        return [
+            'statusCode' => 200,
+            'body' => $this->model->deleteUser($email),
+        ];
     }
 
     public function updateUser($userData)

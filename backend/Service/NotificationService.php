@@ -27,14 +27,16 @@ class NotificationService
     int $receiverId,
     ?string $senderType = 'system',
     ?int $senderId = null,
-    bool $notifyByEmail = false
+    bool $notifyByEmail = false,
+    bool $styledEmail = false
   ): void {
     $this->notify('new_notification', [
       'title' => $title,
       'receiver_id' => $receiverId,
       'sender_type' => $senderType,
       'sender_id' => $senderId,
-      'notify_by_email' => $notifyByEmail
+      'notify_by_email' => $notifyByEmail,
+      'styled_email' => $styledEmail
     ]);
   }
 
