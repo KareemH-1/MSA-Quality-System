@@ -7,6 +7,7 @@ import Faculties from "../pages/Admin/Faculties";
 import ManageCourses from "../pages/Admin/ManageCourses";
 import SystemLogs from "../pages/Admin/SystemLogs";
 import Login from "../pages/Login";
+import ResetPassword from "../pages/ResetPassword";
 import NotFound from "../pages/NotFound";
 import StudentDashboard from "../pages/Student/StudentDashboard";
 import StudentServices from "../pages/Student/StudentServices";
@@ -43,6 +44,11 @@ export const PAGE_CONFIG = {
   login: {
     path: "/",
     component: Login,
+    showSidebar: false,
+  },
+  resetPassword: {
+    path: "/reset-password",
+    component: ResetPassword,
     showSidebar: false,
   },
   home: {
