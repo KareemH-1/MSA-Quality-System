@@ -2,18 +2,16 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/Instructor.php';
 require_once __DIR__ . '/../Service/NotificationService.php';
 require_once __DIR__ . '/../Service/InAppNotificationObserver.php';
 require_once __DIR__ . '/../Service/EmailNotificationObserver.php';
 
-class ModuleLeader
+class ModuleLeader extends Instructor
 {
-  private mysqli $conn;
-  private string $table = 'grade_appeals';
-
   public function __construct(mysqli $conn)
   {
-    $this->conn = $conn;
+    parent::__construct($conn);
   }
 
   public function getAppealsByCourses(int $moduleLeaderId): array
@@ -49,10 +47,10 @@ class ModuleLeader
     $sql = "SELECT 
               u.user_id,
               u.name
-          FROM course_instructors ci
-          JOIN users u ON ci.instructor_id = u.user_id
-          WHERE ci.course_id = ?
-          AND u.role = 'Instructor'";
+            FROM course_instructors ci
+            JOIN users u ON ci.instructor_id = u.user_id
+            WHERE ci.course_id = ?
+            AND u.role = 'Instructor'";
 
     $stmt = $this->conn->prepare($sql);
     if (!$stmt) return [];
@@ -70,45 +68,105 @@ class ModuleLeader
     $sql = "UPDATE " . $this->table . "
             SET assigned_instructor_id = ?, assigned_by = ?, assigned_at = NOW(), status = 'Under Review'
             WHERE appeal_id = ? AND assigned_instructor_id IS NULL";
-    
+
     $stmt = $this->conn->prepare($sql);
     if (!$stmt) return false;
 
     $stmt->bind_param("iii", $instructorId, $moduleLeaderId, $appealId);
     $stmt->execute();
-    if($stmt->affected_rows === 0) {
+    if ($stmt->affected_rows === 0) {
       return false;
     }
 
-    $infoSql = "SELECT ga.student_id, c.name AS course_name FROM grade_appeals ga
-                    JOIN courses c ON ga.course_id = c.course_id
-                    WHERE ga.appeal_id = ?";
+    $infoSql = "SELECT ga.student_id, c.name AS course_name 
+                FROM grade_appeals ga
+                JOIN courses c ON ga.course_id = c.course_id
+                WHERE ga.appeal_id = ?";
 
     $infoStmt = $this->conn->prepare($infoSql);
     $infoStmt->bind_param("i", $appealId);
     $infoStmt->execute();
     $infoResult = $infoStmt->get_result()->fetch_assoc();
 
-    if($infoResult) {
+    if ($infoResult) {
       $studentId = $infoResult['student_id'];
       $courseName = $infoResult['course_name'];
 
       $service = NotificationService::create($this->conn);
-      
+
       $service->send(
         "You have been assigned a new grade appeal for $courseName",
         $instructorId,
         'appeal',
         $moduleLeaderId,
         true
-      );   
+      );
+
       $service->send(
         "Your grade appeal for $courseName is now under review by the instructor.",
-        $studentId, 
+        $studentId,
         'appeal',
         $instructorId,
-        true  
+        true
       );
+    }
+
+    return true;
+  }
+
+  public function reviewAppealAsModuleLeader(
+    int $appealId,
+    int $moduleLeaderId,
+    string $newStatus,
+    ?string $newGrade = null,
+    ?string $note = null
+  ): bool {
+    $sql = "UPDATE " . $this->table . " ga
+            JOIN courses c ON ga.course_id = c.course_id
+            SET ga.status = ?, ga.new_grade = ?, ga.note = ?, ga.resolved_at = NOW()
+            WHERE ga.appeal_id = ?
+            AND c.module_leader_id = ?
+            AND ga.status IN ('Pending', 'Under Review')";
+
+    $stmt = $this->conn->prepare($sql);
+    if (!$stmt) return false;
+
+    $stmt->bind_param("sssii", $newStatus, $newGrade, $note, $appealId, $moduleLeaderId);
+    $stmt->execute();
+
+    if ($stmt->affected_rows === 0) {
+      return false;
+    }
+
+    $infoSql = "SELECT ga.student_id, c.name AS course_name
+                FROM grade_appeals ga
+                JOIN courses c ON ga.course_id = c.course_id
+                WHERE ga.appeal_id = ?";
+
+    $infoStmt = $this->conn->prepare($infoSql);
+    if ($infoStmt) {
+      $infoStmt->bind_param("i", $appealId);
+      $infoStmt->execute();
+      $infoResult = $infoStmt->get_result()->fetch_assoc();
+
+      if ($infoResult) {
+        $studentId = $infoResult['student_id'];
+        $courseName = $infoResult['course_name'];
+
+        if ($newStatus === 'Resolved' || $newStatus === 'Rejected') {
+          $service = NotificationService::create($this->conn);
+
+          $service->send(
+            "Your grade appeal for $courseName has been $newStatus by the module leader.",
+            $studentId,
+            'appeal',
+            $moduleLeaderId,
+            true
+          );
+        }
+      }
+
+      $infoStmt->close();
     }
 
     return true;

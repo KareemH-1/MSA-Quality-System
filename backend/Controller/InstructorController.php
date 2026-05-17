@@ -35,7 +35,7 @@ class InstructorController
         ];
       }
 
-    if($_SESSION['role'] !== 'Instructor') {
+    if($_SESSION['role'] !== 'Instructor' && $_SESSION['role'] !== 'Module_Leader'){
         return [
             'statusCode' => 403,
             'body' => [

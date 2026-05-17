@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { toast } from "react-toastify";
 import { X } from "lucide-react";
 import api from "../../api/axios";
+import ReviewModal from "../shared/ReviewModal";
 import "./styles/ModuleLeaderAppeals.css";
 
 const STATUS_FILTERS = ["All", "Under Review", "Resolved", "Rejected"];
+const GRADE_OPTIONS = ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"];
 
 function AssignModal({ appeal, onClose, onSuccess }) {
   const [instructors, setInstructors] = useState([]);
@@ -25,12 +27,14 @@ function AssignModal({ appeal, onClose, onSuccess }) {
         setLoading(false);
       }
     };
+
     fetchInstructors();
-  }, []);
+  }, [appeal.course_id]);
 
   const handleAssign = async () => {
     if (!selectedInstructor) return;
     setSubmitting(true);
+
     try {
       await api.post("/View/ModuleLeaderView.php?action=assign", {
         appeal_id: appeal.appeal_id,
@@ -123,7 +127,7 @@ function AssignModal({ appeal, onClose, onSuccess }) {
   );
 }
 
-function AppealCard({ appeal, showAssign, onAssign }) {
+function AppealCard({ appeal, showAssign, showReview, onAssign, onReview }) {
   return (
     <div className="appeal-card">
       <div className="card-header">
@@ -154,10 +158,19 @@ function AppealCard({ appeal, showAssign, onAssign }) {
         <span className="reason-preview">{appeal.reason}</span>
       </div>
 
-      {showAssign && (
-        <button className="assign-btn" onClick={onAssign}>
-          Assign to Instructor
-        </button>
+      {(showAssign || showReview) && (
+        <div className="appeal-card__actions">
+          {showAssign && (
+            <button className="assign-btn" onClick={onAssign}>
+              Assign to Instructor
+            </button>
+          )}
+          {showReview && (
+            <button className="review-btn" onClick={onReview}>
+              Review Myself
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
@@ -168,6 +181,7 @@ export default function ModuleLeaderAppeals() {
   const [appeals, setAppeals] = useState([]);
   const [activeFilter, setActiveFilter] = useState("All");
   const [selectedAppeal, setSelectedAppeal] = useState(null);
+  const [selectedReviewAppeal, setSelectedReviewAppeal] = useState(null);
 
   const loadAppeals = async () => {
     setLoading(true);
@@ -185,13 +199,21 @@ export default function ModuleLeaderAppeals() {
     loadAppeals();
   }, []);
 
-  const pendingAppeals = appeals.filter((a) => a.status === "Pending");
-  const nonPendingAppeals = appeals.filter((a) => a.status !== "Pending");
+  const pendingAppeals = useMemo(
+    () => appeals.filter((a) => a.status === "Pending"),
+    [appeals],
+  );
 
-  const filteredAppeals =
-    activeFilter === "All"
+  const nonPendingAppeals = useMemo(
+    () => appeals.filter((a) => a.status !== "Pending"),
+    [appeals],
+  );
+
+  const filteredAppeals = useMemo(() => {
+    return activeFilter === "All"
       ? nonPendingAppeals
       : nonPendingAppeals.filter((a) => a.status === activeFilter);
+  }, [activeFilter, nonPendingAppeals]);
 
   const summary = {
     total: appeals.length,
@@ -228,7 +250,6 @@ export default function ModuleLeaderAppeals() {
         </div>
       </div>
 
-      {/* 2. PENDING ASSIGNMENT SECTION */}
       <div className="ml-section">
         <h3 className="section-title">
           Pending Assignment
@@ -240,7 +261,9 @@ export default function ModuleLeaderAppeals() {
         </h3>
 
         {pendingAppeals.length === 0 ? (
-          <p className="state-msg">All appeals have been assigned.</p>
+          <p className="state-msg">
+            All appeals have been assigned or reviewed.
+          </p>
         ) : (
           <div className="appeals-grid">
             {pendingAppeals.map((appeal) => (
@@ -248,7 +271,9 @@ export default function ModuleLeaderAppeals() {
                 key={appeal.appeal_id}
                 appeal={appeal}
                 showAssign={true}
+                showReview={true}
                 onAssign={() => setSelectedAppeal(appeal)}
+                onReview={() => setSelectedReviewAppeal(appeal)}
               />
             ))}
           </div>
@@ -286,6 +311,8 @@ export default function ModuleLeaderAppeals() {
                 key={appeal.appeal_id}
                 appeal={appeal}
                 showAssign={false}
+                showReview={appeal.status === "Under Review"}
+                onReview={() => setSelectedReviewAppeal(appeal)}
               />
             ))}
           </div>
@@ -300,6 +327,19 @@ export default function ModuleLeaderAppeals() {
             setSelectedAppeal(null);
             loadAppeals();
           }}
+        />
+      )}
+
+      {selectedReviewAppeal && (
+        <ReviewModal
+          appeal={selectedReviewAppeal}
+          onClose={() => setSelectedReviewAppeal(null)}
+          onSuccess={() => {
+            setSelectedReviewAppeal(null);
+            loadAppeals();
+          }}
+          title="Review Appeal Myself"
+          apiEndpoint="/View/ModuleLeaderView.php?action=review"
         />
       )}
     </div>

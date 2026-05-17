@@ -16,7 +16,7 @@ class ModuleLeaderController
 
   private function startSession()
   {
-    if(session_status() === PHP_SESSION_NONE){
+    if (session_status() === PHP_SESSION_NONE) {
       session_start();
     }
   }
@@ -25,24 +25,24 @@ class ModuleLeaderController
   {
     $this->startSession();
 
-    if(empty($_SESSION['user_id']) || empty($_SESSION['role'])) {
-        return [
-            'statusCode' => 401,
-            'body' => [
-                'status' => 'error',
-                'message' => 'Not authenticated',
-            ]
-        ];
+    if (empty($_SESSION['user_id']) || empty($_SESSION['role'])) {
+      return [
+        'statusCode' => 401,
+        'body' => [
+          'status' => 'error',
+          'message' => 'Not authenticated',
+        ]
+      ];
     }
 
-    if($_SESSION['role'] !== 'Module_Leader') {
-        return [
-            'statusCode' => 403,
-            'body' => [
-                'status' => 'error',
-                'message' => 'Forbidden',
-            ]
-        ];
+    if ($_SESSION['role'] !== 'Module_Leader') {
+      return [
+        'statusCode' => 403,
+        'body' => [
+          'status' => 'error',
+          'message' => 'Forbidden',
+        ]
+      ];
     }
 
     return null;
@@ -50,10 +50,11 @@ class ModuleLeaderController
 
   public function getAppeals(): array
   {
-    if($err = $this->requireModuleLeader()) return $err;
+    if ($err = $this->requireModuleLeader()) return $err;
 
     $moduleLeaderId = (int)$_SESSION['user_id'];
     $appeals = $this->moduleLeaderModel->getAppealsByCourses($moduleLeaderId);
+
     return [
       'statusCode' => 200,
       'body' => [
@@ -65,7 +66,7 @@ class ModuleLeaderController
 
   public function getCourseInstructors(): array
   {
-    if($err = $this->requireModuleLeader()) return $err;
+    if ($err = $this->requireModuleLeader()) return $err;
 
     $courseId = isset($_GET['course_id']) ? (int)$_GET['course_id'] : null;
     if (!$courseId) {
@@ -79,6 +80,7 @@ class ModuleLeaderController
     }
 
     $instructors = $this->moduleLeaderModel->getCourseInstructors($courseId);
+
     return [
       'statusCode' => 200,
       'body' => [
@@ -90,7 +92,7 @@ class ModuleLeaderController
 
   public function assignAppeal(array $data): array
   {
-    if($err = $this->requireModuleLeader()) return $err;
+    if ($err = $this->requireModuleLeader()) return $err;
 
     $appealId = isset($data['appeal_id']) ? (int)$data['appeal_id'] : null;
     $instructorId = isset($data['instructor_id']) ? (int)$data['instructor_id'] : null;
@@ -101,12 +103,13 @@ class ModuleLeaderController
         'statusCode' => 400,
         'body' => [
           'status' => 'error',
-          'message' => 'appeal_id, instructor_id, and module_leader_id are required'
+          'message' => 'appeal_id and instructor_id are required'
         ]
-      ];  
+      ];
     }
 
     $success = $this->moduleLeaderModel->assignAppeal($appealId, $instructorId, $moduleLeaderId);
+
     if ($success) {
       return [
         'statusCode' => 200,
@@ -115,14 +118,72 @@ class ModuleLeaderController
           'message' => 'Appeal assigned successfully'
         ]
       ];
-    } else {
+    }
+
+    return [
+      'statusCode' => 500,
+      'body' => [
+        'status' => 'error',
+        'message' => 'Failed to assign appeal'
+      ]
+    ];
+  }
+
+  public function reviewAppeal(array $data): array
+  {
+    if ($err = $this->requireModuleLeader()) return $err;
+
+    if (empty($data['appeal_id']) || empty($data['status'])) {
+      return [
+        'statusCode' => 400,
+        'body' => [
+          'status' => 'error',
+          'message' => 'appeal_id and status are required',
+        ]
+      ];
+    }
+
+    $allowedStatuses = ['Resolved', 'Rejected'];
+    if (!in_array($data['status'], $allowedStatuses, true)) {
+      return [
+        'statusCode' => 400,
+        'body' => [
+          'status' => 'error',
+          'message' => 'Invalid status',
+        ]
+      ];
+    }
+
+    $moduleLeaderId = (int)$_SESSION['user_id'];
+    $appealId = (int)$data['appeal_id'];
+    $newStatus = (string)$data['status'];
+    $newGrade = $data['new_grade'] ?? null;
+    $note = $data['note'] ?? null;
+
+    $ok = $this->moduleLeaderModel->reviewAppealAsModuleLeader(
+      $appealId,
+      $moduleLeaderId,
+      $newStatus,
+      $newGrade,
+      $note
+    );
+
+    if (!$ok) {
       return [
         'statusCode' => 500,
         'body' => [
           'status' => 'error',
-          'message' => 'Failed to assign appeal'
+          'message' => 'Failed to review appeal',
         ]
       ];
     }
+
+    return [
+      'statusCode' => 200,
+      'body' => [
+        'status' => 'success',
+        'message' => 'Appeal reviewed successfully',
+      ]
+    ];
   }
 }
