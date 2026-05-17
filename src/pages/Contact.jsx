@@ -9,6 +9,7 @@ import {
   Mail,
   Phone,
 } from "lucide-react";
+import api from "../api/axios";
 import "../styles/Contact.css";
 import CampusImage from "../assets/MSA_Campus.jpg";
 import Logo from "../assets/MSA_Logo.png";
@@ -77,6 +78,8 @@ const Contact = () => {
     message: "",
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [openFaqIndex, setOpenFaqIndex] = useState(-1);
 
   function handleChange(event) {
@@ -88,9 +91,44 @@ const Contact = () => {
     }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    setIsSubmitted(true);
+
+    if (isLoading) {
+      return;
+    }
+
+    setIsLoading(true);
+    setSubmitError("");
+
+    try {
+      const response = await api.post("/View/TicketView.php?action=create", {
+        fullName: formData.fullName,
+        email: formData.email,
+        category: formData.category,
+        message: formData.message,
+      });
+
+      if (response.data?.status === "success") {
+        setIsSubmitted(true);
+        setFormData({
+          fullName: "",
+          email: "",
+          category: "Technical Support",
+          message: "",
+        });
+      } else {
+        setSubmitError(response.data?.message || "Failed to submit ticket.");
+        setIsSubmitted(false);
+      }
+    } catch (error) {
+      setSubmitError(
+        error.response?.data?.message || error.message || "Failed to submit ticket.",
+      );
+      setIsSubmitted(false);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   function toggleFaq(index) {
@@ -213,10 +251,16 @@ const Contact = () => {
             </div>
 
             <div className="contact-form-actions">
-              <button type="submit" className="contact-submit-btn">
+              <button type="submit" className="contact-submit-btn" disabled={isLoading}>
                 Submit Inquiry
               </button>
             </div>
+
+            {submitError && (
+              <p className="contact-success-msg" role="alert">
+                {submitError}
+              </p>
+            )}
 
             {isSubmitted && (
               <p className="contact-success-msg" role="status">

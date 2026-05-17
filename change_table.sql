@@ -159,3 +159,8 @@ CREATE INDEX idx_answers_question ON answers(question_id);
 CREATE INDEX idx_course_surveys_course ON course_surveys(course_id);
 
 CREATE INDEX idx_faculty_surveys_faculty ON faculty_surveys(faculty_id);
+
+ALTER TABLE support_tickets
+ADD COLUMN type VARCHAR(50) NOT NULL AFTER status,
+ADD COLUMN priority ENUM('low', 'medium', 'high') NOT NULL DEFAULT 'medium' AFTER type,
+ADD COLUMN reply_message TEXT NULL AFTER message;

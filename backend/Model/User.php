@@ -9,6 +9,130 @@ class User {
         $this->conn = $db;
     }
 
+    private function getUserByEmail(string $email): ?array {
+        $sql = "SELECT user_id, password FROM " . $this->table_name . " WHERE email = ? LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return null;
+        }
+
+        $stmt->bind_param("s", $email);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            return null;
+        }
+
+        $userId = null;
+        $password = null;
+        $stmt->bind_result($userId, $password);
+
+        if (!$stmt->fetch()) {
+            $stmt->close();
+            return null;
+        }
+
+        $stmt->close();
+        return [
+            'user_id' => (int)$userId,
+            'password' => (string)$password,
+        ];
+    }
+
+    private function getUserById(int $userId): ?array {
+        $sql = "SELECT email, password FROM " . $this->table_name . " WHERE user_id = ? LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return null;
+        }
+
+        $stmt->bind_param('i', $userId);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            return null;
+        }
+
+        $email = null;
+        $password = null;
+        $stmt->bind_result($email, $password);
+
+        if (!$stmt->fetch()) {
+            $stmt->close();
+            return null;
+        }
+
+        $stmt->close();
+        return [
+            'email' => (string)$email,
+            'password' => (string)$password,
+        ];
+    }
+
+    private function getRecentPasswordHashes(int $userId, int $limit = 2): array {
+        $sql = "SELECT hashed_password FROM password_history WHERE user_id = ? ORDER BY created_at DESC, history_id DESC LIMIT " . (int)$limit;
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return [];
+        }
+
+        $stmt->bind_param('i', $userId);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            return [];
+        }
+
+        $result = $stmt->get_result();
+        $hashes = [];
+        while ($row = $result->fetch_assoc()) {
+            if (!empty($row['hashed_password'])) {
+                $hashes[] = (string)$row['hashed_password'];
+            }
+        }
+
+        $stmt->close();
+        return $hashes;
+    }
+
+    private function passwordWasUsedRecently(int $userId, string $newPassword, int $historyLimit = 2, ?string $currentPassword = null): bool {
+        if ($currentPassword === null) {
+            $user = $this->getUserById($userId);
+            if ($user === null) {
+                return false;
+            }
+
+            $currentPassword = $user['password'];
+        }
+
+        if (password_verify($newPassword, $currentPassword)) {
+            return true;
+        }
+
+        foreach ($this->getRecentPasswordHashes($userId, $historyLimit) as $hash) {
+            if (password_verify($newPassword, $hash)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function insertPasswordHistory(int $userId, string $hashedPassword): bool {
+        $sql = "INSERT INTO password_history (user_id, hashed_password) VALUES (?, ?)";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param('is', $userId, $hashedPassword);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    private function sendPasswordChangedNotification(int $userId): void {
+        $notificationService = NotificationService::createWithoutEmail($this->conn);
+        $notificationService->send('Your password has been changed successfully.', $userId, 'system', null, false, false);
+    }
+
     public function forgetPassword($email){
         //check if email exists
         $sql = "SELECT user_id FROM " . $this->table_name . " WHERE email = ? LIMIT 1";
@@ -218,39 +342,66 @@ class User {
         }
 
         $email = $tokenVerification['email'];
+        $user = $this->getUserByEmail($email);
+        if ($user === null) {
+            return [
+                'status' => 'error',
+                'message' => 'User not found',
+            ];
+        }
+
+        if ($this->passwordWasUsedRecently($user['user_id'], $newPassword, 2, $user['password'])) {
+            return [
+                'status' => 'error',
+                'message' => 'You cannot reuse one of your last 3 passwords',
+            ];
+        }
+
         $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
-        $updateSql = "UPDATE " . $this->table_name . " SET password = ? WHERE email = ?";
-        $updateStmt = $this->conn->prepare($updateSql);
-        if (!$updateStmt) {
-            return [
-                'status' => 'error',
-                'message' => 'Database error: ' . $this->conn->error,
-            ];
-        }
+        $this->conn->begin_transaction();
 
-        $updateStmt->bind_param("ss", $hashedPassword, $email);
-        if (!$updateStmt->execute()) {
+        try {
+            if (!$this->insertPasswordHistory($user['user_id'], $user['password'])) {
+                throw new Exception('Failed to save password history');
+            }
+
+            $updateSql = "UPDATE " . $this->table_name . " SET password = ? WHERE email = ?";
+            $updateStmt = $this->conn->prepare($updateSql);
+            if (!$updateStmt) {
+                throw new Exception('Database error: ' . $this->conn->error);
+            }
+
+            $updateStmt->bind_param("ss", $hashedPassword, $email);
+            if (!$updateStmt->execute()) {
+                $updateStmt->close();
+                throw new Exception('Failed to update password');
+            }
             $updateStmt->close();
+
+            $deleteSql = "DELETE FROM password_resets WHERE token = ?";
+            $deleteStmt = $this->conn->prepare($deleteSql);
+            if (!$deleteStmt) {
+                throw new Exception('Database error');
+            }
+
+            $deleteStmt->bind_param("s", $token);
+            if (!$deleteStmt->execute()) {
+                $deleteStmt->close();
+                throw new Exception('Failed to invalidate reset token');
+            }
+            $deleteStmt->close();
+
+            $this->conn->commit();
+        } catch (Exception $e) {
+            $this->conn->rollback();
             return [
                 'status' => 'error',
-                'message' => 'Failed to update password',
-            ];
-        }
-        $updateStmt->close();
-
-        $deleteSql = "DELETE FROM password_resets WHERE token = ?";
-        $deleteStmt = $this->conn->prepare($deleteSql);
-        if (!$deleteStmt) {
-            return [
-                'status' => 'error',
-                'message' => 'Database error',
+                'message' => $e->getMessage(),
             ];
         }
 
-        $deleteStmt->bind_param("s", $token);
-        $deleteStmt->execute();
-        $deleteStmt->close();
+        $this->sendPasswordChangedNotification($user['user_id']);
 
         return [
             'status' => 'success',

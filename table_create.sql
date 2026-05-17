@@ -149,7 +149,9 @@ CREATE TABLE support_tickets (
     user_name VARCHAR(255),  
     user_email VARCHAR(255),
     message TEXT NOT NULL,
-    status ENUM('Open', 'In Progress', 'Resolved') DEFAULT 'Open', 
+    status ENUM('Open', 'In Progress', 'Resolved') DEFAULT 'Open',
+    type VARCHAR(50) NOT NULL,
+    priority ENUM('low', 'medium', 'high') NOT NULL DEFAULT 'medium',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
 );

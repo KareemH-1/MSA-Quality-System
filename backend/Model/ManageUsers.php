@@ -60,6 +60,130 @@ class ManageUsers {
         $welcomeMessage = "Your account has been created successfully, {$name}. Please sign in at " . APP_URL . ".";
         $notificationService->send($welcomeMessage, $userId, 'system', null, true, true);
     }
+
+    private function getUserByEmail(string $email): ?array {
+        $sql = "SELECT user_id, password FROM users WHERE email = ? LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return null;
+        }
+
+        $stmt->bind_param('s', $email);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            return null;
+        }
+
+        $userId = null;
+        $password = null;
+        $stmt->bind_result($userId, $password);
+
+        if (!$stmt->fetch()) {
+            $stmt->close();
+            return null;
+        }
+
+        $stmt->close();
+        return [
+            'user_id' => (int)$userId,
+            'password' => (string)$password,
+        ];
+    }
+
+    private function getUserById(int $userId): ?array {
+        $sql = "SELECT email, password FROM users WHERE user_id = ? LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return null;
+        }
+
+        $stmt->bind_param('i', $userId);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            return null;
+        }
+
+        $email = null;
+        $password = null;
+        $stmt->bind_result($email, $password);
+
+        if (!$stmt->fetch()) {
+            $stmt->close();
+            return null;
+        }
+
+        $stmt->close();
+        return [
+            'email' => (string)$email,
+            'password' => (string)$password,
+        ];
+    }
+
+    private function getRecentPasswordHashes(int $userId, int $limit = 2): array {
+        $sql = "SELECT hashed_password FROM password_history WHERE user_id = ? ORDER BY created_at DESC, history_id DESC LIMIT " . (int)$limit;
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return [];
+        }
+
+        $stmt->bind_param('i', $userId);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            return [];
+        }
+
+        $result = $stmt->get_result();
+        $hashes = [];
+        while ($row = $result->fetch_assoc()) {
+            if (!empty($row['hashed_password'])) {
+                $hashes[] = (string)$row['hashed_password'];
+            }
+        }
+
+        $stmt->close();
+        return $hashes;
+    }
+
+    private function passwordWasUsedRecently(int $userId, string $newPassword, int $historyLimit = 2, ?string $currentPassword = null): bool {
+        if ($currentPassword === null) {
+            $user = $this->getUserById($userId);
+            if ($user === null) {
+                return false;
+            }
+
+            $currentPassword = $user['password'];
+        }
+
+        if (password_verify($newPassword, $currentPassword)) {
+            return true;
+        }
+
+        foreach ($this->getRecentPasswordHashes($userId, $historyLimit) as $hash) {
+            if (password_verify($newPassword, $hash)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function insertPasswordHistory(int $userId, string $hashedPassword): bool {
+        $sql = "INSERT INTO password_history (user_id, hashed_password) VALUES (?, ?)";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param('is', $userId, $hashedPassword);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    private function sendPasswordChangedNotification(int $userId): void {
+        $notificationService = NotificationService::createWithoutEmail($this->conn);
+        $notificationService->send('Your password has been changed successfully.', $userId, 'system', null, false, false);
+    }
     public function createUser($name, $email, $password, $role, $faculty = null, $level = null, $courses = null, $managedCourses = null) {
         $this->conn->begin_transaction();
         try {
@@ -207,17 +331,63 @@ class ManageUsers {
     }
 
     public function updateUser($email, $name, $password) {
-        $hashed = password_hash($password, PASSWORD_DEFAULT);
-        $sql = "UPDATE users SET name = ?, password = ? WHERE email = ?";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param('sss', $name, $hashed, $email);
-        $res = $stmt->execute();
-        $stmt->close();
-        if ($res) {
-            return ['status' => 'success'];
+        $user = $this->getUserByEmail($email);
+        if ($user === null) {
+            return ['status' => 'error', 'message' => 'User not found'];
         }
 
-        return ['status' => 'error', 'message' => 'Failed to update user'];
+        if (!empty($password) && $this->passwordWasUsedRecently($user['user_id'], $password, 2, $user['password'])) {
+            return ['status' => 'error', 'message' => 'You cannot reuse one of your last 3 passwords'];
+        }
+
+        $this->conn->begin_transaction();
+
+        try {
+            $sql = "UPDATE users SET name = ? WHERE email = ?";
+            $stmt = $this->conn->prepare($sql);
+            if (!$stmt) {
+                throw new Exception('Failed to update user');
+            }
+
+            $stmt->bind_param('ss', $name, $email);
+            if (!$stmt->execute()) {
+                $stmt->close();
+                throw new Exception('Failed to update user');
+            }
+            $stmt->close();
+
+            if (!empty($password)) {
+                $hashed = password_hash($password, PASSWORD_DEFAULT);
+
+                if (!$this->insertPasswordHistory($user['user_id'], $user['password'])) {
+                    throw new Exception('Failed to save password history');
+                }
+
+                $passwordSql = "UPDATE users SET password = ? WHERE email = ?";
+                $passwordStmt = $this->conn->prepare($passwordSql);
+                if (!$passwordStmt) {
+                    throw new Exception('Failed to update password');
+                }
+
+                $passwordStmt->bind_param('ss', $hashed, $email);
+                if (!$passwordStmt->execute()) {
+                    $passwordStmt->close();
+                    throw new Exception('Failed to update password');
+                }
+                $passwordStmt->close();
+            }
+
+            $this->conn->commit();
+        } catch (Exception $e) {
+            $this->conn->rollback();
+            return ['status' => 'error', 'message' => $e->getMessage()];
+        }
+
+        if (!empty($password)) {
+            $this->sendPasswordChangedNotification($user['user_id']);
+        }
+
+        return ['status' => 'success'];
     }
 
     public function getUsers() {
