@@ -8,8 +8,8 @@ require_once __DIR__ . '/../Service/EmailNotificationObserver.php';
 
 class Instructor
 {
-  private mysqli $conn;
-  private string $table = 'grade_appeals';
+  protected mysqli $conn;
+  protected string $table = 'grade_appeals';
 
   public function __construct(mysqli $conn)
   {
@@ -33,8 +33,7 @@ class Instructor
           JOIN courses c ON ga.course_id = c.course_id
           JOIN users u ON ga.student_id = u.user_id      
           WHERE ga.assigned_instructor_id = ?                
-          ORDER BY ga.submitted_at DESC    
-        ";
+          ORDER BY ga.submitted_at DESC";
 
     $stmt = $this->conn->prepare($sql);
     if (!$stmt) return [];
@@ -59,23 +58,23 @@ class Instructor
 
     $stmt->bind_param('sssii', $newStatus, $newGrade, $note, $appealId, $instructorId);
     $stmt->execute();
-    if($stmt->affected_rows === 0) {
+    if ($stmt->affected_rows === 0) {
       return false;
     }
 
     $infoSql = "SELECT ga.student_id, c.name AS course_name FROM grade_appeals ga 
-                    JOIN courses c ON ga.course_id = c.course_id
-                    WHERE ga.appeal_id = ?";
+                JOIN courses c ON ga.course_id = c.course_id
+                WHERE ga.appeal_id = ?";
     $infoStmt = $this->conn->prepare($infoSql);
     $infoStmt->bind_param("i", $appealId);
     $infoStmt->execute();
     $infoResult = $infoStmt->get_result()->fetch_assoc();
 
-    if($infoResult) {
+    if ($infoResult) {
       $studentId = $infoResult['student_id'];
       $courseName = $infoResult['course_name'];
 
-      if($newStatus === 'Resolved' || $newStatus === 'Rejected'){
+      if ($newStatus === 'Resolved' || $newStatus === 'Rejected') {
         $service = NotificationService::create($this->conn);
 
         $service->send(
@@ -83,22 +82,9 @@ class Instructor
           $studentId,
           'appeal',
           $instructorId,
-          true  
+          true
         );
       }
-      // else if($newStatus === 'Under Review') {
-      //   $service = new NotificationService();
-      //   $service->attach(new InAppNotificationObserver($this->conn));
-      //   $service->attach(new EmailNotificationObserver($this->conn));
-
-      //   $service->send(
-      //     "Your grade appeal for $courseName is now under review by the instructor.",
-      //     $studentId,
-      //     'appeal',
-      //     $instructorId,
-      //     true  
-      //   );
-      // }
     }
 
     return true;
