@@ -1,19 +1,24 @@
 <?php
 class Log {
-    private $info_path = '../storage/logs/app.log';
-    private $security_path = '../storage/logs/security.log';
-    private $error_path = '../storage/logs/error.log';
+    private $info_path;
+    private $security_path;
+    private $error_path;
 
     public function __construct() {
-        if (!file_exists($this->info_path)) {
-            file_put_contents($this->info_path, '');
+        $logDir = __DIR__ . '/../../storage/logs';
+
+        // Create the directory if it doesn't exist
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0755, true);
         }
-        if (!file_exists($this->security_path)) {
-            file_put_contents($this->security_path, '');
-        }
-        if (!file_exists($this->error_path)) {
-            file_put_contents($this->error_path, '');
-        }
+
+        $this->info_path = $logDir . '/app.log';
+        $this->security_path = $logDir . '/security.log';
+        $this->error_path = $logDir . '/error.log';
+
+        if (!file_exists($this->info_path)) file_put_contents($this->info_path, '');
+        if (!file_exists($this->security_path)) file_put_contents($this->security_path, '');
+        if (!file_exists($this->error_path)) file_put_contents($this->error_path, '');
     }
 
     public function logInfo($message) {
