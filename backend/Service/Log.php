@@ -1,8 +1,8 @@
 <?php
 class Log {
-    private $info_path = __DIR__ . '/../storage/logs/app.log';
-    private $security_path = __DIR__ . '/../storage/logs/security.log';
-    private $error_path = __DIR__ . '/../storage/logs/error.log';
+    private $info_path = '../storage/logs/app.log';
+    private $security_path = '../storage/logs/security.log';
+    private $error_path = '../storage/logs/error.log';
 
     public function __construct() {
         if (!file_exists($this->info_path)) {
