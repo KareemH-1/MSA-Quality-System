@@ -167,6 +167,30 @@ class TicketController
         ];
     }
 
+    public function updateStatus(array $data): array
+    {
+        if ($err = $this->requireAuth()) {
+            return $err;
+        }
+
+        $ticketId = isset($data['ticket_id']) ? (int)$data['ticket_id'] : 0;
+        $status = $this->getField($data, ['status']);
+
+        if ($ticketId <= 0 || $status === '') {
+            return [
+                'statusCode' => 400,
+                'body' => ['status' => 'error', 'message' => 'ticket_id and status are required'],
+            ];
+        }
+
+        $result = $this->ticketModel->updateStatus($ticketId, $status);
+
+        return [
+            'statusCode' => $result['status'] === 'success' ? 200 : 404,
+            'body' => $result,
+        ];
+    }
+
     public function filterByType(string $type): array
     {
         if ($err = $this->requireAuth()) {

@@ -67,6 +67,14 @@ class TicketView extends JsonView
                 $result = $this->controller->updatePriority($this->readJsonBody());
                 break;
 
+            case 'status':
+                if ($method !== 'POST') {
+                    $result = ['statusCode' => 405, 'body' => ['status' => 'error', 'message' => 'POST required']];
+                    break;
+                }
+                $result = $this->controller->updateStatus($this->readJsonBody());
+                break;
+
             case 'filter':
                 if ($method !== 'GET') {
                     $result = ['statusCode' => 405, 'body' => ['status' => 'error', 'message' => 'GET required']];

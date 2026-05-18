@@ -5,6 +5,7 @@ import SurveyManagement from "../pages/QA_Admin/SurveyManagement";
 import UserManagement from "../pages/Admin/UserManagement";
 import Faculties from "../pages/Admin/Faculties";
 import ManageCourses from "../pages/Admin/ManageCourses";
+import SupportTickets from "../pages/Admin/SupportTickets";
 import SystemLogs from "../pages/Admin/SystemLogs";
 import Login from "../pages/Login";
 import ResetPassword from "../pages/ResetPassword";
@@ -16,7 +17,7 @@ import TakeSurvey from "../pages/Student/TakeSurvey";
 import InstructorServices from "../pages/Instructor/InstructorServices";
 import InstructorNotifications from "../pages/Instructor/InstructorNotifications";
 import ModuleLeaderServices from "../pages/Module_Leader/ModuleLeaderServices";
-import { Bell , Form, Gavel, LibraryBig} from "lucide-react";
+import { Bell , Form, Gavel, LibraryBig, Ticket} from "lucide-react";
 import { getQaDashboardNavbarComponents } from "./QaDashboardNavbarComponents";
 import {
   getAdminFacultyNavbarComponents,
@@ -124,6 +125,17 @@ export const PAGE_CONFIG = {
     showNavbar: true,
     defaultNavItem: "Faculties",
     getNavbarComponents: getAdminFacultyNavbarComponents,
+    roles: [ROLES.ADMIN],
+  },
+  SupportTickets: {
+    path: "/support-tickets",
+    component: SupportTickets,
+    showSidebar: true,
+    sidebarLabel: "Support Tickets",
+    sidebarIcon: Ticket,
+    sidebarIconFill: false,
+    showNavbar: true,
+    defaultNavItem: "Support Tickets",
     roles: [ROLES.ADMIN],
   },
   Logs: {

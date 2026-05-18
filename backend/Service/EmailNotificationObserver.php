@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 class EmailNotificationObserver implements NotificationObserver
 {
   private Notification $notificationModel;
+  private static $lastError = null;
 
   public function __construct(mysqli $db)
   {
@@ -99,11 +100,19 @@ class EmailNotificationObserver implements NotificationObserver
       $mail->Body = $body;
       
       $mail->send();
+      self::$lastError = null;
       return true;
     } catch (Exception $e) {
-      error_log("Email could not be sent to {$to}. Error: {$e->getMessage()}");
+      $msg = $e->getMessage();
+      error_log("Email could not be sent to {$to}. Error: {$msg}");
+      self::$lastError = $msg;
       return false;
     }
+  }
+
+  public static function getLastError(): ?string
+  {
+    return self::$lastError;
   }
 
   private function sendMailContent(string $to, string $subject, ?string $customBody = null, bool $styledEmail = false): void
