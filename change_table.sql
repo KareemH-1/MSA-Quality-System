@@ -164,3 +164,5 @@ ALTER TABLE support_tickets
 ADD COLUMN type VARCHAR(50) NOT NULL AFTER status,
 ADD COLUMN priority ENUM('low', 'medium', 'high') NOT NULL DEFAULT 'medium' AFTER type,
 ADD COLUMN reply_message TEXT NULL AFTER message;
+
+ALTER TABLE answers MODIFY COLUMN answer_text TEXT NULL;

@@ -2,9 +2,17 @@
 
 require_once '../Model/Database.php';
 require_once '../Model/User.php';
+require_once '../Service/Log.php';
 
 class AuthController
 {
+    private Log $log;
+
+    public function __construct()
+    {
+        $this->log = new Log();
+    }
+
     private function hasUppercase($str) {
         for ($i = 0; $i < strlen($str); $i++) {
             if ($str[$i] >= 'A' && $str[$i] <= 'Z') return true;
@@ -37,6 +45,7 @@ class AuthController
     public function login(array $data): array
     {
         if (empty($data['email']) || empty($data['password'])) {
+            $this->log->logSecurity("Login attempt with missing email or password");
             return [
                 'statusCode' => 400,
                 'body' => [
@@ -53,6 +62,7 @@ class AuthController
         $foundUser = $user->login($data['email'], $data['password']);
 
         if (!$foundUser) {
+            $this->log->logSecurity("Failed login attempt for email: {$data['email']}");
             return [
                 'statusCode' => 401,
                 'body' => [
@@ -80,6 +90,8 @@ class AuthController
         $_SESSION['email'] = $data['email'];
         $_SESSION['role'] = $foundUser['role'];
 
+        $this->log->logSecurity("Successful login for user: {$foundUser['name']} (ID: {$foundUser['user_id']}) with role: {$foundUser['role']}");
+
         return [
             'statusCode' => 200,
             'body' => [
@@ -95,6 +107,7 @@ class AuthController
     public function resetPassword(array $data): array
     {
         if (empty($data['token']) || empty($data['password']) || empty($data['confirmPassword'])) {
+            $this->log->logSecurity("Password reset attempt with missing required fields");
             return [
                 'statusCode' => 400,
                 'body' => [
@@ -107,6 +120,7 @@ class AuthController
         $password = $data['password'];
         
         if (strlen($password) < 8) {
+            $this->log->logSecurity("Password reset attempt with password too short");
             return [
                 'statusCode' => 400,
                 'body' => [
@@ -117,6 +131,7 @@ class AuthController
         }
 
         if (!$this->hasUppercase($password)) {
+            $this->log->logSecurity("Password reset attempt with missing uppercase letter");
             return [
                 'statusCode' => 400,
                 'body' => [
@@ -127,6 +142,7 @@ class AuthController
         }
 
         if (!$this->hasLowercase($password)) {
+            $this->log->logSecurity("Password reset attempt with missing lowercase letter");
             return [
                 'statusCode' => 400,
                 'body' => [
@@ -137,6 +153,7 @@ class AuthController
         }
 
         if (!$this->hasDigit($password)) {
+            $this->log->logSecurity("Password reset attempt with missing digit");
             return [
                 'statusCode' => 400,
                 'body' => [
@@ -147,6 +164,7 @@ class AuthController
         }
 
         if (!$this->hasSpecialChar($password)) {
+            $this->log->logSecurity("Password reset attempt with missing special character");
             return [
                 'statusCode' => 400,
                 'body' => [
@@ -157,6 +175,7 @@ class AuthController
         }
 
         if ($data['password'] !== $data['confirmPassword']) {
+            $this->log->logSecurity("Password reset attempt with mismatched passwords");
             return [
                 'statusCode' => 400,
                 'body' => [
@@ -173,11 +192,14 @@ class AuthController
         $result = $user->verifyAndResetPassword($data['token'], $data['password']);
 
         if ($result['status'] === 'error') {
+            $this->log->logSecurity("Password reset failed: {$result['message']}");
             return [
                 'statusCode' => 400,
                 'body' => $result,
             ];
         }
+
+        $this->log->logSecurity("Password reset successful");
 
         return [
             'statusCode' => 200,
@@ -189,6 +211,7 @@ class AuthController
     {
         try {
             if (empty($data['email'])) {
+                $this->log->logSecurity("Forgot password attempt without email");
                 return [
                     'statusCode' => 400,
                     'body' => [
@@ -205,6 +228,7 @@ class AuthController
             $result = $user->forgetPassword($data['email']);
 
             if ($result['status'] === 'error') {
+                $this->log->logSecurity("Forgot password for non-existent email: {$data['email']}");
                 return [
                     'statusCode' => 400,
                     'body' => $result,
@@ -215,6 +239,7 @@ class AuthController
             if ($token) {
                 $emailSent = $user->sendEmailPasswordReset($data['email'], $token);
                 if ($emailSent === false) {
+                    $this->log->logError("Failed to send password reset email to: {$data['email']}");
                     return [
                         'statusCode' => 500,
                         'body' => [
@@ -225,6 +250,8 @@ class AuthController
                 }
             }
 
+            $this->log->logInfo("Password reset email sent to: {$data['email']}");
+
             return [
                 'statusCode' => 200,
                 'body' => [
@@ -233,6 +260,7 @@ class AuthController
                 ],
             ];
         } catch (Exception $e) {
+            $this->log->logError("Exception in forgetPassword: {$e->getMessage()}");
             return [
                 'statusCode' => 500,
                 'body' => [
@@ -247,6 +275,7 @@ class AuthController
     {
         try {
             if (empty($data['token'])) {
+                $this->log->logSecurity("Token verification attempt without token");
                 return [
                     'statusCode' => 400,
                     'body' => [
@@ -263,6 +292,7 @@ class AuthController
             $isValid = $user->verifyResetToken($data['token']);
 
             if (!$isValid) {
+                $this->log->logSecurity("Invalid or expired password reset token verification attempt");
                 return [
                     'statusCode' => 400,
                     'body' => [
@@ -272,6 +302,8 @@ class AuthController
                 ];
             }
 
+            $this->log->logInfo("Password reset token verified successfully");
+
             return [
                 'statusCode' => 200,
                 'body' => [
@@ -280,6 +312,7 @@ class AuthController
                 ],
             ];
         } catch (Exception $e) {
+            $this->log->logError("Exception in verifyToken: {$e->getMessage()}");
             return [
                 'statusCode' => 500,
                 'body' => [
