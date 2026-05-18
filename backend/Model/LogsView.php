@@ -1,5 +1,5 @@
 <?php
-class LogsView {
+class SystemLogsModel {
     private $conn;
     private $log;
     public function __construct() {
@@ -17,9 +17,9 @@ class LogsView {
             $databaseH = true;
         }
 
-        $couldReadInfo = is_readable('../logs/info.log');
-        $couldReadSecurity = is_readable('../logs/security.log');
-        $couldReadError = is_readable('../logs/error.log');
+        $couldReadInfo = is_readable('../storage/logs/app.log');
+        $couldReadSecurity = is_readable('../storage/logs/security.log');
+        $couldReadError = is_readable('../storage/logs/error.log');
 
         if ($couldReadInfo && $couldReadSecurity && $couldReadError) {
             $logsH = true;
@@ -34,16 +34,33 @@ class LogsView {
         ];
     }
 
+    private function parseLogs(array $rawLogs): array {
+        $parsed = [];
+        foreach ($rawLogs as $line) {
+            $line = trim($line);
+            if (empty($line)) continue;
+            
+            // Parse format: [YYYY-MM-DD HH:MM:SS] TYPE: message
+            if (preg_match('/\[(.*?)\]\s+(.*?):\s+(.*)/', $line, $matches)) {
+                $parsed[] = [
+                    'timestamp' => $matches[1],
+                    'type' => trim($matches[2]),
+                    'message' => trim($matches[3])
+                ];
+            }
+        }
+        return $parsed;
+    }
+
     public function getLast200LogsOfAll(){
-        
-        $infoLogs = array_slice($this->log->getLogs('info'), -200);
-        $securityLogs = array_slice($this->log->getLogs('security'), -200);
-        $errorLogs = array_slice($this->log->getLogs('error'), -200);
+        $rawInfoLogs = array_slice($this->log->getLogs('info'), -200);
+        $rawSecurityLogs = array_slice($this->log->getLogs('security'), -200);
+        $rawErrorLogs = array_slice($this->log->getLogs('error'), -200);
 
         return [
-            'info' => $infoLogs,
-            'security' => $securityLogs,
-            'error' => $errorLogs
+            'info' => $this->parseLogs($rawInfoLogs),
+            'security' => $this->parseLogs($rawSecurityLogs),
+            'error' => $this->parseLogs($rawErrorLogs)
         ];
     }
 }

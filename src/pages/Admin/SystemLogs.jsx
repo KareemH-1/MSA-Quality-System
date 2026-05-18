@@ -1,26 +1,32 @@
 import React from 'react'
 import "../../styles/SystemLogs.css"
 import { AppWindow, Badge, Bug, Check, ChevronRight, GlobeLock, FileUp, User, Clock, ExternalLink } from 'lucide-react';
+import api from '../../api/axios';
 
 const SystemLogs = () => {
   const [systemData, setSystemData] = React.useState({ systemOnline: false });
   const [currentTab, setCurrentTab] = React.useState("All");
   const [logs, setLogs] = React.useState([]);
   const [fileImports, setFileImports] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
 
   const setAllLogs = (dataSource = systemData) => {
     const allLogs = [];
-    if (dataSource.ErrorLogs) {
-      dataSource.ErrorLogs.forEach(log => log.type = "Error");
-      allLogs.push(...dataSource.ErrorLogs);
+    if (dataSource.ErrorLogs && Array.isArray(dataSource.ErrorLogs)) {
+      dataSource.ErrorLogs.forEach(log => {
+        allLogs.push({ ...log, type: "Error" });
+      });
     }
-    if (dataSource.SecurityLogs) {
-      dataSource.SecurityLogs.forEach(log => log.type = "Security");
-      allLogs.push(...dataSource.SecurityLogs);
+    if (dataSource.SecurityLogs && Array.isArray(dataSource.SecurityLogs)) {
+      dataSource.SecurityLogs.forEach(log => {
+        allLogs.push({ ...log, type: "Security" });
+      });
     }
-    if (dataSource.AppLogs) {
-      dataSource.AppLogs.forEach(log => log.type = "Info");
-      allLogs.push(...dataSource.AppLogs);
+    if (dataSource.AppLogs && Array.isArray(dataSource.AppLogs)) {
+      dataSource.AppLogs.forEach(log => {
+        allLogs.push({ ...log, type: "Info" });
+      });
     }
     allLogs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
@@ -32,9 +38,10 @@ const SystemLogs = () => {
   };
 
   const setErrorLogs = (dataSource = systemData) => {
-    if (dataSource.ErrorLogs) {
-      const sortedErrorLogs = [...dataSource.ErrorLogs].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-      sortedErrorLogs.forEach(log => log.type = "Error");
+    if (dataSource.ErrorLogs && Array.isArray(dataSource.ErrorLogs)) {
+      const sortedErrorLogs = [...dataSource.ErrorLogs]
+        .map(log => ({ ...log, type: "Error" }))
+        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
       setLogs(sortedErrorLogs);
     } else {
       setLogs([]);
@@ -42,9 +49,10 @@ const SystemLogs = () => {
   };
 
   const setSecurityLogs = (dataSource = systemData) => {
-    if (dataSource.SecurityLogs) {
-      dataSource.SecurityLogs.forEach(log => log.type = "Security");
-      const sortedSecurityLogs = [...dataSource.SecurityLogs].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    if (dataSource.SecurityLogs && Array.isArray(dataSource.SecurityLogs)) {
+      const sortedSecurityLogs = [...dataSource.SecurityLogs]
+        .map(log => ({ ...log, type: "Security" }))
+        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
       setLogs(sortedSecurityLogs);
     } else {
       setLogs([]);
@@ -52,29 +60,42 @@ const SystemLogs = () => {
   };
 
   React.useEffect(() => {
-    fetch('/systemHealth.json')
+    setLoading(true);
+    api.get('/View/LogsView.php')
       .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch system health data');
-        }
-        return response.json();
-      })
-      .then(data => {
-        data.systemOnline = true;
-        setSystemData(data);
-        setAllLogs(data);
-
-        // Sort imports newest -> oldest and store
-        if (data.FileImports && Array.isArray(data.FileImports)) {
-          const sortedImports = [...data.FileImports].sort(
-            (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
-          );
-          setFileImports(sortedImports);
+        console.log('Logs response:', response.data);
+        if (response.data && response.data.status === 'success') {
+          const data = {
+            ErrorLogs: response.data.ErrorLogs || [],
+            SecurityLogs: response.data.SecurityLogs || [],
+            AppLogs: response.data.AppLogs || [],
+            serverConn: response.data.serverConn || 'ERROR',
+            databaseConn: response.data.databaseConn || 'ERROR',
+            fileSystem: response.data.fileSystem || 'ERROR',
+            systemOnline: true
+          };
+          setSystemData(data);
+          setAllLogs(data);
+          setError(null);
+        } else {
+          console.error('Response format check failed:', response.data);
+          throw new Error(response.data?.message || 'Invalid response format');
         }
       })
       .catch(error => {
-        console.error('Error fetching system health data:', error);
+        console.error('Error fetching logs data:', error);
+        if (error.response?.status === 401) {
+          setError('Unauthorized: Please log in again');
+        } else if (error.response?.status === 403) {
+          setError('Forbidden: You do not have permission to view logs');
+        } else {
+          setError(error.message || 'Failed to load system logs');
+        }
         setSystemData({ systemOnline: false });
+        setLogs([]);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, []);
 
@@ -96,6 +117,25 @@ const SystemLogs = () => {
 
   return (
     <div style={{ padding: "10px 40px 40px 40px", marginTop: "20px" }}>
+      {loading && (
+        <div style={{ textAlign: 'center', padding: '20px' }}>
+          <p>Loading system logs...</p>
+        </div>
+      )}
+      {error && !loading && (
+        <div style={{ 
+          background: '#fee', 
+          border: '1px solid #f88', 
+          color: '#a00', 
+          padding: '12px', 
+          borderRadius: '4px',
+          marginBottom: '20px'
+        }}>
+          <p><strong>Error:</strong> {error}</p>
+        </div>
+      )}
+      {!loading && (
+      <>
       <div className="admin-header">
         <p>System Logs & Monitoring</p>
         <h1>System Monitoring</h1>
@@ -246,6 +286,8 @@ const SystemLogs = () => {
           )}
         </div>
       </div>
+      </>
+      )}
     </div>
   )
 }
